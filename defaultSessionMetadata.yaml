@@ -1,0 +1,21 @@
+calibrationSettings:
+  overwriteDeployedIntrinsics: false
+  saveSessionIntrinsics: false
+checkerBoard:
+  black2BlackCornersHeight_n: 8
+  black2BlackCornersWidth_n: 11
+  placement: ground
+  squareSideLength_mm: 60
+gender_mf: m
+height_m: 1.89
+iphoneModel:
+  Cam0: iphone13,3
+  Cam1: iphone13,3
+  Cam2: iphone13,3
+  Cam3: iphone13,3
+  Cam4: iphone13,3
+markerAugmentationSettings:
+  markerAugmenterModel: LSTM
+mass_kg: 83.2
+openSimModel: LaiArnoldModified2017_poly_withArms_weldHand
+subjectID: defaultSubject

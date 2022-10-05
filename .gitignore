@@ -1,0 +1,19 @@
+*.mp4
+#*.mov
+*~
+#*.json
+.ipynb_checkpoints
+__pycache__
+*.log
+*WithKeypoints.avi
+*_rotated.avi
+.env
+*.pth
+
+# Data
+*/Data/*
+Data/
+Examples/Data/*
+
+*.ini
+*.stats
