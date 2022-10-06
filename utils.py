@@ -614,6 +614,24 @@ def changeSessionMetadata(session_ids,newMetaDict):
         deleteResult(trial_id, tag='session_metadata')
         postFileToTrial(metaPath,trial_id,tag='session_metadata',device_id='all')
         os.remove(metaPath)
+        
+def makeSessionPublic(session_id,publicStatus=True):
+    
+    session_url = "{}{}{}/".format(API_URL, "sessions/", session_id)
+    
+    data = {
+            "public":publicStatus
+        }
+        
+    r= requests.patch(session_url, data=data,
+          headers = {"Authorization": "Token {}".format(API_TOKEN)})
+    
+    if r.status_code == 200:
+        print('Successfully made ' + session_id + ' public.')
+    else:
+        print('server resp was ' + str(r.status_code))
+        
+    return
 
         
 def postMotionData(trial_id,session_path,trial_name=None,isNeutral=False):
