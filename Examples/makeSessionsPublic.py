@@ -1,6 +1,6 @@
 """
 ---------------------------------------------------------------------------
-OpenCap: changeSessionMetadata.py
+OpenCap: makeSessionsPublic.py
 ---------------------------------------------------------------------------
 
 Copyright 2022 Stanford University and the Authors
@@ -35,6 +35,8 @@ API_URL = getAPIURL()
 API_TOKEN = getToken()
 
 sessionList = ['<yourSessionID1>','<yourSessionID2>'] # input list of session identifier strings
+makePublic = True # True to make it public, False to make it private
        
 for session in sessionList:
-    makeSessionPublic(session,publicStatus=True)
+    
+    makeSessionPublic(session,publicStatus=makePublic) 

@@ -819,7 +819,7 @@ yErr = [inStd,np.zeros((len(inStd)))]
 xPos = np.repeat(np.array((1,2)),2) + np.tile(np.array((-.17,.17)),2)
 np.random.seed(0)
 xScatter = [x + .2*(.5-np.random.random(10)) for x in xPos]
-colors = [bl,ltbl]*4
+colors = [ltbl,bl]*4
 
 barH = plt.bar(xPos,inMean,width=.25,yerr=yErr,error_kw={'linewidth':.5,'capthick':.5},capsize=1,capstyle='butt',
         color=colors,linewidth=.5,edgecolor='k')
