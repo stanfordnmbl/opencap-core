@@ -38,9 +38,3 @@ These instructions are for Windows 10. The pipeline also runs in Ubuntu. Minimum
 ### Reproducing results from the paper
 1) Data used in the OpenCap publication are available on [SimTK](https://simtk.org/opencap). This dataset includes raw data (e.g., videos, motion capture, ground reaction forces, electromyography), and processed data (e.g., scaled OpenSim models, inverse kinematics, invese dynamics, and dynamic simulation results).
 2) The scripts to process and plot the results are found in the `ReproducePaperResults\` directory. Reference the README in this folder for more details.
-
-
-## Full system architecture for app.opencap.ai.
-
-1. https://github.com/stanfordnmbl/opencap-core -- main processing pipeline. Running in cloud, but also usable locally (Python).
-6. https://github.com/stanfordnmbl/opencap-processing -- postprocessing kinematic results from web application and running dynamic simulation to obtain kinetics (Python).
