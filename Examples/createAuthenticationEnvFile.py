@@ -24,13 +24,14 @@
     to github with a commit, and anyone could get access to your data.
     We recommend only saving this .env file on your own encrypted machine
     and not while running on google collab.
-'''
+antoinefalisse'''
 
+import os
+import sys
+sys.path.append(os.path.abspath('./..'))
 
+from utilsAuth import getToken
 
 # Restart your terminal or IDE (eg Spyder) after running the script for the 
 # new environment variable to be loaded. 
-from utilsAuth import getToken
-import os
-
 getToken(saveEnvPath=os.path.abspath(os.path.join(os.path.dirname(__file__),'../')))
