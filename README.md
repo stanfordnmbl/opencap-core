@@ -42,9 +42,5 @@ These instructions are for Windows 10. The pipeline also runs in Ubuntu. Minimum
 
 ## Full system architecture for app.opencap.ai.
 
-1. https://github.com/stanfordnmbl/opencap-core -- main processing pipeline. Running in cloud, but also usable locally (Python)
-2. https://github.com/stanfordnmbl/opencap-viewer -- user-facing webapp (Vue.js)
-3. https://github.com/stanfordnmbl/opencap-iphone -- iPhone app (Swift, iOS)
-4. https://github.com/stanfordnmbl/opencap-server -- backend API and database (Django, Python)
-5. https://github.com/stanfordnmbl/opencap-infrastructure -- infrastructure
-6. https://github.com/stanfordnmbl/opencap-processing -- postprocessing kinematic results from web application and running dynamic simulation to obtain kinetics (Python)
+1. https://github.com/stanfordnmbl/opencap-core -- main processing pipeline. Running in cloud, but also usable locally (Python).
+6. https://github.com/stanfordnmbl/opencap-processing -- postprocessing kinematic results from web application and running dynamic simulation to obtain kinetics (Python).
