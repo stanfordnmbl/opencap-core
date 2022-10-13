@@ -1,4 +1,4 @@
-# OpenCap
+# OpenCap Core
 This code takes two or more videos and estimates 3D marker positions and human movement kinematics (joint angles) in an OpenSim format. Kinetics (forces) can then be calculated using these outputs using the [opencap-processing](https://github.com/stanfordnmbl/opencap-processing) repository. Learn more about data collection at [opencap.ai](https://opencap.ai). There are three possible ways to use this code:
 1) Collect data and have it automatically processed using web application [app.opencap.ai](https://app.opencap.ai) using iOS devices. We are running the pipeline in the cloud; this service is freely available for academic research use. Visit [opencap.ai/get-started](https://opencap.ai/get-started) to start collecting data. See an example session [here](https://app.opencap.ai/session/7272a71a-e70a-4794-a253-39e11cb7542c).
 2) Run this pipeline locally using videos recorded using app.opencap.ai. Results can be viewed locally, and they will also be updated in the cloud database so they can be visualized at app.opencap.ai. This is useful for customizing the pipeline, for reprocessing data using high accuracy pose estimation settings, or for debugging.
@@ -38,13 +38,3 @@ These instructions are for Windows 10. The pipeline also runs in Ubuntu. Minimum
 ### Reproducing results from the paper
 1) Data used in the OpenCap publication are available on [SimTK](https://simtk.org/opencap). This dataset includes raw data (e.g., videos, motion capture, ground reaction forces, electromyography), and processed data (e.g., scaled OpenSim models, inverse kinematics, invese dynamics, and dynamic simulation results).
 2) The scripts to process and plot the results are found in the `ReproducePaperResults\` directory. Reference the README in this folder for more details.
-
-
-## Full system architecture for app.opencap.ai.
-
-1. https://github.com/stanfordnmbl/opencap-core -- main processing pipeline. Running in cloud, but also usable locally (Python)
-2. https://github.com/stanfordnmbl/opencap-viewer -- user-facing webapp (Vue.js)
-3. https://github.com/stanfordnmbl/opencap-iphone -- iPhone app (Swift, iOS)
-4. https://github.com/stanfordnmbl/opencap-server -- backend API and database (Django, Python)
-5. https://github.com/stanfordnmbl/opencap-infrastructure -- infrastructure
-6. https://github.com/stanfordnmbl/opencap-processing -- postprocessing kinematic results from web application and running dynamic simulation to obtain kinetics (Python)
