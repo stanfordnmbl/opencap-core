@@ -151,7 +151,7 @@ def processTrial(session_id, trial_id, trial_type = 'dynamic',
             error_msg['error_msg_dev'] = e.args[1]
             _ = requests.patch(trial_url, data={"meta": json.dumps(error_msg)},
                    headers = {"Authorization": "Token {}".format(API_TOKEN)})   
-            raise Exception('Dynamic trial failed')
+            raise Exception('Dynamic trial failed.\n' + error_msg['error_msg_dev'])
         
         if not hasWritePermissions:
             print('You are not the owner of this session, so do not have permission to write results to database.')
