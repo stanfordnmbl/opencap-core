@@ -325,7 +325,7 @@ def rotateIntrinsics(CamParams,videoPath):
             # Change principle point - from upper left
             CamParams['intrinsicMat'][0,2] = ly-py
             CamParams['intrinsicMat'][1,2] = px
-        elif rotation == 279: # upside down
+        elif rotation == 270: # upside down
             # Change principle point - from upper left
             CamParams['intrinsicMat'][0,2] = lx-px
             CamParams['intrinsicMat'][1,2] = ly-py
