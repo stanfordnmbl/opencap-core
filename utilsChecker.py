@@ -285,11 +285,22 @@ def saveCameraParameters(filename,CameraParams):
 #%% 
 def getVideoRotation(videoPath):
     
+    
     meta = ffmpeg.probe(videoPath)
     try:
         rotation = meta['format']['tags']['com.apple.quicktime.video-orientation']
     except:
-        rotation = 90 # upright is 90, and intrinsics were captured in that orientation
+        # For AVI (after we rewrite video), no rotation paramter, so just using h and w. 
+        # For now this is ok, we don't need leaning right/left for this, just need to know
+        # how to orient the pose estimation resolution parameters.
+        try: 
+            if meta['format']['format_name'] == 'avi':
+                if meta['streams'][0]['height']>meta['streams'][0]['width']:
+                    rotation = 90
+                else:
+                    rotation = 0
+        except:
+            rotation = 90 # upright is 90, and intrinsics were captured in that orientation
         
     return int(rotation)
 
