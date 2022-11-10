@@ -306,9 +306,7 @@ def rotateIntrinsics(CamParams,videoPath):
         py = originalCamParams['intrinsicMat'][1,2]
         lx = originalCamParams['imageSize'][1]
         ly = originalCamParams['imageSize'][0]
-        
-        old = copy.copy(CamParams)
-    
+           
         if rotation == 0: # leaning left
             # Flip image size
             CamParams['imageSize'] = np.flipud(CamParams['imageSize'])
