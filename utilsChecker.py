@@ -11,6 +11,7 @@ import urllib.request
 import shutil
 import utilsDataman
 import requests
+import ffmpeg
 import matplotlib.pyplot as plt
 from scipy.ndimage import gaussian_filter1d
 from scipy.signal import gaussian, sosfiltfilt, butter, find_peaks
@@ -280,7 +281,57 @@ def saveCameraParameters(filename,CameraParams):
     open_file.close()
     
     return True
+
+#%% 
+def getVideoRotation(videoPath):
     
+    meta = ffmpeg.probe(videoPath)
+    try:
+        rotation = meta['format']['tags']['com.apple.quicktime.video-orientation']
+    except:
+        rotation = 90 # upright is 90, and intrinsics were captured in that orientation
+        
+    return int(rotation)
+
+#%% 
+def rotateIntrinsics(CamParams,videoPath):
+    rotation = getVideoRotation(videoPath)
+    
+    # upright is 90, which is how intrinsics recorded so no rotation needed
+    if rotation !=90:
+        originalCamParams = copy.deepcopy(CamParams)
+        fx = originalCamParams['intrinsicMat'][0,0]
+        fy = originalCamParams['intrinsicMat'][1,1]
+        px = originalCamParams['intrinsicMat'][0,2]
+        py = originalCamParams['intrinsicMat'][1,2]
+        lx = originalCamParams['imageSize'][1]
+        ly = originalCamParams['imageSize'][0]
+           
+        if rotation == 0: # leaning left
+            # Flip image size
+            CamParams['imageSize'] = np.flipud(CamParams['imageSize'])
+            # Flip focal lengths
+            CamParams['intrinsicMat'][0,0] = fy
+            CamParams['intrinsicMat'][1,1] = fx
+            # Change principle point - from upper left
+            CamParams['intrinsicMat'][0,2] = py
+            CamParams['intrinsicMat'][1,2] = lx-px   
+        elif rotation == 180: # leaning right
+            # Flip image size
+            CamParams['imageSize'] = np.flipud(CamParams['imageSize'])
+            # Flip focal lengths
+            CamParams['intrinsicMat'][0,0] = fy
+            CamParams['intrinsicMat'][1,1] = fx
+            # Change principle point - from upper left
+            CamParams['intrinsicMat'][0,2] = ly-py
+            CamParams['intrinsicMat'][1,2] = px
+        elif rotation == 270: # upside down
+            # Change principle point - from upper left
+            CamParams['intrinsicMat'][0,2] = lx-px
+            CamParams['intrinsicMat'][1,2] = ly-py
+            
+    return CamParams
+
 # %% 
 def calcExtrinsics(imageFileName, CameraParams, CheckerBoardParams,
                    imageScaleFactor=1,visualize=False,

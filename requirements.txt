@@ -14,3 +14,4 @@ protobuf==3.19.5
 sklearn
 pingouin==0.5.2
 openpyxl
+ffmpeg-python
