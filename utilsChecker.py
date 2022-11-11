@@ -299,6 +299,8 @@ def getVideoRotation(videoPath):
                     rotation = 90
                 else:
                     rotation = 0
+            else:
+                raise Exception('no rotation info')
         except:
             rotation = 90 # upright is 90, and intrinsics were captured in that orientation
         
