@@ -23,6 +23,7 @@ from utilsChecker import synchronizeVideos
 from utilsChecker import triangulateMultiviewVideo
 from utilsChecker import writeTRCfrom3DKeypoints
 from utilsChecker import popNeutralPoseImages
+from utilsChecker import rotateIntrinsics
 from utilsDetector  import runPoseDetector
 from utilsAugmenter import augmentTRC
 from utilsOpenSim import runScaleTool, getScaleTimeRange, runIKTool, generateVisualizerJson
@@ -142,7 +143,8 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
                         os.path.join(permIntrinsicDir,
                                       'cameraIntrinsics.pickle'))                    
                 # Intrinsics do not exist throw an error. Eventually the
-                # webapp will give you the opportunity to compute them.          
+                # webapp will give you the opportunity to compute them.
+                
                 else:
                     exception = "Intrinsics don't exist for your camera model. OpenCap supports all iOS devices released in 2018 or later: https://www.opencap.ai/get-started."
                     raise Exception(exception, exception)
@@ -156,6 +158,10 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
                     camName in alternateExtrinsics)
                 extrinsicPath = os.path.join(camDir, 'InputMedia', trialName, 
                                              trial_id + '.mov') 
+                                              
+                # Modify intrinsics if camera view is rotated
+                CamParams = rotateIntrinsics(CamParams,extrinsicPath)
+                
                 # for 720p, imageUpsampleFactor=4 is best for small board
                 try:
                     CamParams = calcExtrinsicsFromVideo(
@@ -274,8 +280,8 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
                 raise Exception(e.args[0], e.args[1])
             elif len(e.args) == 1: # generic exception
                 exception = """Video synchronization failed. Verify your setup and try again. 
-                    A fail-safe synchronization method is to ""punch the sky"" at the beginning of a trial: 
-                    quickly move one hand above shoulders, then bring it back down. 
+                    A fail-safe synchronization method is for the participant to
+                    quickly raise one hand above their shoulders, then bring it back down. 
                     Visit https://www.opencap.ai/best-pratices to learn more about 
                     data collection and https://www.opencap.ai/troubleshooting for 
                     potential causes for a failed trial."""

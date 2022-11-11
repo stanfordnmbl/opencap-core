@@ -2,7 +2,61 @@ import os
 import time
 import logging
 import shutil
+import ffmpeg
 
+#%% 
+def getVideoOrientation(videoPath):
+    
+    meta = ffmpeg.probe(videoPath)
+    try:
+        rotation = meta['format']['tags']['com.apple.quicktime.video-orientation']
+    except:
+        # For AVI (after we rewrite video), no rotation paramter, so just using h and w. 
+        # For now this is ok, we don't need leaning right/left for this, just need to know
+        # how to orient the pose estimation resolution parameters.
+        try: 
+            if meta['format']['format_name'] == 'avi':
+                if meta['streams'][0]['height']>meta['streams'][0]['width']:
+                    rotation = 90
+                else:
+                    rotation = 0
+            else:
+                raise Exception('no rotation info')
+        except:
+            rotation = 90 # upright is 90, and intrinsics were captured in that orientation
+            
+    if int(rotation) in [0,180]: 
+        horizontal = True
+    else:
+        horizontal = False
+        
+    return horizontal
+
+#%%
+def getResolutionCommand(resolutionPoseDetection, horizontal):
+    
+    # Adjust OpenPose call based on selected resolution.    
+    if resolutionPoseDetection == 'default':
+        cmd_hr = ' '
+    elif resolutionPoseDetection == '1x1008_4scales':
+        if horizontal:
+            cmd_hr = ' --net_resolution "1008x-1" --scale_number 4 --scale_gap 0.25 '
+        else:
+            cmd_hr = ' --net_resolution "-1x1008" --scale_number 4 --scale_gap 0.25 '
+    elif resolutionPoseDetection == '1x736':
+        if horizontal:
+            cmd_hr = ' --net_resolution "736x-1" '
+        else:
+            cmd_hr = ' --net_resolution "-1x736" '  
+    elif resolutionPoseDetection == '1x736_2scales':
+        if horizontal:
+            cmd_hr = ' --net_resolution "-1x736" --scale_number 2 --scale_gap 0.75 '
+        else:
+            cmd_hr = ' --net_resolution "736x-1" --scale_number 2 --scale_gap 0.75 '
+            
+    return cmd_hr
+
+#%% 
 logging.basicConfig(level=logging.INFO)
 
 logging.info("Waiting for data...")
@@ -12,15 +66,6 @@ output_dir = "/openpose/data/output_openpose"
 
 # Set resolution for OpenPose ('default', '1x736', or '1x1008_4scales').
 resolutionPoseDetection = '1x736'
-# Adjust OpenPose call based on selected resolution.    
-if resolutionPoseDetection == 'default':
-    cmd_hr = ' '
-elif resolutionPoseDetection == '1x1008_4scales':
-    cmd_hr = ' --net_resolution "-1x1008" --scale_number 4 --scale_gap 0.25 '
-elif resolutionPoseDetection == '1x736':
-    cmd_hr = ' --net_resolution "-1x736" '
-elif resolutionPoseDetection == '1x736_2scales':
-    cmd_hr = ' --net_resolution "-1x736" --scale_number 2 --scale_gap 0.75 '
     
 if os.path.isfile(video_path):
     os.remove(video_path)
@@ -35,6 +80,9 @@ while True:
     if os.path.isdir(output_dir):
         shutil.rmtree(output_dir)
     os.makedirs(output_dir)
+    
+    horizontal = getVideoOrientation(video_path)
+    cmd_hr = getResolutionCommand(resolutionPoseDetection, horizontal)
 
     command = "/openpose/build/examples/openpose/openpose.bin\
         --video {video_path}\
