@@ -1,6 +1,6 @@
 version: "3.9"
 services:
-  mobilecap:
+  opencap:
     image: opencap
     volumes:
       - data:/data
