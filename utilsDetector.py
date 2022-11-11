@@ -12,6 +12,7 @@ import logging
 from decouple import config
 
 from utils import getOpenPoseMarkerNames, getMMposeMarkerNames
+from utilsChecker import getVideoRotation
 
 # %%
 def runPoseDetector(CameraDirectories, trialRelativePath, pathPoseDetector,
@@ -151,15 +152,31 @@ def runOpenPoseVideo(cameraDirectory,fileName,pathOpenPose, trialName,
 def runOpenPoseCMD(pathOpenPose, resolutionPoseDetection, cameraDirectory,
                    fileName, openposeJsonDir, pathOutputVideo, trialPrefix, 
                    generateVideo, videoFullPath, pathOutputJsons):
+    
+    rotation = getVideoRotation(videoFullPath)
+    if rotation in [0,180]: 
+        horizontal = True
+    else:
+        horizontal = False
+    
     command = None
     if resolutionPoseDetection == 'default':
         cmd_hr = ' '
     elif resolutionPoseDetection == '1x1008_4scales':
-        cmd_hr = ' --net_resolution "-1x1008" --scale_number 4 --scale_gap 0.25 '
+        if horizontal:
+            cmd_hr = ' --net_resolution "1008x-1" --scale_number 4 --scale_gap 0.25 '
+        else:
+            cmd_hr = ' --net_resolution "-1x1008" --scale_number 4 --scale_gap 0.25 '
     elif resolutionPoseDetection == '1x736':
-        cmd_hr = ' --net_resolution "-1x736" '
+        if horizontal:
+            cmd_hr = ' --net_resolution "736x-1" '
+        else:
+            cmd_hr = ' --net_resolution "-1x736" '  
     elif resolutionPoseDetection == '1x736_2scales':
-        cmd_hr = ' --net_resolution "-1x736" --scale_number 2 --scale_gap 0.75 '
+        if horizontal:
+            cmd_hr = ' --net_resolution "-1x736" --scale_number 2 --scale_gap 0.75 '
+        else:
+            cmd_hr = ' --net_resolution "736x-1" --scale_number 2 --scale_gap 0.75 '
         
     if config("DOCKERCOMPOSE", cast=bool, default=False):
         vid_path_tmp = "/data/tmp-video.mov"
