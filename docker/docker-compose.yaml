@@ -1,7 +1,7 @@
 version: "3.9"
 services:
-  opencap:
-    image: opencap
+  opencap-dev:
+    image: opencap-dev
     volumes:
       - data:/data
     env_file:
@@ -15,8 +15,8 @@ services:
             - driver: nvidia
               count: 1
               capabilities: [gpu]
-  openpose:
-    image: openpose
+  openpose-dev:
+    image: openpose-dev
     volumes:
       - data:/openpose/data
     deploy:
@@ -26,8 +26,8 @@ services:
             - driver: nvidia
               count: 1
               capabilities: [gpu]
-  mmpose:
-    image: mmpose
+  mmpose-dev:
+    image: mmpose-dev
     volumes:
       - data:/mmpose/data
     deploy:
