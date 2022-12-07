@@ -280,8 +280,8 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
                 raise Exception(e.args[0], e.args[1])
             elif len(e.args) == 1: # generic exception
                 exception = """Video synchronization failed. Verify your setup and try again. 
-                    A fail-safe synchronization method is to ""punch the sky"" at the beginning of a trial: 
-                    quickly move one hand above shoulders, then bring it back down. 
+                    A fail-safe synchronization method is for the participant to
+                    quickly raise one hand above their shoulders, then bring it back down. 
                     Visit https://www.opencap.ai/best-pratices to learn more about 
                     data collection and https://www.opencap.ai/troubleshooting for 
                     potential causes for a failed trial."""
