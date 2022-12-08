@@ -51,7 +51,7 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
     # OpenSim pipeline.
     runOpenSimPipeline = True
     # Lowpass filter frequency of 2D keypoints for gait and everything else.
-    filtFreqs = {'gait':12, 'default':30}
+    filtFreqs = {'gait':12, 'default':500} # defaults to framerate/2
     # High-resolution for OpenPose.
     resolutionPoseDetection = resolutionPoseDetection
     # Set to False to only generate the json files (default is True).
