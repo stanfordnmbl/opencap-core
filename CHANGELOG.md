@@ -4,5 +4,6 @@ This is not a comprehensive list of changes but rather a hand-curated collection
 
 Changes
 =======
+- 12/07/2022: Add support for iPhone 14, iPhone 14 Plus, iPad (10th gen), iPadPro 12.9 in (6th gen), and iPadPro 11 in (4th gen) ([pull request](https://github.com/stanfordnmbl/opencap-core/pull/17)).
+- 11/11/2022: Add support for horizontally oriented videos ([pull request](https://github.com/stanfordnmbl/opencap-core/pull/9))
 - 11/09/2022: Add support for iPhone 14 Pro and iPhone 14 Pro Max ([pull request](https://github.com/stanfordnmbl/opencap-core/pull/4)).
-- 11/10/2022: Add support for horizontally oriented videos ([pull request](https://github.com/stanfordnmbl/opencap-core/pull/6))
