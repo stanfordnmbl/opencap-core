@@ -48,21 +48,28 @@ Data folder of your local repository.
 import os
 import sys
 import shutil
+import yaml
 
 repoDir = os.path.abspath(
     os.path.join(os.path.dirname(os.path.abspath(__file__)),'../'))
 sys.path.append(repoDir)
 
-from labValidationIDs import getData
-from utils import downloadVideosFromServer, getDataDirectory
 from main import main
+from utils import importMetadata
 
 # %% User inputs
+# Enter the path to the folder where you downloaded the data. The data is on
+# SimTK: https://simtk.org/frs/?group_id=2385 (LabValidation_withVideos).
+# In this example, our path looks like:
+#   C:/Users/antoi/Documents/MyRepositories/mobilecap_data/Data/LabValidation/subject2
+#   C:/Users/antoi/Documents/MyRepositories/mobilecap_data/Data/LabValidation/subject3
+# ...
+dataDir = 'C:/Users/antoi/Documents/MyRepositories/mobilecap_data/Data/LabValidation/'
 
 # The dataset includes 2 sessions per subject.The first session includes
 # static, sit-to-stand, squat, and drop jump trials. The second session 
-# includes walking trials. The sessions are named <subject_name>_0 and 
-# <subject_name>_1.
+# includes walking trials. The sessions are named <subject_name>_Session0 and 
+# <subject_name>_Session1.
 sessionNames = ['subject2_0', 'subject2_1',
                 'subject3_0', 'subject3_1',
                 'subject4_0', 'subject4_1',
@@ -78,105 +85,172 @@ sessionNames = ['subject2_0', 'subject2_1',
 poseDetectors = ['OpenPose']
 
 # Select the camera configuration you would like to use.
-cameraSetups = ['2-cameras', '3-cameras', '5-cameras']
+# cameraSetups = ['2-cameras', '3-cameras', '5-cameras']
+cameraSetups = ['2-cameras']
 
 # Select the resolution at which you would like to use OpenPose. More details
 # about the options in Examples/reprocessSessions. In the paper, we compared 
 # 'default' and '1x1008_4scales'.
 resolutionPoseDetection = 'default'
 
+# Since the prepint release, we updated a new augmenter model. To use the model
+# used for generating the paper results, select v0.1. To use the latest model
+# (now in production), select v0.2.
+augmenter_model = 'v0.1'
+
+# %% Data re-organization
+# To reprocess the data, we need to re-organize the data so that the folder
+# structure is the same one as the one expected by OpenCap. It is only done
+# once as long as the variable overwriteRestructuring is False. To overwrite
+# filpt the flag to True.
+overwriteRestructuring = False
+subjects = ['subject' + str(i) for i in range(2,12)]
+for subject in subjects:
+    pathSubject = os.path.join(dataDir, subject)
+    pathVideos = os.path.join(pathSubject, 'VideoData')    
+    for session in os.listdir(pathVideos):
+        if 'Session' not in session:
+            continue
+        pathSession = os.path.join(pathVideos, session)
+        pathSessionNew = os.path.join(dataDir, 'Data', subject + '_' + session)
+        if os.path.exists(pathSessionNew) and not overwriteRestructuring:
+            continue
+        os.makedirs(pathSessionNew, exist_ok=True)
+        # Copy metadata
+        pathMetadata = os.path.join(pathSubject, 'metadata.yaml')
+        shutil.copy2(pathMetadata, pathSessionNew)
+        pathMetadataNew = os.path.join(pathSessionNew, 'metadata.yaml')
+        pathMetadataNewRenamed = os.path.join(pathSessionNew, 
+                                              'sessionMetadata.yaml')
+        os.rename(pathMetadataNew, pathMetadataNewRenamed)
+        # Adjust model name
+        sessionMetadata = importMetadata(pathMetadataNewRenamed)
+        sessionMetadata['openSimModel'] = (
+            'LaiArnoldModified2017_poly_withArms_weldHand')
+        with open(pathMetadataNewRenamed, 'w') as file:
+                yaml.dump(sessionMetadata, file)        
+        for cam in os.listdir(pathSession):
+            if "Cam" not in cam:
+                continue            
+            pathCam = os.path.join(pathSession, cam)
+            pathCamNew = os.path.join(pathSessionNew, 'Videos', cam)
+            pathInputMediaNew = os.path.join(pathCamNew, 'InputMedia')
+            # Copy videos.
+            for trial in os.listdir(pathCam):
+                pathTrial = os.path.join(pathCam, trial)
+                if not os.path.isdir(pathTrial):
+                    continue
+                pathVideo = os.path.join(pathTrial, trial + '.avi')
+                pathTrialNew = os.path.join(pathInputMediaNew, trial)
+                os.makedirs(pathTrialNew, exist_ok=True)
+                shutil.copy2(pathVideo, pathTrialNew)
+            # Copy camera parameters
+            pathParameters = os.path.join(pathCam, 
+                                          'cameraIntrinsicsExtrinsics.pickle')
+            shutil.copy2(pathParameters, pathCamNew)
+
+# %% Fixed settings.
+# The dataset contains 5 videos per trial. The 5 videos are taken from cameras
+# positioned at different angles: Cam0:-70deg, Cam1:-45deg, Cam2:0deg, 
+# Cam3:45deg, and Cam4:70deg where 0deg faces the participant. Depending on the
+# cameraSetup, we load different videos.
+cam2sUse = {'5-cameras': ['Cam0', 'Cam1', 'Cam2', 'Cam3', 'Cam4'], 
+            '3-cameras': ['Cam1', 'Cam2', 'Cam3'], 
+            '2-cameras': ['Cam1', 'Cam3']}
+
 # %% Functions for re-processing the data.
-def process_trial(trial_id, trial_name=None, session_name='', isDocker=False,
-                  session_id=None, cam2Use=['all'],
+def process_trial(trial_name=None, session_name=None, isDocker=False,
+                  cam2Use=['all'],
                   intrinsicsFinalFolder='Deployed', extrinsicsTrial=False,
                   alternateExtrinsics=None, markerDataFolderNameSuffix=None,
                   imageUpsampleFactor=4, poseDetector='OpenPose',
                   resolutionPoseDetection='default', scaleModel=False,
                   bbox_thr=0.8, augmenter_model='v0.2', benchmark=False,
-                  calibrationOptions=None):
-    
-    # Download videos.
-    trial_name = downloadVideosFromServer(session_id, trial_id, isDocker=True, 
-                                          trial_name=trial_name,
-                                          session_name=session_name,
-                                          benchmark=benchmark)
+                  calibrationOptions=None, offset=True, dataDir=None):
 
     # Run main processing pipeline.
-    main(session_name, trial_name, trial_id, cam2Use, intrinsicsFinalFolder,
-         isDocker, extrinsicsTrial, alternateExtrinsics, calibrationOptions,
-         markerDataFolderNameSuffix, imageUpsampleFactor, poseDetector,
-         resolutionPoseDetection=resolutionPoseDetection,
-         scaleModel=scaleModel, bbox_thr=bbox_thr,
-         augmenter_model=augmenter_model, benchmark=benchmark)
+    main(session_name, trial_name, trial_name, cam2Use, intrinsicsFinalFolder,
+          isDocker, extrinsicsTrial, alternateExtrinsics, calibrationOptions,
+          markerDataFolderNameSuffix, imageUpsampleFactor, poseDetector,
+          resolutionPoseDetection=resolutionPoseDetection,
+          scaleModel=scaleModel, bbox_thr=bbox_thr,
+          augmenter_model=augmenter_model, benchmark=benchmark, offset=offset,
+          dataDir=dataDir)
 
     return
 
 # %% Process trials.
-for count, sessionName in enumerate(sessionNames):
+for count, sessionName in enumerate(sessionNames):    
+    # Get trial names.
+    pathCam0 = os.path.join(dataDir, 'Data', sessionName, 'Videos', 'Cam0',
+                            'InputMedia')    
+    # Work around to re-order trials and have the static first (if available).
+    trials_tmp = os.listdir(pathCam0)
+    trials_tmp = [t for t in trials_tmp if
+                  os.path.isdir(os.path.join(pathCam0, t))]
+    # Re-order to have static first
+    session_with_static = False
+    for trial in trials_tmp:
+        if 'static' in trial.lower():                    
+            static_idx = trials_tmp.index(trial) 
+            session_with_static = True
+    if session_with_static:
+        trials = [trials_tmp[static_idx]]
+        for trial in trials_tmp:
+            if 'static' not in trial.lower():
+                trials.append(trial)
+    else:
+        trials = trials_tmp
+    
     for poseDetector in poseDetectors:
         for cameraSetup in cameraSetups:
-            data = getData(sessionName)
-            cam2Use = data['camera_setup'][cameraSetup]
+            cam2Use = cam2sUse[cameraSetup]
 
             # The second sessions (<>_1) have no static trial for scaling the
             # model. The static trials were collected as part of the first
             # session for each subject (<>_0). We here copy the Model folder
             # from the first session to the second session.
             if sessionName[-1] == '1':
-                dataDir = getDataDirectory()
                 sessionDir = os.path.join(dataDir, 'Data', sessionName)
                 sessionDir_0 = sessionDir[:-1] + '0'
                 camDir_0 = os.path.join(
                     sessionDir_0, 'OpenSimData', 
                     poseDetector + '_' + resolutionPoseDetection, cameraSetup)
-                modelName = 'LaiArnoldModified2017_poly_withArms_weldHand'
-                modelDir_0 = os.path.join(camDir_0, modelName, 'Model')
+                modelDir_0 = os.path.join(camDir_0, 'Model')
                 camDir_1 = os.path.join(
                     sessionDir, 'OpenSimData', 
                     poseDetector + '_' + resolutionPoseDetection, cameraSetup)
-                modelDir_1 = os.path.join(camDir_1, modelName, 'Model')
+                modelDir_1 = os.path.join(camDir_1, 'Model')
                 os.makedirs(modelDir_1, exist_ok=True)
                 for file in os.listdir(modelDir_0):
                     pathFile = os.path.join(modelDir_0, file)
                     pathFileEnd = os.path.join(modelDir_1, file)
                     shutil.copy2(pathFile, pathFileEnd)
-                
+                    
             # Process trial.
-            for trial in data['trials']:
+            for trial in trials:                
+                print('Processing {}'.format(trial))
                 
-                name = None # default
-                if "name" in data['trials'][trial]:
-                    name = data['trials'][trial]["name"]
+                # Detect if static trial with netural pose to scale model.
+                if 'static' in trial.lower():                    
+                    scaleModel = True
+                else:
+                    scaleModel = False
+                
+                # Session specific intrinsic parameters
+                if 'subject2' in sessionName or 'subject3' in sessionName:
+                    intrinsicsFinalFolder = 'Deployed_720_240fps'
+                else:
+                    intrinsicsFinalFolder = 'Deployed_720_60fps'
                     
-                intrinsicsFinalFolder = 'Deployed' # default
-                if "intrinsicsFinalFolder" in data['trials'][trial]:
-                    intrinsicsFinalFolder = (
-                        data['trials'][trial]["intrinsicsFinalFolder"])
                     
-                extrinsicsTrial = False # default
-                if "extrinsicsTrial" in data['trials'][trial]:
-                    extrinsicsTrial = data['trials'][trial]["extrinsicsTrial"]
-                    
-                scaleModel = False # default
-                if "scaleModel" in data['trials'][trial]:
-                    scaleModel = data['trials'][trial]['scaleModel']
-                    
-                # Select 'v0.1' to use the augmenter model used for the paper
-                # results. We re-trained the model, and obtained better results
-                # as compared to the paper results. We therefore now default to
-                # the re-trained model.
-                augmenter_model = 'v0.2' # default
-                if "augmenter_model" in data['trials'][trial]:
-                    augmenter_model = data['trials'][trial]['augmenter_model']
-                    
-                process_trial(data['trials'][trial]["id"], name,
+                process_trial(trial,
                               session_name=sessionName,
-                              session_id=data['session_id'],
-                              isDocker=False, cam2Use=cam2Use, 
+                              cam2Use=cam2Use, 
                               intrinsicsFinalFolder=intrinsicsFinalFolder,
-                              extrinsicsTrial=extrinsicsTrial,
                               markerDataFolderNameSuffix=cameraSetup,
                               poseDetector=poseDetector,
                               resolutionPoseDetection=resolutionPoseDetection,
                               scaleModel=scaleModel, 
-                              augmenter_model=augmenter_model)
+                              augmenter_model=augmenter_model,
+                              dataDir=dataDir)

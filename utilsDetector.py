@@ -37,20 +37,32 @@ def runPoseDetector(CameraDirectories, trialRelativePath, pathPoseDetector,
         cameraDirectory = CameraDirectories_selectedCams[camName]
         print('Running {} for {}'.format(poseDetector, camName))
         if poseDetector == 'OpenPose':
-            runOpenPoseVideo(
+            extension = runOpenPoseVideo(
                 cameraDirectory,trialRelativePath,pathPoseDetector, trialName,
                 resolutionPoseDetection=resolutionPoseDetection,
                 generateVideo=generateVideo)
         elif poseDetector == 'mmpose':
             runMMposeVideo(
                 cameraDirectory,trialRelativePath,pathPoseDetector, trialName,
-                generateVideo=generateVideo, bbox_thr=bbox_thr)           
+                generateVideo=generateVideo, bbox_thr=bbox_thr)
+            
+    return extension
             
 # %%
 def runOpenPoseVideo(cameraDirectory,fileName,pathOpenPose, trialName,
                      resolutionPoseDetection='default', generateVideo=True):
     
     trialPrefix, _ = os.path.splitext(os.path.basename(fileName))
+    
+    
+    # Detect extension
+    pathVideoDir = os.path.split(os.path.join(cameraDirectory, fileName))[0]
+    videoName = os.path.split(os.path.join(cameraDirectory, fileName))[1]
+    for file in os.listdir(pathVideoDir):
+        if videoName == file.rsplit('.', 1)[0]:
+            extension = '.' + file.rsplit('.', 1)[1]
+            
+    fileName += extension
     videoFullPath = os.path.normpath(os.path.join(cameraDirectory, fileName))
     
     if not os.path.exists(videoFullPath):
@@ -147,6 +159,8 @@ def runOpenPoseVideo(cameraDirectory,fileName,pathOpenPose, trialName,
         
         # Delete jsons
         shutil.rmtree(pathJsonDir)
+        
+    return extension
         
 # %%
 def runOpenPoseCMD(pathOpenPose, resolutionPoseDetection, cameraDirectory,
