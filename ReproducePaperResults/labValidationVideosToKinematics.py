@@ -21,15 +21,18 @@ This script processes videos to estimate kinematics with the data from the
 "OpenCap: 3D human movement dynamics from smartphone videos" paper. The dataset
 includes 10 subjects, with 2 sessions per subject. The first session includes
 static, sit-to-stand, squat, and drop jump trials. The second session includes
-walking trials. The sessions are named <subject_name>_0 and <subject_name>_1.
-The data for this validation part of the paper were collected prior to 
-developing the web application. The session and trial IDs were therefore
-manually entered, see labValidationIDs. In the paper, we compared 3 camera
-configurations: 2 cameras at +/- 45deg ('2-cameras'), 3 cameras at +/- 45deg 
-and 0deg ('3-cameras'), and 5 cameras at +/- 45deg, +/- 70deg, and 0deg
-('5-cameras'); 0deg faces the participant. Use the variable cameraSetups below
-to select which camera configuration to use. In the paper, we also compared
-three algorithms for pose detection: OpenPose at default resolution, OpenPose
+walking trials.
+
+The dataset is available on SimTK: https://simtk.org/frs/?group_id=2385. Make
+sure you download the dataset with videos: LabValidation_withVideos.
+
+In the paper, we compared 3 camera configurations: 
+    2 cameras at +/- 45deg ('2-cameras'), 
+    3 cameras at +/- 45deg and 0deg ('3-cameras'), and 
+    5 cameras at +/- 45deg, +/- 70deg, and 0deg ('5-cameras'); 
+where 0deg faces the participant. Use the variable cameraSetups below to select
+which camera configuration to use. In the paper, we also compared three 
+algorithms for pose detection: OpenPose at default resolution, OpenPose
 with higher accuracy, and HRNet. HRNet is not supported on Windows, and we
 therefore do not support it here (it is supported on the web application). To
 use OpenPose at default resolution, set the variable resolutionPoseDetection to
@@ -40,8 +43,7 @@ GPU requirements. Please note that we have updated OpenCap since submitting
 the paper. As part of the updates, we re-trained the deep learning model we
 use to predict anatomical markers from video keypoints, and we updated how
 videos are time synchronized. These changes might have a slight effect
-on the results. By default, running this script will save the data in the
-Data folder of your local repository.
+on the results.
 """
 
 # %% Paths and imports.
@@ -61,25 +63,25 @@ from utils import importMetadata
 # Enter the path to the folder where you downloaded the data. The data is on
 # SimTK: https://simtk.org/frs/?group_id=2385 (LabValidation_withVideos).
 # In this example, our path looks like:
-#   C:/Users/antoi/Documents/MyRepositories/mobilecap_data/Data/LabValidation/subject2
-#   C:/Users/antoi/Documents/MyRepositories/mobilecap_data/Data/LabValidation/subject3
-# ...
-dataDir = 'C:/Users/antoi/Documents/MyRepositories/mobilecap_data/Data/LabValidation/'
+#   C:/Users/opencap/Documents//Data_paper/LabValidation/subject2
+#   C:/Users/opencap/Documents//Data_paper/LabValidation/subject3
+#   ...
+dataDir = 'C:/Users/opencap/Documents//Data_paper/LabValidation/'
 
 # The dataset includes 2 sessions per subject.The first session includes
 # static, sit-to-stand, squat, and drop jump trials. The second session 
 # includes walking trials. The sessions are named <subject_name>_Session0 and 
 # <subject_name>_Session1.
-sessionNames = ['subject2_0', 'subject2_1',
-                'subject3_0', 'subject3_1',
-                'subject4_0', 'subject4_1',
-                'subject5_0', 'subject5_1', 
-                'subject6_0', 'subject6_1',
-                'subject7_0', 'subject7_1', 
-                'subject8_0', 'subject8_1', 
-                'subject9_0', 'subject9_1', 
-                'subject10_0', 'subject10_1', 
-                'subject11_0', 'subject11_1']
+sessionNames = ['subject2_Session0', 'subject2_Session1',
+                'subject3_Session0', 'subject3_Session1',
+                'subject4_Session0', 'subject4_Session1',
+                'subject5_Session0', 'subject5_Session1', 
+                'subject6_Session0', 'subject6_Session1',
+                'subject7_Session0', 'subject7_Session1', 
+                'subject8_Session0', 'subject8_Session1', 
+                'subject9_Session0', 'subject9_Session1', 
+                'subject10_Session0', 'subject10_Session1', 
+                'subject11_Session0', 'subject11_Session1']
 
 # We only support OpenPose on Windows.
 poseDetectors = ['OpenPose']
@@ -96,7 +98,7 @@ resolutionPoseDetection = 'default'
 # Since the prepint release, we updated a new augmenter model. To use the model
 # used for generating the paper results, select v0.1. To use the latest model
 # (now in production), select v0.2.
-augmenter_model = 'v0.1'
+augmenter_model = 'v0.2'
 
 # %% Data re-organization
 # To reprocess the data, we need to re-organize the data so that the folder
@@ -117,17 +119,14 @@ for subject in subjects:
             continue
         os.makedirs(pathSessionNew, exist_ok=True)
         # Copy metadata
-        pathMetadata = os.path.join(pathSubject, 'metadata.yaml')
+        pathMetadata = os.path.join(pathSubject, 'sessionMetadata.yaml')
         shutil.copy2(pathMetadata, pathSessionNew)
-        pathMetadataNew = os.path.join(pathSessionNew, 'metadata.yaml')
-        pathMetadataNewRenamed = os.path.join(pathSessionNew, 
-                                              'sessionMetadata.yaml')
-        os.rename(pathMetadataNew, pathMetadataNewRenamed)
+        pathMetadataNew = os.path.join(pathSessionNew, 'sessionMetadata.yaml')
         # Adjust model name
-        sessionMetadata = importMetadata(pathMetadataNewRenamed)
+        sessionMetadata = importMetadata(pathMetadataNew)
         sessionMetadata['openSimModel'] = (
             'LaiArnoldModified2017_poly_withArms_weldHand')
-        with open(pathMetadataNewRenamed, 'w') as file:
+        with open(pathMetadataNew, 'w') as file:
                 yaml.dump(sessionMetadata, file)        
         for cam in os.listdir(pathSession):
             if "Cam" not in cam:
@@ -158,7 +157,7 @@ cam2sUse = {'5-cameras': ['Cam0', 'Cam1', 'Cam2', 'Cam3', 'Cam4'],
             '3-cameras': ['Cam1', 'Cam2', 'Cam3'], 
             '2-cameras': ['Cam1', 'Cam3']}
 
-# %% Functions for re-processing the data.
+# # %% Functions for re-processing the data.
 def process_trial(trial_name=None, session_name=None, isDocker=False,
                   cam2Use=['all'],
                   intrinsicsFinalFolder='Deployed', extrinsicsTrial=False,
@@ -184,28 +183,34 @@ for count, sessionName in enumerate(sessionNames):
     # Get trial names.
     pathCam0 = os.path.join(dataDir, 'Data', sessionName, 'Videos', 'Cam0',
                             'InputMedia')    
-    # Work around to re-order trials and have the static first (if available).
+    # Work around to re-order trials and have the extrinsics trial firs, and
+    # the static second (if available).
     trials_tmp = os.listdir(pathCam0)
     trials_tmp = [t for t in trials_tmp if
                   os.path.isdir(os.path.join(pathCam0, t))]
-    # Re-order to have static first
     session_with_static = False
     for trial in trials_tmp:
+        if 'extrinsics' in trial.lower():                    
+            extrinsics_idx = trials_tmp.index(trial) 
         if 'static' in trial.lower():                    
             static_idx = trials_tmp.index(trial) 
-            session_with_static = True
+            session_with_static = True            
+    trials = [trials_tmp[extrinsics_idx]]
     if session_with_static:
-        trials = [trials_tmp[static_idx]]
+        trials.append(trials_tmp[static_idx])
         for trial in trials_tmp:
-            if 'static' not in trial.lower():
+            if ('static' not in trial.lower() and 
+                'extrinsics' not in trial.lower()):
                 trials.append(trial)
     else:
-        trials = trials_tmp
+        for trial in trials_tmp:
+            if 'extrinsics' not in trial.lower():
+                trials.append(trial)
     
     for poseDetector in poseDetectors:
         for cameraSetup in cameraSetups:
             cam2Use = cam2sUse[cameraSetup]
-
+            
             # The second sessions (<>_1) have no static trial for scaling the
             # model. The static trials were collected as part of the first
             # session for each subject (<>_0). We here copy the Model folder
@@ -231,7 +236,13 @@ for count, sessionName in enumerate(sessionNames):
             for trial in trials:                
                 print('Processing {}'.format(trial))
                 
-                # Detect if static trial with netural pose to scale model.
+                # Detect if extrinsics trial to compute extrinsic parameters. 
+                if 'extrinsics' in trial.lower():                    
+                    extrinsicsTrial = True
+                else:
+                    extrinsicsTrial = False
+                
+                # Detect if static trial with neutral pose to scale model.
                 if 'static' in trial.lower():                    
                     scaleModel = True
                 else:
@@ -241,13 +252,13 @@ for count, sessionName in enumerate(sessionNames):
                 if 'subject2' in sessionName or 'subject3' in sessionName:
                     intrinsicsFinalFolder = 'Deployed_720_240fps'
                 else:
-                    intrinsicsFinalFolder = 'Deployed_720_60fps'
-                    
+                    intrinsicsFinalFolder = 'Deployed_720_60fps'                    
                     
                 process_trial(trial,
                               session_name=sessionName,
                               cam2Use=cam2Use, 
                               intrinsicsFinalFolder=intrinsicsFinalFolder,
+                              extrinsicsTrial=extrinsicsTrial,
                               markerDataFolderNameSuffix=cameraSetup,
                               poseDetector=poseDetector,
                               resolutionPoseDetection=resolutionPoseDetection,

@@ -13,7 +13,7 @@ import numpy as np
 import yaml
 import traceback
 
-from utils import importMetadata, loadCameraParameters
+from utils import importMetadata, loadCameraParameters, getVideoExtension
 from utils import getDataDirectory, getOpenPoseDirectory, getMMposeDirectory
 from utilsChecker import saveCameraParameters
 from utilsChecker import calcExtrinsicsFromVideo
@@ -158,9 +158,11 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
                 useSecondExtrinsicsSolution = (
                     alternateExtrinsics is not None and 
                     camName in alternateExtrinsics)
-                # TODO detect extension rather than assuming mov
+                pathVideoWithoutExtension = os.path.join(
+                    camDir, 'InputMedia', trialName, trialName)
+                extension = getVideoExtension(pathVideoWithoutExtension)
                 extrinsicPath = os.path.join(camDir, 'InputMedia', trialName, 
-                                             trial_id + '.mov') 
+                                             trial_id + extension) 
                                               
                 # Modify intrinsics if camera view is rotated
                 CamParams = rotateIntrinsics(CamParams,extrinsicPath)

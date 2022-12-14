@@ -11,7 +11,7 @@ import logging
 
 from decouple import config
 
-from utils import getOpenPoseMarkerNames, getMMposeMarkerNames
+from utils import getOpenPoseMarkerNames, getMMposeMarkerNames, getVideoExtension
 from utilsChecker import getVideoRotation
 
 # %%
@@ -52,16 +52,9 @@ def runPoseDetector(CameraDirectories, trialRelativePath, pathPoseDetector,
 def runOpenPoseVideo(cameraDirectory,fileName,pathOpenPose, trialName,
                      resolutionPoseDetection='default', generateVideo=True):
     
-    trialPrefix, _ = os.path.splitext(os.path.basename(fileName))
-    
-    
-    # Detect extension
-    pathVideoDir = os.path.split(os.path.join(cameraDirectory, fileName))[0]
-    videoName = os.path.split(os.path.join(cameraDirectory, fileName))[1]
-    for file in os.listdir(pathVideoDir):
-        if videoName == file.rsplit('.', 1)[0]:
-            extension = '.' + file.rsplit('.', 1)[1]
-            
+    trialPrefix, _ = os.path.splitext(os.path.basename(fileName))    
+    pathVideoWithoutExtension = os.path.join(cameraDirectory, fileName)
+    extension = getVideoExtension(pathVideoWithoutExtension)            
     fileName += extension
     videoFullPath = os.path.normpath(os.path.join(cameraDirectory, fileName))
     
