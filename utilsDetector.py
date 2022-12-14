@@ -84,15 +84,14 @@ def runOpenPoseVideo(cameraDirectory,fileName,pathOpenPose, trialName,
     
     # The video is rewritten, unrotated, and downsampled. There is no
     # need to do anything specific for the rotation, just rewriting the video
-    # unrotates it. We downsample to 60 frames/s so that it is manageable
-    # by OpenPose timing-wise.
+    # unrotates it.
     trialPath, _ = os.path.splitext(fileName)        
     fileName = trialPath + "_rotated.avi"
     pathVideoRot = os.path.normpath(os.path.join(cameraDirectory, fileName))
     cmd_fr = ' '
-    if frameRate > 60.0:
-        cmd_fr = ' -r 60 '
-        frameRate = 60.0  
+    # if frameRate > 60.0: # previously downsampled for efficiency
+    #     cmd_fr = ' -r 60 '
+    #     frameRate = 60.0  
     CMD = "ffmpeg -loglevel error -y -i {}{}-q 0 {}".format(
         videoFullPath, cmd_fr, pathVideoRot)
         
