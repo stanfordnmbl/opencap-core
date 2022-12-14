@@ -80,24 +80,21 @@ def runOpenPoseVideo(cameraDirectory,fileName,pathOpenPose, trialName,
     os.makedirs(pathOutputJsons, exist_ok=True)
     os.makedirs(pathOutputPkl, exist_ok=True)
     
-    # Get frame rate.
-    thisVideo = cv2.VideoCapture(videoFullPath)
-    frameRate = np.round(thisVideo.get(cv2.CAP_PROP_FPS))
-    
     # Get number of frames.
+    thisVideo = cv2.VideoCapture(videoFullPath)
     nFrameIn = int(thisVideo.get(cv2.CAP_PROP_FRAME_COUNT))
     
     # The video is rewritten, unrotated, and downsampled. There is no
     # need to do anything specific for the rotation, just rewriting the video
-    # unrotates it. We downsample to 60 frames/s so that it is manageable
-    # by OpenPose timing-wise.
+    # unrotates it.
     trialPath, _ = os.path.splitext(fileName)        
     fileName = trialPath + "_rotated.avi"
     pathVideoRot = os.path.normpath(os.path.join(cameraDirectory, fileName))
     cmd_fr = ' '
-    if frameRate > 60.0:
-        cmd_fr = ' -r 60 '
-        frameRate = 60.0  
+    # frameRate = np.round(thisVideo.get(cv2.CAP_PROP_FPS))
+    # if frameRate > 60.0: # previously downsampled for efficiency
+    #     cmd_fr = ' -r 60 '
+    #     frameRate = 60.0  
     CMD = "ffmpeg -loglevel error -y -i {}{}-q 0 {}".format(
         videoFullPath, cmd_fr, pathVideoRot)
         
