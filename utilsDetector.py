@@ -11,7 +11,7 @@ import logging
 
 from decouple import config
 
-from utils import getOpenPoseMarkerNames, getMMposeMarkerNames
+from utils import getOpenPoseMarkerNames, getMMposeMarkerNames, getVideoExtension
 from utilsChecker import getVideoRotation
 
 # %%
@@ -37,20 +37,25 @@ def runPoseDetector(CameraDirectories, trialRelativePath, pathPoseDetector,
         cameraDirectory = CameraDirectories_selectedCams[camName]
         print('Running {} for {}'.format(poseDetector, camName))
         if poseDetector == 'OpenPose':
-            runOpenPoseVideo(
+            extension = runOpenPoseVideo(
                 cameraDirectory,trialRelativePath,pathPoseDetector, trialName,
                 resolutionPoseDetection=resolutionPoseDetection,
                 generateVideo=generateVideo)
         elif poseDetector == 'mmpose':
             runMMposeVideo(
                 cameraDirectory,trialRelativePath,pathPoseDetector, trialName,
-                generateVideo=generateVideo, bbox_thr=bbox_thr)           
+                generateVideo=generateVideo, bbox_thr=bbox_thr)
+            
+    return extension
             
 # %%
 def runOpenPoseVideo(cameraDirectory,fileName,pathOpenPose, trialName,
                      resolutionPoseDetection='default', generateVideo=True):
     
-    trialPrefix, _ = os.path.splitext(os.path.basename(fileName))
+    trialPrefix, _ = os.path.splitext(os.path.basename(fileName))    
+    pathVideoWithoutExtension = os.path.join(cameraDirectory, fileName)
+    extension = getVideoExtension(pathVideoWithoutExtension)            
+    fileName += extension
     videoFullPath = os.path.normpath(os.path.join(cameraDirectory, fileName))
     
     if not os.path.exists(videoFullPath):
@@ -84,14 +89,15 @@ def runOpenPoseVideo(cameraDirectory,fileName,pathOpenPose, trialName,
     
     # The video is rewritten, unrotated, and downsampled. There is no
     # need to do anything specific for the rotation, just rewriting the video
-    # unrotates it.
+    # unrotates it. We downsample to 60 frames/s so that it is manageable
+    # by OpenPose timing-wise.
     trialPath, _ = os.path.splitext(fileName)        
     fileName = trialPath + "_rotated.avi"
     pathVideoRot = os.path.normpath(os.path.join(cameraDirectory, fileName))
     cmd_fr = ' '
-    # if frameRate > 60.0: # previously downsampled for efficiency
-    #     cmd_fr = ' -r 60 '
-    #     frameRate = 60.0  
+    if frameRate > 60.0:
+        cmd_fr = ' -r 60 '
+        frameRate = 60.0  
     CMD = "ffmpeg -loglevel error -y -i {}{}-q 0 {}".format(
         videoFullPath, cmd_fr, pathVideoRot)
         
@@ -146,6 +152,8 @@ def runOpenPoseVideo(cameraDirectory,fileName,pathOpenPose, trialName,
         
         # Delete jsons
         shutil.rmtree(pathJsonDir)
+        
+    return extension
         
 # %%
 def runOpenPoseCMD(pathOpenPose, resolutionPoseDetection, cameraDirectory,
