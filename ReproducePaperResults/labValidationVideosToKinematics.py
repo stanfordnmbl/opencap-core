@@ -106,7 +106,7 @@ augmenter_model = 'v0.2'
 # once as long as the variable overwriteRestructuring is False. To overwrite
 # flip the flag to True.
 overwriteRestructuring = False
-subjects = ['subject' + str(i) for i in range(2,3)]
+subjects = ['subject' + str(i) for i in range(2,12)]
 for subject in subjects:
     pathSubject = os.path.join(dataDir, subject)
     pathVideos = os.path.join(pathSubject, 'VideoData')    
@@ -265,5 +265,3 @@ for count, sessionName in enumerate(sessionNames):
                               scaleModel=scaleModel, 
                               augmenter_model=augmenter_model,
                               dataDir=dataDir)
-                
-            test=1
