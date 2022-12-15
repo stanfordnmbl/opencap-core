@@ -63,10 +63,10 @@ from utils import importMetadata
 # Enter the path to the folder where you downloaded the data. The data is on
 # SimTK: https://simtk.org/frs/?group_id=2385 (LabValidation_withVideos).
 # In this example, our path looks like:
-#   C:/Users/opencap/Documents//Data_paper/LabValidation/subject2
-#   C:/Users/opencap/Documents//Data_paper/LabValidation/subject3
+#   C:/Users/opencap/Documents/LabValidation_withVideos/subject2
+#   C:/Users/opencap/Documents/LabValidation_withVideos/subject3
 #   ...
-dataDir = 'C:/Users/opencap/Documents//Data_paper/LabValidation/'
+dataDir = 'C:/Users/opencap/Documents/LabValidation_withVideos/'
 
 # The dataset includes 2 sessions per subject.The first session includes
 # static, sit-to-stand, squat, and drop jump trials. The second session 
@@ -104,9 +104,9 @@ augmenter_model = 'v0.2'
 # To reprocess the data, we need to re-organize the data so that the folder
 # structure is the same one as the one expected by OpenCap. It is only done
 # once as long as the variable overwriteRestructuring is False. To overwrite
-# filpt the flag to True.
+# flip the flag to True.
 overwriteRestructuring = False
-subjects = ['subject' + str(i) for i in range(2,12)]
+subjects = ['subject' + str(i) for i in range(2,3)]
 for subject in subjects:
     pathSubject = os.path.join(dataDir, subject)
     pathVideos = os.path.join(pathSubject, 'VideoData')    
@@ -265,3 +265,5 @@ for count, sessionName in enumerate(sessionNames):
                               scaleModel=scaleModel, 
                               augmenter_model=augmenter_model,
                               dataDir=dataDir)
+                
+            test=1

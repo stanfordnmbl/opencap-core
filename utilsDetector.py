@@ -6,8 +6,6 @@ import numpy as np
 import json
 import sys
 import time
-import shutil
-import logging
 
 from decouple import config
 
@@ -33,11 +31,18 @@ def runPoseDetector(CameraDirectories, trialRelativePath, pathPoseDetector,
         CameraDirectories_selectedCams[cam] = CameraDirectories[cam]
         CamParamList_selectedCams.append(CamParamDict[cam])
         
+    # Get/add video extension.        
+    cameraDirectory = CameraDirectories_selectedCams[cameras2Use[0]]
+    pathVideoWithoutExtension = os.path.join(cameraDirectory, 
+                                             trialRelativePath)
+    extension = getVideoExtension(pathVideoWithoutExtension)            
+    trialRelativePath += extension
+        
     for camName in CameraDirectories_selectedCams:
         cameraDirectory = CameraDirectories_selectedCams[camName]
         print('Running {} for {}'.format(poseDetector, camName))
         if poseDetector == 'OpenPose':
-            extension = runOpenPoseVideo(
+            runOpenPoseVideo(
                 cameraDirectory,trialRelativePath,pathPoseDetector, trialName,
                 resolutionPoseDetection=resolutionPoseDetection,
                 generateVideo=generateVideo)
@@ -52,10 +57,7 @@ def runPoseDetector(CameraDirectories, trialRelativePath, pathPoseDetector,
 def runOpenPoseVideo(cameraDirectory,fileName,pathOpenPose, trialName,
                      resolutionPoseDetection='default', generateVideo=True):
     
-    trialPrefix, _ = os.path.splitext(os.path.basename(fileName))    
-    pathVideoWithoutExtension = os.path.join(cameraDirectory, fileName)
-    extension = getVideoExtension(pathVideoWithoutExtension)            
-    fileName += extension
+    trialPrefix, _ = os.path.splitext(os.path.basename(fileName)) 
     videoFullPath = os.path.normpath(os.path.join(cameraDirectory, fileName))
     
     if not os.path.exists(videoFullPath):
@@ -150,7 +152,7 @@ def runOpenPoseVideo(cameraDirectory,fileName,pathOpenPose, trialName,
         # Delete jsons
         shutil.rmtree(pathJsonDir)
         
-    return extension
+    return
         
 # %%
 def runOpenPoseCMD(pathOpenPose, resolutionPoseDetection, cameraDirectory,
