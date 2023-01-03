@@ -201,7 +201,7 @@ def runOpenPoseCMD(pathOpenPose, resolutionPoseDetection, cameraDirectory,
                 if not os.path.isfile(vid_path):
                     break
                 
-                if start + 60*5 < time.time():
+                if start + 60*30 < time.time():
                     raise Exception("OpenPose processing timeout")
                 
                 time.sleep(0.1)
@@ -309,7 +309,7 @@ def runMMposeVideo(
                     if not os.path.isfile(vid_path):
                         break
                     
-                    if start + 60*5 < time.time():
+                    if start + 60*30 < time.time():
                         raise Exception("mmpose processing timeout")
                     
                     time.sleep(0.1)
