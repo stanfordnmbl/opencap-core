@@ -159,7 +159,7 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
                     alternateExtrinsics is not None and 
                     camName in alternateExtrinsics)
                 pathVideoWithoutExtension = os.path.join(
-                    camDir, 'InputMedia', trialName, trialName)
+                    camDir, 'InputMedia', trialName, trial_id)
                 extension = getVideoExtension(pathVideoWithoutExtension)
                 extrinsicPath = os.path.join(camDir, 'InputMedia', trialName, 
                                              trial_id + extension) 
