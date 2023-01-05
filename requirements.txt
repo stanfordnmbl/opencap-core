@@ -11,7 +11,7 @@ regex
 maskpass==0.3.6
 python-decouple==3.5
 protobuf==3.19.5
-sklearn
+scikit-learn
 pingouin==0.5.2
 openpyxl
 ffmpeg-python

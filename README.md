@@ -10,8 +10,9 @@ This code takes two or more videos and estimates 3D marker positions and human m
 
 
 ## Publication
-More information is available in our [preprint](https://www.biorxiv.org/content/10.1101/2022.07.07.499061v1): <br> <br>
-Uhlrich SD*, Falisse A*, Kidzinski L*, Ko M, Chaudhari AS, Hicks JL, Delp SL, 2022. OpenCap: 3D human movement dynamics from smartphone videos. _biorxiv_. https://doi.org/10.1101/2022.07.07.499061. *contributed equally
+More information is available in our [preprint](https://www.biorxiv.org/content/10.1101/2022.07.07.499061v1): <br> <br> 
+Uhlrich SD*, Falisse A*, Kidzinski L*, Ko M, Chaudhari AS, Hicks JL, Delp SL, 2022. OpenCap: 3D human movement dynamics from smartphone videos. _biorxiv_. https://doi.org/10.1101/2022.07.07.499061. *contributed equally <br> <br> 
+Archived code base accompanying the paper: [https://doi.org/10.5281/zenodo.7419967](https://doi.org/10.5281/zenodo.7419967).
 
 ## Running the pipeline locally
 ### Hardware and OS requirements:

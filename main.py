@@ -13,7 +13,7 @@ import numpy as np
 import yaml
 import traceback
 
-from utils import importMetadata, loadCameraParameters
+from utils import importMetadata, loadCameraParameters, getVideoExtension
 from utils import getDataDirectory, getOpenPoseDirectory, getMMposeDirectory
 from utilsChecker import saveCameraParameters
 from utilsChecker import calcExtrinsicsFromVideo
@@ -35,7 +35,8 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
          markerDataFolderNameSuffix=None, imageUpsampleFactor=4,
          poseDetector='OpenPose', resolutionPoseDetection='default', 
          scaleModel=False, bbox_thr=0.8, augmenter_model='v0.2',
-         genericFolderNames=False, offset=True, benchmark=False):
+         genericFolderNames=False, offset=True, benchmark=False,
+         dataDir=None):
 
     # %% High-level settings.
     # Camera calibration.
@@ -70,7 +71,8 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
         
     # %% Paths and metadata. This gets defined through web app.
     baseDir = os.path.dirname(os.path.abspath(__file__))
-    dataDir = getDataDirectory(isDocker)
+    if dataDir is None:
+        dataDir = getDataDirectory(isDocker)
     if 'dataDir' not in locals():
         sessionDir = os.path.join(baseDir, 'Data', sessionName)
     else:
@@ -156,8 +158,11 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
                 useSecondExtrinsicsSolution = (
                     alternateExtrinsics is not None and 
                     camName in alternateExtrinsics)
+                pathVideoWithoutExtension = os.path.join(
+                    camDir, 'InputMedia', trialName, trialName)
+                extension = getVideoExtension(pathVideoWithoutExtension)
                 extrinsicPath = os.path.join(camDir, 'InputMedia', trialName, 
-                                             trial_id + '.mov') 
+                                             trial_id + extension) 
                                               
                 # Modify intrinsics if camera view is rotated
                 CamParams = rotateIntrinsics(CamParams,extrinsicPath)
@@ -219,9 +224,8 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
         pathOutputFiles[trialName] = os.path.join(preAugmentationDir,
                                                   trial_id + ".trc")
     
-    # Trial relative path.
-    trialRelativePath = os.path.join('InputMedia', trialName,
-                                     trial_id + '.mov')
+    # Trial relative path
+    trialRelativePath = os.path.join('InputMedia', trialName, trial_id)
     
     if runPoseDetection:
         # Detect if checkerboard is upside down.
@@ -249,12 +253,13 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
              sessionMetadata.yaml is not currently supported')
         # Run pose detection algorithm.
         try:        
-            runPoseDetector(
+            videoExtension = runPoseDetector(
                     cameraDirectories, trialRelativePath, poseDetectorDirectory,
                     trialName, CamParamDict=CamParamDict, 
                     resolutionPoseDetection=resolutionPoseDetection, 
                     generateVideo=generateVideo, cams2Use=camerasToUse,
                     poseDetector=poseDetector, bbox_thr=bbox_thr)
+            trialRelativePath += videoExtension
         except Exception as e:
             if len(e.args) == 2: # specific exception
                 raise Exception(e.args[0], e.args[1])
@@ -377,8 +382,6 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
             if not markerDataFolderNameSuffix is None:
                 openSimFolderName = os.path.join(openSimFolderName,
                                                  markerDataFolderNameSuffix)
-            openSimFolderName = os.path.join(openSimFolderName,
-                                         sessionMetadata['openSimModel'])       
         
         openSimDir = os.path.join(sessionDir, openSimFolderName)        
         outputScaledModelDir = os.path.join(openSimDir, 'Model')
@@ -404,6 +407,7 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
                                                       thresholdTime=0.1,
                                                       removeRoot=True)          
             # Run scale tool.
+                print('Running Scaling')
                 pathScaledModel = runScaleTool(
                     pathGenericSetupFile4Scaling, pathGenericModel4Scaling,
                     sessionMetadata['mass_kg'], pathTRCFile4Scaling, 
