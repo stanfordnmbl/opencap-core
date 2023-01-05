@@ -7,4 +7,3 @@ RUN pip3 install -r requirements.txt
 
 COPY loop.py /openpose
 CMD python3.6 loop.py
-
