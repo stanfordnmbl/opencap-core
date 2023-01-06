@@ -1204,3 +1204,12 @@ def delete_multiple_element(list_object, indices):
         if idx < len(list_object):
             list_object.pop(idx)
 
+def getVideoExtension(pathFileWithoutExtension):
+    
+    pathVideoDir = os.path.split(pathFileWithoutExtension)[0]
+    videoName = os.path.split(pathFileWithoutExtension)[1]
+    for file in os.listdir(pathVideoDir):
+        if videoName == file.rsplit('.', 1)[0]:
+            extension = '.' + file.rsplit('.', 1)[1]
+            
+    return extension
