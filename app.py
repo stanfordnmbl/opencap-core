@@ -83,19 +83,10 @@ while True:
                          headers = {"Authorization": "Token {}".format(API_TOKEN)})
         continue
 
-    # TODO: we should do that on the API side
-    # This script should never received trials that hasn't been fully uploaded
-    uploadTimeout = 45
-    startTime = time.time()
-    while any([v["video"] is None for v in trial["videos"]]):
-        logging.info('waiting for videos to upload')
-        time.sleep(2)
-        trial = requests.get(trial_url,
-                         headers = {"Authorization": "Token {}".format(API_TOKEN)}).json()
-        if time.time() - startTime > uploadTimeout:
-            r = requests.patch(trial_url, data={"status": "error"},
-                         headers = {"Authorization": "Token {}".format(API_TOKEN)})
-            break
+    if any([v["video"] is None for v in trial["videos"]]):
+        r = requests.patch(trial_url, data={"status": "error"},
+                     headers = {"Authorization": "Token {}".format(API_TOKEN)})
+        break
 
     trial_type = "dynamic"
     if trial["name"] == "calibration":

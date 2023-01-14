@@ -6,12 +6,10 @@ import numpy as np
 import json
 import sys
 import time
-import shutil
-import logging
 
 from decouple import config
 
-from utils import getOpenPoseMarkerNames, getMMposeMarkerNames
+from utils import getOpenPoseMarkerNames, getMMposeMarkerNames, getVideoExtension
 from utilsChecker import getVideoRotation
 
 # %%
@@ -33,6 +31,13 @@ def runPoseDetector(CameraDirectories, trialRelativePath, pathPoseDetector,
         CameraDirectories_selectedCams[cam] = CameraDirectories[cam]
         CamParamList_selectedCams.append(CamParamDict[cam])
         
+    # Get/add video extension.        
+    cameraDirectory = CameraDirectories_selectedCams[cameras2Use[0]]
+    pathVideoWithoutExtension = os.path.join(cameraDirectory, 
+                                             trialRelativePath)
+    extension = getVideoExtension(pathVideoWithoutExtension)            
+    trialRelativePath += extension
+        
     for camName in CameraDirectories_selectedCams:
         cameraDirectory = CameraDirectories_selectedCams[camName]
         print('Running {} for {}'.format(poseDetector, camName))
@@ -44,13 +49,15 @@ def runPoseDetector(CameraDirectories, trialRelativePath, pathPoseDetector,
         elif poseDetector == 'mmpose':
             runMMposeVideo(
                 cameraDirectory,trialRelativePath,pathPoseDetector, trialName,
-                generateVideo=generateVideo, bbox_thr=bbox_thr)           
+                generateVideo=generateVideo, bbox_thr=bbox_thr)
+            
+    return extension
             
 # %%
 def runOpenPoseVideo(cameraDirectory,fileName,pathOpenPose, trialName,
                      resolutionPoseDetection='default', generateVideo=True):
     
-    trialPrefix, _ = os.path.splitext(os.path.basename(fileName))
+    trialPrefix, _ = os.path.splitext(os.path.basename(fileName)) 
     videoFullPath = os.path.normpath(os.path.join(cameraDirectory, fileName))
     
     if not os.path.exists(videoFullPath):
@@ -75,24 +82,21 @@ def runOpenPoseVideo(cameraDirectory,fileName,pathOpenPose, trialName,
     os.makedirs(pathOutputJsons, exist_ok=True)
     os.makedirs(pathOutputPkl, exist_ok=True)
     
-    # Get frame rate.
-    thisVideo = cv2.VideoCapture(videoFullPath)
-    frameRate = np.round(thisVideo.get(cv2.CAP_PROP_FPS))
-    
     # Get number of frames.
+    thisVideo = cv2.VideoCapture(videoFullPath)
     nFrameIn = int(thisVideo.get(cv2.CAP_PROP_FRAME_COUNT))
     
     # The video is rewritten, unrotated, and downsampled. There is no
     # need to do anything specific for the rotation, just rewriting the video
-    # unrotates it. We downsample to 60 frames/s so that it is manageable
-    # by OpenPose timing-wise.
+    # unrotates it.
     trialPath, _ = os.path.splitext(fileName)        
     fileName = trialPath + "_rotated.avi"
     pathVideoRot = os.path.normpath(os.path.join(cameraDirectory, fileName))
     cmd_fr = ' '
-    if frameRate > 60.0:
-        cmd_fr = ' -r 60 '
-        frameRate = 60.0  
+    # frameRate = np.round(thisVideo.get(cv2.CAP_PROP_FPS))
+    # if frameRate > 60.0: # previously downsampled for efficiency
+    #     cmd_fr = ' -r 60 '
+    #     frameRate = 60.0  
     CMD = "ffmpeg -loglevel error -y -i {}{}-q 0 {}".format(
         videoFullPath, cmd_fr, pathVideoRot)
         
@@ -148,6 +152,8 @@ def runOpenPoseVideo(cameraDirectory,fileName,pathOpenPose, trialName,
         # Delete jsons
         shutil.rmtree(pathJsonDir)
         
+    return
+        
 # %%
 def runOpenPoseCMD(pathOpenPose, resolutionPoseDetection, cameraDirectory,
                    fileName, openposeJsonDir, pathOutputVideo, trialPrefix, 
@@ -195,7 +201,7 @@ def runOpenPoseCMD(pathOpenPose, resolutionPoseDetection, cameraDirectory,
                 if not os.path.isfile(vid_path):
                     break
                 
-                if start + 60*5 < time.time():
+                if start + 60*30 < time.time():
                     raise Exception("OpenPose processing timeout")
                 
                 time.sleep(0.1)
@@ -303,7 +309,7 @@ def runMMposeVideo(
                     if not os.path.isfile(vid_path):
                         break
                     
-                    if start + 60*5 < time.time():
+                    if start + 60*30 < time.time():
                         raise Exception("mmpose processing timeout")
                     
                     time.sleep(0.1)
