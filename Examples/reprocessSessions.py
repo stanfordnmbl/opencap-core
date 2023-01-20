@@ -70,17 +70,17 @@ session_ids = ['23d52d41-69fe-47cf-8b60-838e4268dd50']
 
 calib_id = [] # None (auto-selected trial), [] (skip), or string of specific trial_id
 static_id = [] # None (auto-selected trial), [] (skip), or string of specific trial_id
-dynamic_ids = None # None (all dynamic trials), [] (skip), or list of trial_id strings
+dynamic_trialNames = None # None (all dynamic trials), [] (skip), or list of trial names
 
+# extract trial ids from trial names
+if dynamic_trialNames is not None and len(dynamic_trialNames)>0:
+    trialNames = getTrialNameIdMapping(session_ids[0])
+    dynamic_ids = [trialNames[name]['id'] for name in dynamic_trialNames]
+else:
+    dynamic_ids = dynamic_trialNames
 
-# # Optional: Uncomment this section to create a list of dynamic_ids to 
-# # reprocess from the trial names. This overwrites previous selection.
-
-# trialNames = getTrialNameIdMapping(session_ids[0])
-# dynamic_trialNames = ['squat'] # Enter a list of dynamic trial names to be reprocessed
-# dynamic_ids = [trialNames[name]['id'] for name in dynamic_trialNames]
-# print ('You are reprocessing specific dynamic trials by name')
-
+# # Optional: Uncomment this section to create a list of dynamic_ids to reprocess.
+# dynamic_ids = None # None (all dynamic trials), [] (skip), or list of trial_id strings
 
 # The resolution at which the videos are processed by OpenPose can be adjusted.
 # The finer the resolution the more accurate the results (typically) but also
