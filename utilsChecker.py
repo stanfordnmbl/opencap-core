@@ -2043,7 +2043,7 @@ def cross_corr(y1, y2,multCorrGaussianStd=None,visualize=False, dataForReproj=No
     if dataForReproj is not None:
         _,peaks = find_peaks(corr, height=.1)
         
-        # inject no delay so it doesn't thrown an error for static trials
+        # inject no delay so it doesn't throw an error for static trials
         if len(peaks['peak_heights']) == 0:
             peaks['peak_heights'] = np.ndarray((1,1))
             peaks['peak_heights'][0] = corr[int(len(corr)/2)]
