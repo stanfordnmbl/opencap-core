@@ -1064,7 +1064,7 @@ def synchronizeVideoKeypoints(keypointList, confidenceList,
                                  'confidence': confidenceSyncListFilt,
                                  'cameras2Use': c_cameras2Use
                                  }
-                corVal,lag = cross_corr(vertVel,vertVelList[0],multCorrGaussianStd=20,visualize=False,dataForReproj=dataForReproj) # gaussian curve gets multipled by correlation plot - helping choose the smallest shift value for periodic motions
+                corVal,lag = cross_corr(vertVel,vertVelList[0],multCorrGaussianStd=maxShiftSteps/2,visualize=False,dataForReproj=dataForReproj) # gaussian curve gets multipled by correlation plot - helping choose the smallest shift value for periodic motions
             elif syncActivity == 'gait':
                 
                 dataForReproj = {'CamParamList':c_CameraParams,
@@ -2042,6 +2042,12 @@ def cross_corr(y1, y2,multCorrGaussianStd=None,visualize=False, dataForReproj=No
     # find correlation peak with minimum reprojection error
     if dataForReproj is not None:
         _,peaks = find_peaks(corr, height=.1)
+        
+        # inject no delay so it doesn't thrown an error for static trials
+        if len(peaks['peak_heights']) == 0:
+            peaks['peak_heights'] = np.ndarray((1,1))
+            peaks['peak_heights'][0] = corr[int(len(corr)/2)]
+            print('There were no peaks in the vert vel cross correlation. Using 0 lag.')
         idxPeaks = np.squeeze(np.asarray([np.argwhere(peaks['peak_heights'][i]==corr) for i in range(len(peaks['peak_heights']))]))
         lags = idxPeaks-shift
         # look at 3 lags closest to 0
