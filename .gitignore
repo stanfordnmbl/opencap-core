@@ -17,3 +17,5 @@ Examples/Data/*
 
 *.ini
 *.stats
+
+tests/
