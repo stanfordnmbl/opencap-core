@@ -251,13 +251,33 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
         else:
             raise Exception('checkerBoard placement value in\
              sessionMetadata.yaml is not currently supported')
+             
+        # Check if all videos
+        if camerasToUse[0] == 'all':
+            cameras2Use_t = list(cameraDirectories.keys())
+        else:
+            cameras2Use_t = camerasToUse            
+        
+        missing_videos = []
+        for cam in cameras2Use_t:            
+            c_cameraDirectory = cameraDirectories[cam]
+            c_cameraDirectory_path = os.path.join(c_cameraDirectory, trialRelativePath + '.mov')
+            if os.path.exists(c_cameraDirectory_path):
+                print("{} exists".format(cam))
+            else:
+                missing_videos.append(cam)
+                print("{} does not exist".format(cam))
+                
+        for missing_video in missing_videos:
+            cameras2Use_t.remove(missing_video)
+             
         # Run pose detection algorithm.
         try:        
             videoExtension = runPoseDetector(
                     cameraDirectories, trialRelativePath, poseDetectorDirectory,
                     trialName, CamParamDict=CamParamDict, 
                     resolutionPoseDetection=resolutionPoseDetection, 
-                    generateVideo=generateVideo, cams2Use=camerasToUse,
+                    generateVideo=generateVideo, cams2Use=cameras2Use_t,
                     poseDetector=poseDetector, bbox_thr=bbox_thr)
             trialRelativePath += videoExtension
         except Exception as e:
@@ -268,6 +288,8 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
                     Visit https://www.opencap.ai/best-pratices to learn more about data collection
                     and https://www.opencap.ai/troubleshooting for potential causes for a failed trial."""
                 raise Exception(exception, traceback.format_exc())
+                
+    test=1
         
     if runSynchronization:
         # Synchronize videos. 
@@ -277,7 +299,7 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
                     cameraDirectories, trialRelativePath, poseDetectorDirectory,
                     undistortPoints=True, CamParamDict=CamParamDict,
                     filtFreqs=filtFreqs, confidenceThreshold=0.4,
-                    imageBasedTracker=False, cams2Use=camerasToUse, 
+                    imageBasedTracker=False, cams2Use=cameras2Use_t, 
                     poseDetector=poseDetector, trialName=trialName,
                     resolutionPoseDetection=resolutionPoseDetection))
         except Exception as e:
