@@ -86,7 +86,7 @@ while True:
     if any([v["video"] is None for v in trial["videos"]]):
         r = requests.patch(trial_url, data={"status": "error"},
                      headers = {"Authorization": "Token {}".format(API_TOKEN)})
-        break
+        continue
 
     trial_type = "dynamic"
     if trial["name"] == "calibration":
