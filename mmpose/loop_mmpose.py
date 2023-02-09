@@ -58,4 +58,3 @@ while True:
         
     except:
         logging.info("Pose detection failed.")
-        os.remove(video_path)
