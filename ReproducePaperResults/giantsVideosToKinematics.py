@@ -66,7 +66,7 @@ from utils import importMetadata
 #   C:/Users/opencap/Documents/LabValidation_withVideos/subject2
 #   C:/Users/opencap/Documents/LabValidation_withVideos/subject3
 #   ...
-dataDir = '/home/clarkadmin/Documents/MyRepositories/opencap-data/Giants/'
+dataDir = 'C:/Users/opencap/Documents/MyRepositories/mobilecap_data/Data/Giants/'
 
 # The dataset includes 2 sessions per subject.The first session includes
 # static, sit-to-stand, squat, and drop jump trials. The second session 
