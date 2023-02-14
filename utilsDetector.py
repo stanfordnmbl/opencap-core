@@ -275,17 +275,18 @@ def runMMposeVideo(
     fileName = trialPath + "_rotated.avi"
     pathVideoRot = os.path.normpath(os.path.join(cameraDirectory, fileName))  
     cmd_fr = ' '
-    # if frameRate > 60.0:
-    #     cmd_fr = ' -r 60 '
-    #     frameRate = 60.0  
+    # Hard coded
+    frameRate = 400.0
+    if frameRate > 60.0:
+        cmd_fr = ' -r {} '.format(frameRate)
     CMD = "ffmpeg -loglevel error -y -i {}{}-q 0 {}".format(
         videoFullPath, cmd_fr, pathVideoRot)
         
     videoFullPath = pathVideoRot
     trialPrefix = trialPrefix + "_rotated"
     
-    if not os.path.exists(pathVideoRot):
-        os.system(CMD)
+    # if not os.path.exists(pathVideoRot):
+    os.system(CMD)
  
     pklPath = os.path.join(pathOutputPkl, trialPrefix + '.pkl')
     ppPklPath = os.path.join(pathOutputPkl, trialPrefix + '_pp.pkl')
@@ -308,7 +309,7 @@ def runMMposeVideo(
                     if not os.path.isfile(vid_path):
                         break
                     
-                    if start + 60*30 < time.time():
+                    if start + 60*120 < time.time():
                         raise Exception("mmpose processing timeout")
                     
                     time.sleep(0.1)

@@ -25,8 +25,8 @@ from utilsChecker import writeTRCfrom3DKeypoints
 from utilsChecker import popNeutralPoseImages
 from utilsChecker import rotateIntrinsics
 from utilsDetector  import runPoseDetector
-from utilsAugmenter import augmentTRC
-from utilsOpenSim import runScaleTool, getScaleTimeRange, runIKTool, generateVisualizerJson
+# from utilsAugmenter import augmentTRC
+# from utilsOpenSim import runScaleTool, getScaleTimeRange, runIKTool, generateVisualizerJson
 
 def main(sessionName, trialName, trial_id, camerasToUse=['all'],
          intrinsicsFinalFolder='Deployed', isDocker=False,
@@ -44,13 +44,13 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
     # Pose detection.
     runPoseDetection = True
     # Video Synchronization.
-    runSynchronization = True
+    runSynchronization = False
     # Triangulation.
-    runTriangulation = True
+    runTriangulation = False
     # Marker augmentation.
-    runMarkerAugmentation = True
+    runMarkerAugmentation = False
     # OpenSim pipeline.
-    runOpenSimPipeline = True
+    runOpenSimPipeline = False
     # Lowpass filter frequency of 2D keypoints for gait and everything else.
     filtFreqs = {'gait':12, 'default':500} # defaults to framerate/2
     # High-resolution for OpenPose.
@@ -370,113 +370,113 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
             # (0.01 so that there is no overall offset, see utilsOpenSim).
             vertical_offset = 0.01            
         
-    # %% OpenSim pipeline.
-    if runOpenSimPipeline:
-        openSimPipelineDir = os.path.join(baseDir, "opensimPipeline")        
+    # # %% OpenSim pipeline.
+    # if runOpenSimPipeline:
+    #     openSimPipelineDir = os.path.join(baseDir, "opensimPipeline")        
         
-        if genericFolderNames:
-            openSimFolderName = 'OpenSimData'
-        else:
-            openSimFolderName = os.path.join('OpenSimData', 
-                                             poseDetector + suff_pd)
-            if not markerDataFolderNameSuffix is None:
-                openSimFolderName = os.path.join(openSimFolderName,
-                                                 markerDataFolderNameSuffix)
+    #     if genericFolderNames:
+    #         openSimFolderName = 'OpenSimData'
+    #     else:
+    #         openSimFolderName = os.path.join('OpenSimData', 
+    #                                          poseDetector + suff_pd)
+    #         if not markerDataFolderNameSuffix is None:
+    #             openSimFolderName = os.path.join(openSimFolderName,
+    #                                              markerDataFolderNameSuffix)
         
-        openSimDir = os.path.join(sessionDir, openSimFolderName)        
-        outputScaledModelDir = os.path.join(openSimDir, 'Model')
+    #     openSimDir = os.path.join(sessionDir, openSimFolderName)        
+    #     outputScaledModelDir = os.path.join(openSimDir, 'Model')
         
-        # Scaling.    
-        if scaleModel:
-            os.makedirs(outputScaledModelDir, exist_ok=True)
-            # Path setup file.
-            genericSetupFile4ScalingName = (
-                'Setup_scaling_RajagopalModified2016_withArms_KA.xml')
-            pathGenericSetupFile4Scaling = os.path.join(
-                openSimPipelineDir, 'Scaling', genericSetupFile4ScalingName)
-            # Path model file.
-            pathGenericModel4Scaling = os.path.join(
-                openSimPipelineDir, 'Models', 
-                sessionMetadata['openSimModel'] + '.osim')            
-            # Path TRC file.
-            pathTRCFile4Scaling = pathAugmentedOutputFiles[trialName]
-            # Get time range.
-            try:
-                timeRange4Scaling = getScaleTimeRange(pathTRCFile4Scaling,
-                                                      thresholdPosition=0.007,
-                                                      thresholdTime=0.1,
-                                                      removeRoot=True)          
-            # Run scale tool.
-                print('Running Scaling')
-                pathScaledModel = runScaleTool(
-                    pathGenericSetupFile4Scaling, pathGenericModel4Scaling,
-                    sessionMetadata['mass_kg'], pathTRCFile4Scaling, 
-                    timeRange4Scaling, outputScaledModelDir,
-                    subjectHeight=sessionMetadata['height_m'])
-            except Exception as e:
-                if len(e.args) == 2: # specific exception
-                    raise Exception(e.args[0], e.args[1])
-                elif len(e.args) == 1: # generic exception
-                    exception = "Musculoskeletal model scaling failed. Verify your setup and try again. Visit https://www.opencap.ai/best-pratices to learn more about data collection and https://www.opencap.ai/troubleshooting for potential causes for a failed neutral pose."
-                    raise Exception(exception, traceback.format_exc())
-            # Extract one frame from videos to verify neutral pose.
-            staticImagesFolderDir = os.path.join(sessionDir, 
-                                                 'NeutralPoseImages')
-            os.makedirs(staticImagesFolderDir, exist_ok=True)
-            popNeutralPoseImages(cameraDirectories, cameras2Use, 
-                                 timeRange4Scaling[0], staticImagesFolderDir,
-                                 trial_id, writeVideo = True)   
-            pathOutputIK = pathScaledModel[:-5]+'.mot'     
+    #     # Scaling.    
+    #     if scaleModel:
+    #         os.makedirs(outputScaledModelDir, exist_ok=True)
+    #         # Path setup file.
+    #         genericSetupFile4ScalingName = (
+    #             'Setup_scaling_RajagopalModified2016_withArms_KA.xml')
+    #         pathGenericSetupFile4Scaling = os.path.join(
+    #             openSimPipelineDir, 'Scaling', genericSetupFile4ScalingName)
+    #         # Path model file.
+    #         pathGenericModel4Scaling = os.path.join(
+    #             openSimPipelineDir, 'Models', 
+    #             sessionMetadata['openSimModel'] + '.osim')            
+    #         # Path TRC file.
+    #         pathTRCFile4Scaling = pathAugmentedOutputFiles[trialName]
+    #         # Get time range.
+    #         try:
+    #             timeRange4Scaling = getScaleTimeRange(pathTRCFile4Scaling,
+    #                                                   thresholdPosition=0.007,
+    #                                                   thresholdTime=0.1,
+    #                                                   removeRoot=True)          
+    #         # Run scale tool.
+    #             print('Running Scaling')
+    #             pathScaledModel = runScaleTool(
+    #                 pathGenericSetupFile4Scaling, pathGenericModel4Scaling,
+    #                 sessionMetadata['mass_kg'], pathTRCFile4Scaling, 
+    #                 timeRange4Scaling, outputScaledModelDir,
+    #                 subjectHeight=sessionMetadata['height_m'])
+    #         except Exception as e:
+    #             if len(e.args) == 2: # specific exception
+    #                 raise Exception(e.args[0], e.args[1])
+    #             elif len(e.args) == 1: # generic exception
+    #                 exception = "Musculoskeletal model scaling failed. Verify your setup and try again. Visit https://www.opencap.ai/best-pratices to learn more about data collection and https://www.opencap.ai/troubleshooting for potential causes for a failed neutral pose."
+    #                 raise Exception(exception, traceback.format_exc())
+    #         # Extract one frame from videos to verify neutral pose.
+    #         staticImagesFolderDir = os.path.join(sessionDir, 
+    #                                              'NeutralPoseImages')
+    #         os.makedirs(staticImagesFolderDir, exist_ok=True)
+    #         popNeutralPoseImages(cameraDirectories, cameras2Use, 
+    #                              timeRange4Scaling[0], staticImagesFolderDir,
+    #                              trial_id, writeVideo = True)   
+    #         pathOutputIK = pathScaledModel[:-5]+'.mot'     
         
-        # Inverse kinematics.
-        if not scaleModel:
-            outputIKDir = os.path.join(openSimDir, 'Kinematics')
-            os.makedirs(outputIKDir, exist_ok=True)
-            # Check if there is a scaled model.
-            pathScaledModel = os.path.join(outputScaledModelDir, 
-                                            sessionMetadata['openSimModel'] + 
-                                            "_scaled.osim")
-            if os.path.exists(pathScaledModel):
-                # Path setup file.
-                genericSetupFile4IKName = 'Setup_IK.xml'
-                pathGenericSetupFile4IK = os.path.join(
-                    openSimPipelineDir, 'IK', genericSetupFile4IKName)
-                # Path TRC file.
-                pathTRCFile4IK = pathAugmentedOutputFiles[trialName]
-                # Run IK tool. 
-                print('Running Inverse Kinematics')
-                try:
-                    pathOutputIK = runIKTool(
-                        pathGenericSetupFile4IK, pathScaledModel, 
-                        pathTRCFile4IK, outputIKDir)
-                except Exception as e:
-                    if len(e.args) == 2: # specific exception
-                        raise Exception(e.args[0], e.args[1])
-                    elif len(e.args) == 1: # generic exception
-                        exception = "Inverse kinematics failed. Verify your setup and try again. Visit https://www.opencap.ai/best-pratices to learn more about data collection and https://www.opencap.ai/troubleshooting for potential causes for a failed trial."
-                        raise Exception(exception, traceback.format_exc())
-            else:
-                raise ValueError("No scaled model available.")
+    #     # Inverse kinematics.
+    #     if not scaleModel:
+    #         outputIKDir = os.path.join(openSimDir, 'Kinematics')
+    #         os.makedirs(outputIKDir, exist_ok=True)
+    #         # Check if there is a scaled model.
+    #         pathScaledModel = os.path.join(outputScaledModelDir, 
+    #                                         sessionMetadata['openSimModel'] + 
+    #                                         "_scaled.osim")
+    #         if os.path.exists(pathScaledModel):
+    #             # Path setup file.
+    #             genericSetupFile4IKName = 'Setup_IK.xml'
+    #             pathGenericSetupFile4IK = os.path.join(
+    #                 openSimPipelineDir, 'IK', genericSetupFile4IKName)
+    #             # Path TRC file.
+    #             pathTRCFile4IK = pathAugmentedOutputFiles[trialName]
+    #             # Run IK tool. 
+    #             print('Running Inverse Kinematics')
+    #             try:
+    #                 pathOutputIK = runIKTool(
+    #                     pathGenericSetupFile4IK, pathScaledModel, 
+    #                     pathTRCFile4IK, outputIKDir)
+    #             except Exception as e:
+    #                 if len(e.args) == 2: # specific exception
+    #                     raise Exception(e.args[0], e.args[1])
+    #                 elif len(e.args) == 1: # generic exception
+    #                     exception = "Inverse kinematics failed. Verify your setup and try again. Visit https://www.opencap.ai/best-pratices to learn more about data collection and https://www.opencap.ai/troubleshooting for potential causes for a failed trial."
+    #                     raise Exception(exception, traceback.format_exc())
+    #         else:
+    #             raise ValueError("No scaled model available.")
         
-        # Write body transforms to json for visualization.
-        outputJsonVisDir = os.path.join(sessionDir,'VisualizerJsons',
-                                        trialName)
-        os.makedirs(outputJsonVisDir,exist_ok=True)
-        outputJsonVisPath = os.path.join(outputJsonVisDir,
-                                         trialName + '.json')
-        generateVisualizerJson(pathScaledModel, pathOutputIK,
-                               outputJsonVisPath, 
-                               vertical_offset=vertical_offset)  
+    #     # Write body transforms to json for visualization.
+    #     outputJsonVisDir = os.path.join(sessionDir,'VisualizerJsons',
+    #                                     trialName)
+    #     os.makedirs(outputJsonVisDir,exist_ok=True)
+    #     outputJsonVisPath = os.path.join(outputJsonVisDir,
+    #                                      trialName + '.json')
+    #     generateVisualizerJson(pathScaledModel, pathOutputIK,
+    #                            outputJsonVisPath, 
+    #                            vertical_offset=vertical_offset)  
         
-    # %% Dump settings in yaml.
-    if not extrinsicsTrial:
-        pathSettings = os.path.join(postAugmentationDir, 
-                                    'Settings_' + trial_id + '.yaml')
-        settings = {'poseDetector': poseDetector, 'resolutionPoseDetection':
-                    resolutionPoseDetection, 'augmenter_model': 
-                    augmenter_model, 'offset': offset, 'imageUpsampleFactor': 
-                    imageUpsampleFactor}
-        if poseDetector == 'mmpose':
-            settings['bbox_thr']: str(bbox_thr)
-        with open(pathSettings, 'w') as file:
-                yaml.dump(settings, file)
+    # # %% Dump settings in yaml.
+    # if not extrinsicsTrial:
+    #     pathSettings = os.path.join(postAugmentationDir, 
+    #                                 'Settings_' + trial_id + '.yaml')
+    #     settings = {'poseDetector': poseDetector, 'resolutionPoseDetection':
+    #                 resolutionPoseDetection, 'augmenter_model': 
+    #                 augmenter_model, 'offset': offset, 'imageUpsampleFactor': 
+    #                 imageUpsampleFactor}
+    #     if poseDetector == 'mmpose':
+    #         settings['bbox_thr']: str(bbox_thr)
+    #     with open(pathSettings, 'w') as file:
+    #             yaml.dump(settings, file)
