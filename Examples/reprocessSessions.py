@@ -69,7 +69,7 @@ session_ids = ['c29a673d-b819-4b5b-b3f8-1b78239bcacb']
 # static_id. A list of strings is allowed for dynamic_ids.
 
 calib_id = [] # None (auto-selected trial), [] (skip), or string of specific trial_id
-static_id = None # None (auto-selected trial), [] (skip), or string of specific trial_id
+static_id = [] # None (auto-selected trial), [] (skip), or string of specific trial_id
 dynamic_trialNames = None # None (all dynamic trials), [] (skip), or list of trial names
 
 # extract trial ids from trial names
