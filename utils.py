@@ -1151,6 +1151,29 @@ def getOpenPoseMarkers_lowerExtremity():
 
     return feature_markers, response_markers
 
+# Different order of markers compared to getOpenPoseMarkers_lowerExtremity 
+def getOpenPoseMarkers_lowerExtremity2():
+    
+    feature_markers = [
+        "Neck", "RShoulder", "LShoulder", "RHip", "LHip", "RKnee", "LKnee",
+        "RAnkle", "LAnkle", "RHeel", "LHeel", "RSmallToe", "LSmallToe",
+        "RBigToe", "LBigToe"]
+    
+    response_markers = [
+        'RASIS_study', 'LASIS_study', 'RPSIS_study',
+        'LPSIS_study', 'RKnee_study', 'RMKnee_study', 
+        'RAnkle_study', 'RMAnkle_study', 'RToe_study', 
+        'R5meta_study', 'RCalc_study', 'LKnee_study', 
+        'LMKnee_study', 'LAnkle_study', 'LMAnkle_study',
+        'LToe_study', 'LCalc_study', 'L5meta_study', 
+        'RShoulder_study', 'LShoulder_study', 'C7_study', 
+        'RThigh1_study', 'RThigh2_study', 'RThigh3_study',
+        'LThigh1_study', 'LThigh2_study', 'LThigh3_study',
+        'RSh1_study', 'RSh2_study', 'RSh3_study', 'LSh1_study',
+        'LSh2_study', 'LSh3_study', 'RHJC_study', 'LHJC_study']
+    
+    return feature_markers, response_markers
+
 def getMMposeMarkers_lowerExtremity():
 
     # Here we replace RSmallToe_mmpose and LSmallToe_mmpose by RSmallToe and
@@ -1195,6 +1218,19 @@ def getMarkers_upperExtremity_noPelvis():
     response_markers = ["r_lelbow_study", "L_lelbow_study", "r_melbow_study",
                         "L_melbow_study", "r_lwrist_study", "L_lwrist_study",
                         "r_mwrist_study", "L_mwrist_study"]
+
+    return feature_markers, response_markers
+
+# Different order of markers compared to getMarkers_upperExtremity_noPelvis
+def getMarkers_upperExtremity_noPelvis2():
+
+    feature_markers = [
+        "Neck", "RShoulder", "LShoulder", "RElbow", "LElbow", "RWrist",
+        "LWrist"]
+
+    response_markers = ["r_lelbow_study", "r_melbow_study", "r_lwrist_study",
+                        "r_mwrist_study", "L_lelbow_study", "L_melbow_study",
+                        "L_lwrist_study", "L_mwrist_study"]
 
     return feature_markers, response_markers
 
