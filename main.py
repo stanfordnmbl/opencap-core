@@ -48,7 +48,7 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
     # Triangulation.
     runTriangulation = True
     # Marker augmentation.
-    runMarkerAugmentation = True
+    runMarkerAugmentation = False
     # OpenSim pipeline.
     runOpenSimPipeline = True
     # Lowpass filter frequency of 2D keypoints for gait and everything else.
@@ -368,7 +368,9 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
         if offset:
             # If offset, no need to offset again for the webapp visualization.
             # (0.01 so that there is no overall offset, see utilsOpenSim).
-            vertical_offset = 0.01            
+            vertical_offset = 0.01   
+            
+    vertical_offset = 0.01 
         
     # %% OpenSim pipeline.
     if runOpenSimPipeline:
@@ -445,16 +447,16 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
                 pathTRCFile4IK = pathAugmentedOutputFiles[trialName]
                 # Run IK tool. 
                 print('Running Inverse Kinematics')
-                # try:
-                #     pathOutputIK = runIKTool(
-                #         pathGenericSetupFile4IK, pathScaledModel, 
-                #         pathTRCFile4IK, outputIKDir)
-                # except Exception as e:
-                #     if len(e.args) == 2: # specific exception
-                #         raise Exception(e.args[0], e.args[1])
-                #     elif len(e.args) == 1: # generic exception
-                #         exception = "Inverse kinematics failed. Verify your setup and try again. Visit https://www.opencap.ai/best-pratices to learn more about data collection and https://www.opencap.ai/troubleshooting for potential causes for a failed trial."
-                #         raise Exception(exception, traceback.format_exc())
+                try:
+                    pathOutputIK = runIKTool(
+                        pathGenericSetupFile4IK, pathScaledModel, 
+                        pathTRCFile4IK, outputIKDir)
+                except Exception as e:
+                    if len(e.args) == 2: # specific exception
+                        raise Exception(e.args[0], e.args[1])
+                    elif len(e.args) == 1: # generic exception
+                        exception = "Inverse kinematics failed. Verify your setup and try again. Visit https://www.opencap.ai/best-pratices to learn more about data collection and https://www.opencap.ai/troubleshooting for potential causes for a failed trial."
+                        raise Exception(exception, traceback.format_exc())
             else:
                 raise ValueError("No scaled model available.")
         

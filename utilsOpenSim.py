@@ -175,9 +175,9 @@ def runIKTool(pathGenericSetupFile, pathScaledModel, pathTRCFile,
     IKTool.set_report_errors(True)
     IKTool.set_report_marker_locations(False)
     IKTool.set_output_motion_file(pathOutputMotion)
-    IKTool.printToXML(pathOutputSetup)
-    command = 'opensim-cmd -o error' + ' run-tool ' + pathOutputSetup
-    os.system(command)
+    # IKTool.printToXML(pathOutputSetup)
+    # command = 'opensim-cmd -o error' + ' run-tool ' + pathOutputSetup
+    # os.system(command)
     
     return pathOutputMotion
     
