@@ -1160,17 +1160,17 @@ def getOpenPoseMarkers_lowerExtremity2():
         "RBigToe", "LBigToe"]
     
     response_markers = [
-        'RASIS_study', 'LASIS_study', 'RPSIS_study',
-        'LPSIS_study', 'RKnee_study', 'RMKnee_study', 
-        'RAnkle_study', 'RMAnkle_study', 'RToe_study', 
-        'R5meta_study', 'RCalc_study', 'LKnee_study', 
-        'LMKnee_study', 'LAnkle_study', 'LMAnkle_study',
-        'LToe_study', 'LCalc_study', 'L5meta_study', 
-        'RShoulder_study', 'LShoulder_study', 'C7_study', 
-        'RThigh1_study', 'RThigh2_study', 'RThigh3_study',
-        'LThigh1_study', 'LThigh2_study', 'LThigh3_study',
-        'RSh1_study', 'RSh2_study', 'RSh3_study', 'LSh1_study',
-        'LSh2_study', 'LSh3_study', 'RHJC_study', 'LHJC_study']
+        'r.ASIS_study', 'L.ASIS_study', 'r.PSIS_study',
+        'L.PSIS_study', 'r_knee_study', 'r_mknee_study', 
+        'r_ankle_study', 'r_mankle_study', 'r_toe_study', 
+        'r_5meta_study', 'r_calc_study', 'L_knee_study', 
+        'L_mknee_study', 'L_ankle_study', 'L_mankle_study',
+        'L_toe_study', 'L_calc_study', 'L_5meta_study', 
+        'r_shoulder_study', 'L_shoulder_study', 'C7_study', 
+        'r_thigh1_study', 'r_thigh2_study', 'r_thigh3_study',
+        'L_thigh1_study', 'L_thigh2_study', 'L_thigh3_study',
+        'r_sh1_study', 'r_sh2_study', 'r_sh3_study', 'L_sh1_study',
+        'L_sh2_study', 'L_sh3_study', 'RHJC_study', 'LHJC_study']
     
     return feature_markers, response_markers
 
