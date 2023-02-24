@@ -25,8 +25,8 @@ from utilsChecker import writeTRCfrom3DKeypoints
 from utilsChecker import popNeutralPoseImages
 from utilsChecker import rotateIntrinsics
 from utilsDetector  import runPoseDetector
-from utilsAugmenter import augmentTRC
-from utilsOpenSim import runScaleTool, getScaleTimeRange, runIKTool, generateVisualizerJson
+# from utilsAugmenter import augmentTRC
+# from utilsOpenSim import runScaleTool, getScaleTimeRange, runIKTool, generateVisualizerJson
 
 def main(sessionName, trialName, trial_id, camerasToUse=['all'],
          intrinsicsFinalFolder='Deployed', isDocker=False,
@@ -48,9 +48,9 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
     # Triangulation.
     runTriangulation = True
     # Marker augmentation.
-    runMarkerAugmentation = True
+    runMarkerAugmentation = False
     # OpenSim pipeline.
-    runOpenSimPipeline = True
+    runOpenSimPipeline = False
     # Lowpass filter frequency of 2D keypoints for gait and everything else.
     filtFreqs = {'gait':12, 'default':500} # defaults to framerate/2
     # High-resolution for OpenPose.

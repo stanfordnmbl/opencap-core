@@ -55,8 +55,9 @@ API_TOKEN = getToken()
 # Enter the identifier(s) of the session(s) you want to reprocess. This is a list of one
 # or more session identifiers. The identifier is found as the 36-character string at the
 # end of the session url: app.opencap.ai/session/<session_id>
-session_ids = ['23d52d41-69fe-47cf-8b60-838e4268dd50']
+session_ids = ['bb06d157-4007-427c-b8a7-49daf0f47688']
 
+poseDetector = 'mmpose'
 
 
 # Select which trials to reprocess. You can reprocess all trials in the session 
@@ -78,6 +79,8 @@ if dynamic_trialNames is not None and len(dynamic_trialNames)>0:
     dynamic_ids = [trialNames[name]['id'] for name in dynamic_trialNames]
 else:
     dynamic_ids = dynamic_trialNames
+
+print(dynamic_ids)
 
 # # Optional: Uncomment this section to create a list of dynamic_ids to reprocess.
 # dynamic_ids = None # None (all dynamic trials), [] (skip), or list of trial_id strings
@@ -108,4 +111,5 @@ deleteLocalFolder = False
 # %% Process data.
 batchReprocess(session_ids,calib_id,static_id,dynamic_ids,
                resolutionPoseDetection=resolutionPoseDetection,
-               deleteLocalFolder=deleteLocalFolder)
+               deleteLocalFolder=deleteLocalFolder,poseDetector=poseDetector)
+test=1
