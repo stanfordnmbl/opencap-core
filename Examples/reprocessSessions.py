@@ -57,7 +57,7 @@ API_TOKEN = getToken()
 # end of the session url: app.opencap.ai/session/<session_id>
 session_ids = ['bb06d157-4007-427c-b8a7-49daf0f47688']
 
-poseDetector = 'mmpose'
+poseDetector = 'OpenPose'
 
 
 # Select which trials to reprocess. You can reprocess all trials in the session 
@@ -99,7 +99,7 @@ print(dynamic_ids)
 #   - '1x1008_4scales': 1x1008 resolution with 4 scales (gap = 0.25). (we were only able to run with a GPU with 24GB memory)
 #       - This is the highest resolution/settings we could use with a 24GB
 #         GPU without running into memory issues.
-resolutionPoseDetection = 'default'
+resolutionPoseDetection = '1x1008_4scales'
 
 
 # Set deleteLocalFolder to False to keep a local copy of the data. If you are 
