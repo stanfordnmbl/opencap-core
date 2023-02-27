@@ -4,6 +4,7 @@ import utilsDataman
 import copy
 import tensorflow as tf
 from utils import TRC2numpy
+import json
 
 def augmentTRC(pathInputTRCFile, subject_mass, subject_height,
                pathOutputTRCFile, augmenterDir, augmenterModelName="LSTM",
@@ -49,11 +50,7 @@ def augmentTRC(pathInputTRCFile, subject_mass, subject_height,
     
     # %% Process data.
     # Import TRC file
-    trc_file = utilsDataman.TRCFile(pathInputTRCFile)
-    
-    # Get reference marker position.
-    referenceMarker = "midHip" # TODO - make this an input parameter.
-    referenceMarker_data = trc_file.marker(referenceMarker)
+    trc_file = utilsDataman.TRCFile(pathInputTRCFile)    
     
     # Loop over augmenter types to handle separate augmenters for lower and
     # upper bodies.
@@ -72,9 +69,11 @@ def augmentTRC(pathInputTRCFile, subject_mass, subject_height,
         trc_data = TRC2numpy(pathInputTRCFile, feature_markers)
         trc_data_data = trc_data[:,1:]
         
-
-        
         # Step 2: Normalize with reference marker position.
+        with open(os.path.join(augmenterModelDir, "metadata.json"), 'r') as f:
+            metadata = json.load(f)
+        referenceMarker = metadata['reference_marker']
+        referenceMarker_data = trc_file.marker(referenceMarker)
         norm_trc_data_data = np.zeros((trc_data_data.shape[0],
                                        trc_data_data.shape[1]))
         for i in range(0,trc_data_data.shape[1],3):
