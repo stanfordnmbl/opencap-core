@@ -293,16 +293,16 @@ def batchReprocess(session_ids,calib_id,static_id,dynamic_ids,poseDetector='Open
                               isDocker=isServer,
                               hasWritePermissions = hasWritePermissions)
                 statusData = {'status':'done'}
-                _ = requests.patch("https://api.opencap.ai/trials/{}/".format(static_id_toProcess), data=statusData,
+                _ = requests.patch(API_URL + "trials/{}/".format(static_id_toProcess), data=statusData,
                          headers = {"Authorization": "Token {}".format(API_TOKEN)})
             except Exception as e:
                 print(e)
                 statusData = {'status':'error'}
-                _ = requests.patch("https://api.opencap.ai/trials/{}/".format(static_id_toProcess), data=statusData,
+                _ = requests.patch(API_URL + "trials/{}/".format(static_id_toProcess), data=statusData,
                          headers = {"Authorization": "Token {}".format(API_TOKEN)})
         if dynamic_ids == None:
 
-            session = requests.get("https://api.opencap.ai/sessions/{}/".format(session_id),
+            session = requests.get(API_URL + "sessions/{}/".format(session_id),
                                    headers = {"Authorization": "Token {}".format(API_TOKEN)}).json()
             dynamic_ids_toProcess = [t['id'] for t in session['trials'] if (t['name'] != 'calibration' and t['name'] !='neutral')]
         else:
@@ -323,10 +323,10 @@ def batchReprocess(session_ids,calib_id,static_id,dynamic_ids,poseDetector='Open
                           hasWritePermissions = hasWritePermissions)
                 
                 statusData = {'status':'done'}
-                _ = requests.patch("https://api.opencap.ai/trials/{}/".format(dID), data=statusData,
+                _ = requests.patch(API_URL + "trials/{}/".format(dID), data=statusData,
                          headers = {"Authorization": "Token {}".format(API_TOKEN)})
             except Exception as e:
                 print(e)
                 statusData = {'status':'error'}
-                _ = requests.patch("https://api.opencap.ai/trials/{}/".format(static_id_toProcess), data=statusData,
+                _ = requests.patch(API_URL + "trials/{}/".format(static_id_toProcess), data=statusData,
                          headers = {"Authorization": "Token {}".format(API_TOKEN)})
