@@ -8,7 +8,7 @@ import json
 
 def augmentTRC(pathInputTRCFile, subject_mass, subject_height,
                pathOutputTRCFile, augmenterDir, augmenterModelName="LSTM",
-               augmenter_model='v0.2', offset=True):
+               augmenter_model='v0.3', offset=True):
     
     # This is by default - might need to be adjusted in the future.
     featureHeight = True
@@ -33,7 +33,7 @@ def augmentTRC(pathInputTRCFile, subject_mass, subject_height,
         augmenterModelType_all = [augmenterModelType_lower, augmenterModelType_upper]
         feature_markers_all = [feature_markers_lower, feature_markers_upper]
         response_markers_all = [response_markers_lower, response_markers_upper]
-    elif augmenter_model == 'v0.3':
+    elif augmenter_model == 'v0.3' or augmenter_model == 'v0.4':
         # Lower body           
         augmenterModelType_lower = '{}_lower'.format(augmenter_model)
         from utils import getOpenPoseMarkers_lowerExtremity2
