@@ -80,8 +80,6 @@ if dynamic_trialNames is not None and len(dynamic_trialNames)>0:
 else:
     dynamic_ids = dynamic_trialNames
 
-print(dynamic_ids)
-
 # # Optional: Uncomment this section to create a list of dynamic_ids to reprocess.
 # dynamic_ids = None # None (all dynamic trials), [] (skip), or list of trial_id strings
 
