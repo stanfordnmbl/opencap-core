@@ -1,5 +1,7 @@
 Changelog:
 
+v0.4: models trained with new dataset (data rotated "about sphere") -  models 9 (no tuning) and 10 from marker-augmenter repository - RKnee is ref.
+v0.3: models trained with new dataset (data rotated "about sphere") -  models 9 and 10 from marker-augmenter repository - midHip is ref.
 v0.2: DEFAULT - models trained with augmented dataset (data rotated about vertical axis) -  models 20 and 21 from openpose-augmenter repository.
 v0.1: separate models for lower and upper extremities  = models used for paper - models 13 and 16 from openpose-augmenter repository.
 v0.0: single model for both lower and upper extremities - model 14 from openpose-augmenter repository.

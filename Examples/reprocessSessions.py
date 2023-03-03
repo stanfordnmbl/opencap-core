@@ -55,8 +55,10 @@ API_TOKEN = getToken()
 # Enter the identifier(s) of the session(s) you want to reprocess. This is a list of one
 # or more session identifiers. The identifier is found as the 36-character string at the
 # end of the session url: app.opencap.ai/session/<session_id>
+
 session_ids = ['05e92962-f12f-4e49-a9bf-7d952c610c46']
 
+poseDetector = 'OpenPose'
 
 
 # Select which trials to reprocess. You can reprocess all trials in the session 
@@ -96,6 +98,7 @@ else:
 #   - '1x1008_4scales': 1x1008 resolution with 4 scales (gap = 0.25). (we were only able to run with a GPU with 24GB memory)
 #       - This is the highest resolution/settings we could use with a 24GB
 #         GPU without running into memory issues.
+
 resolutionPoseDetection = '1x736'
 
 
@@ -108,4 +111,5 @@ deleteLocalFolder = False
 # %% Process data.
 batchReprocess(session_ids,calib_id,static_id,dynamic_ids,
                resolutionPoseDetection=resolutionPoseDetection,
-               deleteLocalFolder=deleteLocalFolder)
+               deleteLocalFolder=deleteLocalFolder,poseDetector=poseDetector)
+test=1
