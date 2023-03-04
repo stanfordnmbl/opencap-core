@@ -56,7 +56,7 @@ API_TOKEN = getToken()
 # or more session identifiers. The identifier is found as the 36-character string at the
 # end of the session url: app.opencap.ai/session/<session_id>
 
-session_ids = ['05e92962-f12f-4e49-a9bf-7d952c610c46']
+session_ids = ['762152da-ce04-4d22-af16-493643b0c32e']
 
 poseDetector = 'OpenPose'
 
@@ -72,7 +72,7 @@ poseDetector = 'OpenPose'
 
 calib_id = [] # None (auto-selected trial), [] (skip), or string of specific trial_id
 static_id = [] # None (auto-selected trial), [] (skip), or string of specific trial_id
-dynamic_trialNames = ['circles'] # None (all dynamic trials), [] (skip), or list of trial names
+dynamic_trialNames = None # None (all dynamic trials), [] (skip), or list of trial names
 
 # extract trial ids from trial names
 if dynamic_trialNames is not None and len(dynamic_trialNames)>0:
@@ -99,7 +99,7 @@ else:
 #       - This is the highest resolution/settings we could use with a 24GB
 #         GPU without running into memory issues.
 
-resolutionPoseDetection = '1x736'
+resolutionPoseDetection = '1x1008_4scales'
 
 
 # Set deleteLocalFolder to False to keep a local copy of the data. If you are 
