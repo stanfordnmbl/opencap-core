@@ -34,7 +34,7 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
          calibrationOptions=None,
          markerDataFolderNameSuffix=None, imageUpsampleFactor=4,
          poseDetector='OpenPose', resolutionPoseDetection='default', 
-         scaleModel=False, bbox_thr=0.8, augmenter_model='v0.3',
+         scaleModel=False, bbox_thr=0.8, augmenter_model='v0.2',
          genericFolderNames=False, offset=True, benchmark=False,
          dataDir=None):
 
@@ -85,6 +85,8 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
             poseDetector = 'mmpose'
         else:
             poseDetector = 'OpenPose'
+
+    poseDetector = 'OpenPose'
 
     # %% Paths to pose detector folder for local testing.
     if poseDetector == 'OpenPose':

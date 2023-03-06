@@ -1,5 +1,7 @@
 Changelog:
 
+v0.6: models trained with new dataset (data rotated "about sphere") -  models 11 (no tuning) and 14 (no tuning) from marker-augmenter repository - midHip is ref.
+v0.5: models trained with new dataset (data rotated "about sphere") -  models 11 (no tuning) and 12 (no tuning) from marker-augmenter repository - midHip is ref.
 v0.4: models trained with new dataset (data rotated "about sphere") -  models 9 (no tuning) and 10 from marker-augmenter repository - RKnee is ref.
 v0.3: models trained with new dataset (data rotated "about sphere") -  models 9 and 10 from marker-augmenter repository - midHip is ref.
 v0.2: DEFAULT - models trained with augmented dataset (data rotated about vertical axis) -  models 20 and 21 from openpose-augmenter repository.
