@@ -1016,6 +1016,9 @@ def synchronizeVideoKeypoints(keypointList, confidenceList,
         syncActivity = 'gait'
     else:
         syncActivity = 'general'
+    
+    # Hack
+    syncActivity = 'gait'
         
     print('Using ' + syncActivity + ' sync function.')
     
@@ -1494,7 +1497,7 @@ def trackKeypointBox(videoPath,bbStart,allPeople,allBoxes,dataOut,frameStart = 0
             
         if not samePerson and not justStarted:
             if len(badFrames) >= badFramesBeforeStop:
-                print('not same person at ' + str(frameNum - frameIncrement*badFramesBeforeStop))
+                print('not same person at ' + str(frameNum - frameIncrement*badFramesBeforeStop) + ': ' + videoPath)
                 # Replace the data from the badFrames with zeros
                 if len(badFrames) > 1:
                     dataOut[badFrames,:] = np.zeros(len(badFrames),dataOut.shape[0])
@@ -1606,7 +1609,7 @@ def trackBoundingBox(videoPath,bbStart,allPeople,allBoxes,dataOut,frameStart = 0
                                                                               # image based tracker except when person leaves scene
 
         if not samePerson and not justStarted:
-            print('not same person at ' + str(frameNum))
+            print('not same person at ' + str(frameNum) + ': ' + videoPath)
             break
         
         dataOut[frameNum,:] = allPeople[iPerson][frameNum,:]

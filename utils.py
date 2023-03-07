@@ -42,7 +42,8 @@ def getDataDirectory(isDocker=False):
     elif computername == 'clarkadmin-MS-7996':
         dataDir = '/home/clarkadmin/Documents/MyRepositories/mobilecap_data/'
     elif computername == 'DESKTOP-NJMGEBG':
-        dataDir = 'C:/Users/opencap/Documents/MyRepositories/mobilecap_data/'
+        # dataDir = 'C:/Users/opencap/Documents/MyRepositories/mobilecap_data/'
+        dataDir = 'C:/Users/opencap/Desktop/TEPLIN_TRIMMED/'
     elif isDocker:
         dataDir = os.getcwd()
     else:
