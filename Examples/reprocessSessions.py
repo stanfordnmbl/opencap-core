@@ -70,7 +70,7 @@ session_ids = ['059b2b0d-8d83-4cde-b856-fde0d031be21']
 
 calib_id = [] # None (auto-selected trial), [] (skip), or string of specific trial_id
 static_id = [] # None (auto-selected trial), [] (skip), or string of specific trial_id
-dynamic_trialNames = ['constant400'] # None (all dynamic trials), [] (skip), or list of trial names
+dynamic_trialNames = ['constant400', 'constant400_1', 'constant500', 'constant600', 'fly400', 'fly500', 'fly600', 'dead10', 'dead10_1', 'dead20', 'dead30'] # None (all dynamic trials), [] (skip), or list of trial names
 
 # extract trial ids from trial names
 if dynamic_trialNames is not None and len(dynamic_trialNames)>0:
