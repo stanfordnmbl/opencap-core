@@ -93,17 +93,9 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
         poseDetectorDirectory = getMMposeDirectory(isDocker)    
 
     # %% Camera calibration.
-    if runCameraCalibration:    
-        # Get checkerboard parameters from metadata.
-        CheckerBoardParams = {
-            'dimensions': (
-                sessionMetadata['checkerBoard']['black2BlackCornersWidth_n'],
-                sessionMetadata['checkerBoard']['black2BlackCornersHeight_n']),
-            'squareSize': 
-                sessionMetadata['checkerBoard']['squareSideLength_mm']}       
+    if runCameraCalibration:      
         # Camera directories and models.
         cameraDirectories = {}
-        cameraModels = {}
         for pathCam in glob.glob(os.path.join(sessionDir, 'Videos', 'Cam*')):
             if os.name == 'nt': # windows
                 camName = pathCam.split('\\')[-1]
@@ -111,13 +103,13 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
                 camName = pathCam.split('/')[-1]
             cameraDirectories[camName] = os.path.join(sessionDir, 'Videos',
                                                       pathCam)
-            cameraModels[camName] = sessionMetadata['iphoneModel'][camName]        
         
         # Get cameras' intrinsics and extrinsics.     
         # Load parameters if saved, compute and save them if not.
         CamParamDict = {}
         loadedCamParams = {}
-        for camName in cameraDirectories:
+        cameraModels = {}
+        for iCam,camName in enumerate(cameraDirectories):
             camDir = cameraDirectories[camName]
             # Intrinsics ######################################################
             # Intrinsics and extrinsics already exist for this session.
@@ -131,6 +123,17 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
                 
             # Extrinsics do not exist for this session.
             else:
+                # Get checkerboard parameters from metadata.
+                if iCam == 0:
+                    CheckerBoardParams = {
+                        'dimensions': (
+                            sessionMetadata['checkerBoard']['black2BlackCornersWidth_n'],
+                            sessionMetadata['checkerBoard']['black2BlackCornersHeight_n']),
+                        'squareSize': 
+                            sessionMetadata['checkerBoard']['squareSideLength_mm']}    
+                
+                cameraModels[camName] = sessionMetadata['iphoneModel'][camName]  
+                
                 print("Compute extrinsics for {} - not yet existing".format(
                     camName))
                 # Intrinsics ##################################################

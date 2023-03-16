@@ -17,10 +17,6 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 import utils
 
-
-
-
-
 def xcpToCamera(xcpPath,cameraIDs='Vue'):
     # CameraIDs is a dict of ids, or a type of camera, which will use all cameras
     # of this type.
@@ -81,8 +77,6 @@ def xcpToCamera(xcpPath,cameraIDs='Vue'):
 # %% testing as script
 xcpPath = os.path.join('C:/Users/hpl/Documents/MyRepositories/opencap-core_ACL/sandbox',
                        'testCalibration.xcp')
-
-testCalibration = utils.loadCameraParameters('cameraIntrinsicsExtrinsics.pickle')
 
 xcpToCamera(xcpPath)
 

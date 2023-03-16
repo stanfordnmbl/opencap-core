@@ -285,8 +285,7 @@ def saveCameraParameters(filename,CameraParams):
 #%% 
 def getVideoRotation(videoPath):
     
-    
-    meta = ffmpeg.probe(videoPath)
+    meta = ffmpeg.probe(videoPath) 
     try:
         rotation = meta['format']['tags']['com.apple.quicktime.video-orientation']
     except:
