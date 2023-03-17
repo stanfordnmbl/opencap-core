@@ -129,8 +129,8 @@ def xcpToCameraParameters(xcpPath,cameraIDs='Vue',saveBasePath=None):
         principalPoint = stringToList(thisCam['KeyFrames']['KeyFrame']['@PRINCIPAL_POINT'])
         focalLength = stringToList(thisCam['KeyFrames']['KeyFrame']['@FOCAL_LENGTH'])[0]
         cameraParameters['intrinsicMat'] = np.diag(np.array([focalLength, focalLength, 1]))
-        cameraParameters['intrinsicMat'][0,2] = principalPoint[0]
-        cameraParameters['intrinsicMat'][1,2] = principalPoint[1]
+        cameraParameters['intrinsicMat'][0,2] = 1920-principalPoint[0]
+        cameraParameters['intrinsicMat'][1,2] = 1080-principalPoint[1]
         
         # rotation 
         quat = stringToList(thisCam['KeyFrames']['KeyFrame']['@ORIENTATION'])

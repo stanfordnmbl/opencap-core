@@ -19,3 +19,4 @@ Examples/Data/*
 *.stats
 
 tests/
+sandbox/Data/*

@@ -173,8 +173,8 @@ def calcIntrinsics(folderName, CheckerBoardParams=None, filenames=['*.jpg'],
             print("Couldn't find checkerboard in " + pathName)
   
     if len(twodpoints) < .5*len(imageFiles):
-       print('Checkerboard not detected in at least half of intrinsic images. Re-record video.')
-       return None
+        print('Checkerboard not detected in at least half of intrinsic images. Re-record video.')
+        return None
        
      
     # Perform camera calibration by 
