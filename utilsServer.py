@@ -173,6 +173,10 @@ def processTrial(session_id, trial_id, trial_type = 'dynamic',
         
     else:
         raise Exception('Wrong trial type. Options: calibration, static, dynamic.')
+    
+    # Remove data
+    if deleteLocalFolder:
+        shutil.rmtree(session_path)
         
         
 def getCalibrationImagePath(session_id,isDocker=True):
