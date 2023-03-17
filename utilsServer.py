@@ -72,7 +72,6 @@ def processTrial(session_id, trial_id, trial_type = 'dynamic',
         # Write calibration solutions to django
         writeCalibrationOptionsToAPI(session_path,session_id,calibration_id = trial_id,
                                      trialName = extrinsicTrialName)
-        return
         
     elif trial_type == 'static':
         # delete static files if they exist.
@@ -174,12 +173,11 @@ def processTrial(session_id, trial_id, trial_type = 'dynamic',
         
     else:
         raise Exception('Wrong trial type. Options: calibration, static, dynamic.')
-        
+    
     # Remove data
-
     if deleteLocalFolder:
         shutil.rmtree(session_path)
-      
+        
         
 def getCalibrationImagePath(session_id,isDocker=True):
     session_name = session_id # TODO We may want to name this on server side?
