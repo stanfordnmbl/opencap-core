@@ -15,6 +15,8 @@ logging.basicConfig(level=logging.INFO)
 API_TOKEN = getToken()
 API_URL = getAPIURL()
 
+# if true, will delete entire data directory when finished with a trial
+isDocker = True
 
 while True:
     queue_path = "trials/dequeue/"
@@ -67,7 +69,7 @@ while True:
     logging.info("processTrial({},{},trial_type={})".format(trial["session"], trial["id"], trial_type))
 
     try:
-        processTrial(trial["session"], trial["id"], trial_type=trial_type, isDocker=True)   
+        processTrial(trial["session"], trial["id"], trial_type=trial_type, isDocker=isDocker)   
         # note a result needs to be posted for the API to know we finished, but we are posting them 
         # automatically thru procesTrial now
         r = requests.patch(trial_url, data={"status": "done"},
@@ -81,7 +83,8 @@ while True:
         traceback.print_exc()
     
     # Clean data directory
-    folders = glob.glob(os.path.join(getDataDirectory(isDocker=True),'Data','*') 
-    for f in folders:         
-        shutil.rmtree(f)
-        logging.info('deleting ' + f)
+    if isDocker:
+        folders = glob.glob(os.path.join(getDataDirectory(isDocker=True),'Data','*') 
+        for f in folders:         
+            shutil.rmtree(f)
+            logging.info('deleting ' + f)
