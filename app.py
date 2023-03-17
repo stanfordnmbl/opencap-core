@@ -84,7 +84,7 @@ while True:
     
     # Clean data directory
     if isDocker:
-        folders = glob.glob(os.path.join(getDataDirectory(isDocker=True),'Data','*') 
+        folders = glob.glob(os.path.join(getDataDirectory(isDocker=True),'Data','*'))
         for f in folders:         
             shutil.rmtree(f)
             logging.info('deleting ' + f)
