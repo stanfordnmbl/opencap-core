@@ -4,6 +4,7 @@ import json
 from utilsServer import processTrial
 import traceback
 import logging
+import glob
 import numpy as np
 from utilsAPI import getAPIURL
 from utilsAuth import getToken
@@ -79,6 +80,8 @@ while True:
                          headers = {"Authorization": "Token {}".format(API_TOKEN)})
         traceback.print_exc()
     
-    # Delete data whether trial succeeded or not
-    session_path = os.path.join(getDataDirectory(isDocker=True),'Data',trial["session"]) 
-    shutil.rmtree(sessionPath)
+    # Clean data directory
+    folders = glob.glob(os.path.join(getDataDirectory(isDocker=True),'Data','*') 
+    for f in folders:         
+        shutil.rmtree(f)
+        logging.info('deleting ' + f)
