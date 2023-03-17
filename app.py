@@ -1,6 +1,8 @@
 import requests
 import time
 import json
+import os
+import shutil
 from utilsServer import processTrial
 import traceback
 import logging
