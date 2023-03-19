@@ -8,7 +8,7 @@ import traceback
 import logging
 import glob
 import numpy as np
-from utilsAPI import getAPIURL
+from utilsAPI import getAPIURL, getWorkerType
 from utilsAuth import getToken
 from utils import getDataDirectory
 
@@ -16,12 +16,16 @@ logging.basicConfig(level=logging.INFO)
 
 API_TOKEN = getToken()
 API_URL = getAPIURL()
+workerType = getWorkerType()
 
 # if true, will delete entire data directory when finished with a trial
-isDocker = True
+isDocker = False
 
 while True:
-    queue_path = "trials/dequeue/"
+    # workerType = 'calibration' -> just processes calibration and neutral
+    # workerType = 'all' -> processes all types of trials
+    # no query string -> defaults to 'all'
+    queue_path = "trials/dequeue/?workerType=" + workerType
     try:
         r = requests.get("{}{}".format(API_URL, queue_path),
                          headers = {"Authorization": "Token {}".format(API_TOKEN)})
