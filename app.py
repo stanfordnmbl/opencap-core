@@ -35,7 +35,7 @@ while True:
         continue
 
     if r.status_code == 404:
-        logging.info("...workerType: " + workerType + " ...")
+        logging.info("...pulling " + workerType + " trials.")
         time.sleep(1)
         continue
     
