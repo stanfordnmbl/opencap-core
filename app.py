@@ -19,7 +19,7 @@ API_URL = getAPIURL()
 workerType = getWorkerType()
 
 # if true, will delete entire data directory when finished with a trial
-isDocker = False
+isDocker = True
 
 while True:
     # workerType = 'calibration' -> just processes calibration and neutral
