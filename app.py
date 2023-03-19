@@ -35,8 +35,8 @@ while True:
         continue
 
     if r.status_code == 404:
-        logging.info(".")
-        time.sleep(0.5)
+        logging.info("... pulling " + workerType + " trials ...")
+        time.sleep(1)
         continue
     
     if np.floor(r.status_code/100) == 5: # 5xx codes are server faults
