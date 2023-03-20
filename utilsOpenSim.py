@@ -31,8 +31,9 @@ def runScaleTool(pathGenericSetupFile, pathGenericModel, subjectMass,
     if 'Lai' in scaledModelName or 'Rajagopal' in scaledModelName:        
         if 'Mocap' in setupFileName:        
             markerSetFileName = 'RajagopalModified2016_markers_mocap.xml'
-        elif 'openpose' in setupFileName:
-            markerSetFileName = 'RajagopalModified2016_markers_openpose.xml'
+        # TODO: temp hack
+        # elif 'openpose' in setupFileName:
+        #     markerSetFileName = 'RajagopalModified2016_markers_openpose.xml'
         elif 'mmpose' in setupFileName:
             markerSetFileName = 'RajagopalModified2016_markers_mmpose.xml'    
         else:
@@ -50,7 +51,7 @@ def runScaleTool(pathGenericSetupFile, pathGenericModel, subjectMass,
     pathMarkerSet = os.path.join(dirGenericModel, markerSetFileName)
     
     # Add the marker set to the generic model and save that updated model.
-    opensim.Logger.setLevelString('error')
+    # opensim.Logger.setLevelString('error')
     genericModel = opensim.Model(pathGenericModel)
     markerSet = opensim.MarkerSet(pathMarkerSet)
     genericModel.set_MarkerSet(markerSet)
@@ -163,7 +164,7 @@ def runIKTool(pathGenericSetupFile, pathScaledModel, pathTRCFile,
         pathOutputFolder, 'Setup_IK_' + IKFileName + '.xml')
     
     # Setup IK tool.
-    opensim.Logger.setLevelString('error')
+    # opensim.Logger.setLevelString('error')
     IKTool = opensim.InverseKinematicsTool(pathGenericSetupFile)            
     IKTool.setName(IKFileName)
     IKTool.set_model_file(pathScaledModel)          
