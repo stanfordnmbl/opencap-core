@@ -18,3 +18,11 @@ def getAPIURL():
         API_URL= API_URL + '/'
 
     return API_URL
+
+def getWorkerType():
+    try: # look in environment file
+        workerType = config("WORKER_TYPE")
+    except: # default
+        workerType = "all"
+    
+    return workerType
