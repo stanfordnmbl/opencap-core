@@ -152,8 +152,8 @@ def xcpToCameraParameters(xcpPath,cameraIDs='Vue',saveBasePath=None,visualizeCam
         # rotation_EulerAngles 3x1
         cameraParameters['rotation_EulerAngles'] = np.array(cv2.Rodrigues(cameraParameters['rotation'])[0])
         
-        # translation. Vicon defines this as translation from camera to origin in world,
-        # our camera model wants it expressed in camera
+        # translation. Vicon defines this as translation from origin to camera in world,
+        # our camera model wants it expressed in camera to origin in camera
         translation = stringToList(thisCam['KeyFrames']['KeyFrame']['@POSITION'])
         translation = np.expand_dims(np.array(translation),axis=1)
         cameraParameters['translation'] = -np.matmul(R_camera_to_world,translation)
@@ -230,6 +230,113 @@ def plotCameras(CameraParameters):
     ax1.axes.set_zlim3d(bottom=-5, top=5)
 
     plt.show()
+    
+# %% Pick points from an image for calibration
+
+def pickPointsFromImage(imagePath,nPts):
+    
+    refPts = []
+    def click_and_save(event, x, y, flags, param):  
+        # grab references to the global variables
+        nonlocal refPts
+        if event == cv2.EVENT_LBUTTONDOWN:
+            refPts.append((x,y))
+    # load the image, clone it, and setup the mouse callback function
+    refPts = []
+
+    image = cv2.imread(imagePath)
+    clone = image.copy()
+    cv2.namedWindow("image")
+    cv2.setMouseCallback("image", click_and_save)
+    print('Click on ' + str(nPts) + ' points or press q when finished. Smallest x/y vals to largest, cross over for top.')
+    
+    # keep looping until the 'q' key is pressed
+    ptLength = 0
+    while True:
+        # display the image and wait for a keypress
+        cv2.imshow("image", image)
+        key = cv2.waitKey(1) & 0xFF
+        
+        if len(refPts) > ptLength:
+            image = cv2.circle(image, refPts[-1], radius=2, color=(0, 255, 0), thickness=-1)
+        
+        if key == ord("q") or len(refPts) >nPts:
+            refPts.pop(-1) # last click is just to exit
+            cv2.destroyAllWindows()
+            break
+        
+    # get image height and subtract y
+    ht = image.shape[1]
+    refPts = [[rP[0],ht - rP[1]] for rP in refPts]
+    
+    return refPts
+
+
+def sampleGrid(imagePoints, gridSize = (5,3),imagePath = None,gridDims = [(-40,40),(0,60),(0,0)]):
+    
+    if len(imagePoints) != 6:
+        raise Exception('grid generation is hard coded to only take 6 points.')
+    
+    # create a grid of points between the points in imagePoints
+    # nInterp is the number of points to interpolate between each pair of points
+    # 3d points start at the origin and are a gridSize grid in the x-y plane.
+    # the z coordinate is the same for all points
+
+    # create a grid of points in 3d
+    x = np.linspace(gridDims[0][0],gridDims[0][1],gridSize[0])
+    y = np.linspace(gridDims[1][0],gridDims[1][1],gridSize[1])
+    z = 0
+    X,Y,Z = np.meshgrid(x,y,z)
+
+    # reshape to a list of points
+    points3d = np.vstack((X.flatten(),Y.flatten(),Z.flatten())).T
+
+    # create a list of points2d as midpoint between imagePoints  
+    imagePoints = np.array(imagePoints)
+    
+    vec0 = np.ndarray((gridSize[0],2))
+    vec0[0,:] = imagePoints[0]
+    vec0[1,:] = np.divide((imagePoints[0]+imagePoints[1]),2)
+    vec0[2,:] = imagePoints[1]
+    vec0[3,:] = np.divide((imagePoints[1]+imagePoints[2]),2)
+    vec0[4,:] = imagePoints[2]
+    
+    vec2 = np.ndarray((gridSize[0],2))
+    vec2[0,:] = imagePoints[3]
+    vec2[1,:] = np.divide((imagePoints[3]+imagePoints[4]),2)
+    vec2[2,:] = imagePoints[4]
+    vec2[3,:] = np.divide((imagePoints[4]+imagePoints[5]),2)
+    vec2[4,:] = imagePoints[5]
+
+    # vec1 is the midpoint between vec0 and vec2
+    vec1 = (vec0 + vec2)/2
+    
+    points2d = np.vstack((vec0,vec1,vec2))
+
+        
+
+    test =1 
+
+
+
+
+    
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+    return points2d, points3d
+
 
 # %% 
 def getTrialNames(path):
