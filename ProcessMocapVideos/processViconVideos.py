@@ -24,9 +24,7 @@ This script processes videos from Vicon RGB cameras to estimate kinematics.
 import os
 import sys
 import shutil
-import yaml
 import utilsMocap
-import utils
 
 repoDir = os.path.abspath(
     os.path.join(os.path.dirname(os.path.abspath(__file__)),'../'))
@@ -46,8 +44,9 @@ dataBaseDir = 'C:\SharedGdrive/HPL_MASPL/'
 
 # rewrite video directories?
 overwriteRestructuring = True
-deleteFolders = False # true to delete what was there
-copyVideos = False # true if wanting to re-copy
+deleteFolders = False
+copyVideos = False # true to copy into new structure
+
 
 # The dataset includes 2 sessions per subject.The first session includes
 # static, sit-to-stand, squat, and drop jump trials. The second session 
@@ -61,7 +60,7 @@ mass = 65.8
 subjectID = '1003'
 
 # We only support OpenPose on Windows.
-poseDetectors = ['OpenPose']
+poseDetector = 'OpenPose'
 
 # List of cameras in order. First entry will be Cam 0.
 camList = ['2122194','2111275','2141511','2111270','2121724']
@@ -73,7 +72,7 @@ cameraSetups = ['2-cameras']
 # Select the resolution at which you would like to use OpenPose. More details
 # about the options in Examples/reprocessSessions. In the paper, we compared 
 # 'default' and '1x1008_4scales'.
-resolutionPoseDetection = 'default'
+resolutionPoseDetection = '1x1008_4scales'
 
 # Since the prepint release, we updated a new augmenter model. To use the model
 # used for generating the paper results, select v0.1. To use the latest model
@@ -99,7 +98,7 @@ for subject in subjects:
                 pass
         utilsMocap.moveFilesToOpenCapStructure(pathRawVideos, outPath, 
                                                camList, calibration=True,
-                                               copyVideos=False)
+                                               copyVideos=copyVideos)
 
     # Save metadata if not already done
     utilsMocap.createMetadata(outPath, height=height, mass=mass, subjectID=subjectID)
@@ -137,18 +136,17 @@ def process_trial(trial_name=None, session_name=None, isDocker=False,
 # Hard-coded way through for now
 
 sessionName = 'S1003'
-cam2Use = ['Cam0','Cam1','Cam2']
-markerDataFolderNameSuffix = '3-cameras'
-poseDetector = 'OpenPose'
-resolutionPoseDetection = 'default' # '1x736'
-augmenter_model = 'v0.2'
+cam2Use = ['Cam' + str(i) for i in [0, 2, 4]]
+markerDataFolderNameSuffix = '3-cameras-024'
 dataDir = 'C:\SharedGdrive/HPL_MASPL/OpenCap'
 
+# trials = ['DLSQUATS','DROPLANDING_03']
+trialNames = utilsMocap.getTrialNames(os.path.join(dataDir, 'Data', sessionName, 'Videos', 'Cam0', 'InputMedia'))
+scaleModel = [True]
+staticTrial = [sessionName + '_DLSQUATS']
+trials = staticTrial + trialNames
+scaleModel = scaleModel + [False for i in range(len(trialNames))]
 
-trials = ['DLSQUATS','DROPLANDING_03']
-scaleModel = [True, False]
-
-trials = [sessionName + '_' + t for t in trials]
 
 for i,trial in enumerate(trials):
     process_trial(trial,
@@ -163,8 +161,6 @@ for i,trial in enumerate(trials):
                     dataDir=dataDir)
 
 test =1
-
-
 
 
 

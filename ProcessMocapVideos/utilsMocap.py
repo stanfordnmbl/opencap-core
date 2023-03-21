@@ -217,30 +217,13 @@ def plotCameras(CameraParameters):
         # plot camera
         R = cam['rotation'] # R_camera_to_world
         t = cam['translation'] # t_camera_to_world]camera
-        t = np.matmul(R.T,t) # t_camera_to_world]world
-        # negate and turn to meters. The way our camera is defined, 
-        # translation is from camera to lab expressed in lab
-        t =  [-tr[0]/1000 for tr in t] 
+        t = -np.matmul(R.T,t)/1000 # t_world_to_camera]world in meters
+        t =  [tr[0] for tr in t] 
 
         plotRt(R, t, ax1, arrow_prop_dict)
         
         # add text with Cam # and coordinates of t in world frame rounded to one decimal
         ax1.text(t[0], t[1], t[2], 'Cam' + str(i) + ' ' + str(np.round(t,1)))
-    
-
-
-        
-    
-
-    # a = Arrow3D([t[0], t[0] + R[0,0]],
-    #             [t[1], t[1] + R[1,0]],
-    #             [t[2], t[2] + R[2,0]], **arrow_prop_dict, color='r')
-    # ax1.add_artist(a)
-    # a = Arrow3D([0, 0], [0, 1], [0, 0], **arrow_prop_dict, color='b')
-    # ax1.add_artist(a)
-    # a = Arrow3D([0, 0], [0, 0], [0, 1], **arrow_prop_dict, color='g')
-    # ax1.add_artist(a)
-
 
     ax1.axes.set_xlim3d(left=-5, right=5) 
     ax1.axes.set_ylim3d(bottom=-5, top=5) 
@@ -248,3 +231,7 @@ def plotCameras(CameraParameters):
 
     plt.show()
 
+# %% 
+def getTrialNames(path):
+    # get all the folder names in the path
+    return [f.name for f in os.scandir(path) if f.is_dir()]
