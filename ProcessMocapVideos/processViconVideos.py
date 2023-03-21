@@ -46,6 +46,8 @@ dataBaseDir = 'C:\SharedGdrive/HPL_MASPL/'
 
 # rewrite video directories?
 overwriteRestructuring = True
+deleteFolders = False # true to delete what was there
+copyVideos = False # true if wanting to re-copy
 
 # The dataset includes 2 sessions per subject.The first session includes
 # static, sit-to-stand, squat, and drop jump trials. The second session 
@@ -85,7 +87,6 @@ augmenter_model = 'v0.2'
 # We also convert the Vicon calibration to OpenCap format and put in the 
 # appropriate OpenCap folder.
 subjects = ['S' + sN for sN in sessionNames]
-deleteFolders = False
 for subject in subjects:
     pathRawVideos = os.path.join(dataBaseDir,'RawData',subject,'Videos')
     outPath = os.path.join(dataBaseDir,'OpenCap','Data',subject)
@@ -136,8 +137,8 @@ def process_trial(trial_name=None, session_name=None, isDocker=False,
 # Hard-coded way through for now
 
 sessionName = 'S1003'
-cam2Use = ['Cam0','Cam2']
-markerDataFolderNameSuffix = '2-cameras'
+cam2Use = ['Cam0','Cam1','Cam2']
+markerDataFolderNameSuffix = '3-cameras'
 poseDetector = 'OpenPose'
 resolutionPoseDetection = 'default' # '1x736'
 augmenter_model = 'v0.2'

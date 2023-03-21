@@ -16,6 +16,15 @@ import sys
 import cv2
 import scipy.spatial.transform as spTransform
 
+
+# See if we need to delete any
+import matplotlib as mpl
+from mpl_toolkits.mplot3d import Axes3D
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.patches import FancyArrowPatch
+from mpl_toolkits.mplot3d import proj3d
+
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 import utils
@@ -66,7 +75,9 @@ def moveFilesToOpenCapStructure(inputDirectory,outputDirectory,camList=None,cali
         
         # Convert calibrations and save
         xcpToCameraParameters(outCalibrationPath,camList,
-                              saveBasePath=os.path.join(outputDirectory,'Videos'))
+                              saveBasePath=os.path.join(outputDirectory,'Videos'),
+                              visualizeCameras=True)
+        
                
     return
 
@@ -88,7 +99,7 @@ def createMetadata(outputDirectory, height=1.7, mass=75, subjectID='default'):
     return
 
 # %% 
-def xcpToCameraParameters(xcpPath,cameraIDs='Vue',saveBasePath=None):
+def xcpToCameraParameters(xcpPath,cameraIDs='Vue',saveBasePath=None,visualizeCameras=False):
     # CameraIDs is a dict of ids, or a type of camera, which will use all cameras
     # of this type.
     
@@ -113,6 +124,7 @@ def xcpToCameraParameters(xcpPath,cameraIDs='Vue',saveBasePath=None):
         return thisList
     
     # extract parameters
+    cameraParametersAll = []
     for i,camID in enumerate(cameraIDs):
         cameraParameters = {}
         # Parameters defined here https://www.researchgate.net/publication/347567947_Towards_end-to-end_training_of_proposal-based_3D_human_pose_estimation
@@ -135,17 +147,104 @@ def xcpToCameraParameters(xcpPath,cameraIDs='Vue',saveBasePath=None):
         # rotation 
         quat = stringToList(thisCam['KeyFrames']['KeyFrame']['@ORIENTATION'])
         cameraParameters['rotation'] = spTransform.Rotation.as_matrix((spTransform.Rotation.from_quat(quat)))
+        R_camera_to_world = cameraParameters['rotation']
         
         # rotation_EulerAngles 3x1
         cameraParameters['rotation_EulerAngles'] = np.array(cv2.Rodrigues(cameraParameters['rotation'])[0])
         
-        # translation 3x1
+        # translation. Vicon defines this as translation from camera to origin in world,
+        # our camera model wants it expressed in camera
         translation = stringToList(thisCam['KeyFrames']['KeyFrame']['@POSITION'])
-        cameraParameters['translation'] = np.expand_dims(np.array(translation),axis=1)
+        translation = np.expand_dims(np.array(translation),axis=1)
+        cameraParameters['translation'] = -np.matmul(R_camera_to_world,translation)
+
         
         if saveBasePath is not None:
             utilsChecker.saveCameraParameters(os.path.join(saveBasePath,'Cam' + str(i),
                                                            'cameraIntrinsicsExtrinsics.pickle'),
                                                            cameraParameters)
+        cameraParametersAll.append(cameraParameters)
+    
+    if visualizeCameras:
+        plotCameras(cameraParametersAll)
 
-    return cameraParameters  
+    return cameraParametersAll  
+
+# %% 3D plot of cameras in the world
+
+def plotCameras(CameraParameters):
+
+    class Arrow3D(FancyArrowPatch):
+        def __init__(self, xs, ys, zs, *args, **kwargs):
+            FancyArrowPatch.__init__(self, (0, 0), (0, 0), *args, **kwargs)
+            self._verts3d = xs, ys, zs
+    
+        def draw(self, renderer):
+            xs3d, ys3d, zs3d = self._verts3d
+            xs, ys, zs = proj3d.proj_transform(xs3d, ys3d, zs3d, renderer.M)
+            self.set_positions((xs[0], ys[0]), (xs[1], ys[1]))
+            FancyArrowPatch.draw(self, renderer)
+    
+    def plotRt(R, t, thisAx, arrow_prop_dict):
+        # plot coordinate system rotated by R and translated by t
+        a = Arrow3D([t[0], t[0] + R[0,0]],
+                    [t[1], t[1] + R[0,1]],
+                    [t[2], t[2] + R[0,2]], **arrow_prop_dict, color='r')
+
+        thisAx.add_artist(a)
+        a = Arrow3D([t[0], t[0] + R[1,0]],
+                    [t[1], t[1] + R[1,1]],
+                    [t[2], t[2] + R[1,2]], **arrow_prop_dict, color='g')
+        thisAx.add_artist(a)
+
+        a = Arrow3D([t[0], t[0] + R[2,0]],
+                    [t[1], t[1] + R[2,1]],
+                    [t[2], t[2] + R[2,2]], **arrow_prop_dict, color='b')
+        thisAx.add_artist(a)
+
+
+    fig = plt.figure()
+    ax1 = fig.add_subplot(111, projection='3d')
+    arrow_prop_dict = dict(mutation_scale=20, arrowstyle='->', shrinkA=0, shrinkB=0)
+
+    # world coord frame
+    plotRt(np.eye(3), [0,0,0], ax1, arrow_prop_dict)
+    ax1.text(0,0,0, 'lab')
+
+
+
+    for i,cam in enumerate(CameraParameters):
+        # plot camera
+        R = cam['rotation'] # R_camera_to_world
+        t = cam['translation'] # t_camera_to_world]camera
+        t = np.matmul(R.T,t) # t_camera_to_world]world
+        # negate and turn to meters. The way our camera is defined, 
+        # translation is from camera to lab expressed in lab
+        t =  [-tr[0]/1000 for tr in t] 
+
+        plotRt(R, t, ax1, arrow_prop_dict)
+        
+        # add text with Cam # and coordinates of t in world frame rounded to one decimal
+        ax1.text(t[0], t[1], t[2], 'Cam' + str(i) + ' ' + str(np.round(t,1)))
+    
+
+
+        
+    
+
+    # a = Arrow3D([t[0], t[0] + R[0,0]],
+    #             [t[1], t[1] + R[1,0]],
+    #             [t[2], t[2] + R[2,0]], **arrow_prop_dict, color='r')
+    # ax1.add_artist(a)
+    # a = Arrow3D([0, 0], [0, 1], [0, 0], **arrow_prop_dict, color='b')
+    # ax1.add_artist(a)
+    # a = Arrow3D([0, 0], [0, 0], [0, 1], **arrow_prop_dict, color='g')
+    # ax1.add_artist(a)
+
+
+    ax1.axes.set_xlim3d(left=-5, right=5) 
+    ax1.axes.set_ylim3d(bottom=-5, top=5) 
+    ax1.axes.set_zlim3d(bottom=-5, top=5)
+
+    plt.show()
+
