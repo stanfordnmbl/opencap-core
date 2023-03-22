@@ -15,6 +15,8 @@ import copy
 import sys
 import cv2
 import scipy.spatial.transform as spTransform
+import win32api
+import win32con
 
 
 # See if we need to delete any
@@ -127,37 +129,44 @@ def xcpToCameraParameters(xcpPath,cameraIDs='Vue',saveBasePath=None,visualizeCam
     cameraParametersAll = []
     for i,camID in enumerate(cameraIDs):
         cameraParameters = {}
-        # Parameters defined here https://www.researchgate.net/publication/347567947_Towards_end-to-end_training_of_proposal-based_3D_human_pose_estimation
-        thisCam = next(cam for cam in xmlDict['Cameras']['Camera'] if cam["@DEVICEID"] == camID)
-        # image size
-        sensorSize = stringToList(thisCam['@SENSOR_SIZE'])
-        cameraParameters['imageSize'] = np.expand_dims(np.array((sensorSize)),axis=1)
         
-        # vicon only uses 3 distortion parameters for r^2, r^4, r^6. Set the final two to 0 for opencv undistort (denominator)
-        distortion = stringToList(thisCam['KeyFrames']['KeyFrame']['@VICON_RADIAL2'])
-        cameraParameters['distortion'] = np.expand_dims(np.array(distortion[3:6] + [0,0]),axis=0)
-
-        # intrinsic matrix 
-        principalPoint = stringToList(thisCam['KeyFrames']['KeyFrame']['@PRINCIPAL_POINT'])
-        focalLength = stringToList(thisCam['KeyFrames']['KeyFrame']['@FOCAL_LENGTH'])[0]
-        cameraParameters['intrinsicMat'] = np.diag(np.array([focalLength, focalLength, 1]))
-        cameraParameters['intrinsicMat'][0,2] = 1920-principalPoint[0]
-        cameraParameters['intrinsicMat'][1,2] = 1080-principalPoint[1]
-        
-        # rotation 
-        quat = stringToList(thisCam['KeyFrames']['KeyFrame']['@ORIENTATION'])
-        cameraParameters['rotation'] = spTransform.Rotation.as_matrix((spTransform.Rotation.from_quat(quat)))
-        R_camera_to_world = cameraParameters['rotation']
-        
-        # rotation_EulerAngles 3x1
-        cameraParameters['rotation_EulerAngles'] = np.array(cv2.Rodrigues(cameraParameters['rotation'])[0])
-        
-        # translation. Vicon defines this as translation from origin to camera in world,
-        # our camera model wants it expressed in camera to origin in camera
-        translation = stringToList(thisCam['KeyFrames']['KeyFrame']['@POSITION'])
-        translation = np.expand_dims(np.array(translation),axis=1)
-        cameraParameters['translation'] = -np.matmul(R_camera_to_world,translation)
-
+        # first check if we have manually saved camera parameters
+        manualPath = os.path.join(os.path.dirname(xcpPath),'manualCameraParameters_' + camID + '.pickle')
+        if os.path.exists(manualPath):
+            cameraParameters = utils.loadCameraParameters(manualPath)
+            print('Loaded manual calibration for Vicon camera ' + camID + ".")
+            
+        else: # pull from Vicon xcp          
+            # Parameters defined here https://www.researchgate.net/publication/347567947_Towards_end-to-end_training_of_proposal-based_3D_human_pose_estimation
+            thisCam = next(cam for cam in xmlDict['Cameras']['Camera'] if cam["@DEVICEID"] == camID)
+            # image size
+            sensorSize = stringToList(thisCam['@SENSOR_SIZE'])
+            cameraParameters['imageSize'] = np.expand_dims(np.array((sensorSize)),axis=1)
+            
+            # vicon only uses 3 distortion parameters for r^2, r^4, r^6. Set the final two to 0 for opencv undistort (denominator)
+            distortion = stringToList(thisCam['KeyFrames']['KeyFrame']['@VICON_RADIAL2'])
+            cameraParameters['distortion'] = np.expand_dims(np.array(distortion[3:6] + [0,0]),axis=0)
+    
+            # intrinsic matrix 
+            principalPoint = stringToList(thisCam['KeyFrames']['KeyFrame']['@PRINCIPAL_POINT'])
+            focalLength = stringToList(thisCam['KeyFrames']['KeyFrame']['@FOCAL_LENGTH'])[0]
+            cameraParameters['intrinsicMat'] = np.diag(np.array([focalLength, focalLength, 1]))
+            cameraParameters['intrinsicMat'][0,2] = 1920-principalPoint[0]
+            cameraParameters['intrinsicMat'][1,2] = 1080-principalPoint[1]
+            
+            # rotation 
+            quat = stringToList(thisCam['KeyFrames']['KeyFrame']['@ORIENTATION'])
+            cameraParameters['rotation'] = spTransform.Rotation.as_matrix((spTransform.Rotation.from_quat(quat)))
+            R_camera_to_world = cameraParameters['rotation']
+            
+            # rotation_EulerAngles 3x1
+            cameraParameters['rotation_EulerAngles'] = np.array(cv2.Rodrigues(cameraParameters['rotation'])[0])
+            
+            # translation. Vicon defines this as translation from origin to camera in world,
+            # our camera model wants it expressed in camera to origin in camera
+            translation = stringToList(thisCam['KeyFrames']['KeyFrame']['@POSITION'])
+            translation = np.expand_dims(np.array(translation),axis=1)
+            cameraParameters['translation'] = -np.matmul(R_camera_to_world,translation)
         
         if saveBasePath is not None:
             utilsChecker.saveCameraParameters(os.path.join(saveBasePath,'Cam' + str(i),
@@ -241,6 +250,8 @@ def pickPointsFromImage(imagePath,nPts):
         nonlocal refPts
         if event == cv2.EVENT_LBUTTONDOWN:
             refPts.append((x,y))
+        if event == cv2.EVENT_MOUSEMOVE:
+            win32api.SetCursor(win32api.LoadCursor(0, win32con.IDC_ARROW))
     # load the image, clone it, and setup the mouse callback function
     refPts = []
 
@@ -259,6 +270,8 @@ def pickPointsFromImage(imagePath,nPts):
         
         if len(refPts) > ptLength:
             image = cv2.circle(image, refPts[-1], radius=2, color=(0, 255, 0), thickness=-1)
+            if len(refPts)>1:
+                image = cv2.line(image,refPts[-2],refPts[-1], color=(0, 255, 0), thickness=1)
         
         if key == ord("q") or len(refPts) >nPts:
             refPts.pop(-1) # last click is just to exit
@@ -267,7 +280,7 @@ def pickPointsFromImage(imagePath,nPts):
         
     # get image height and subtract y
     ht = image.shape[1]
-    refPts = [[rP[0],ht - rP[1]] for rP in refPts]
+    # refPts = [[rP[0],ht - rP[1]] for rP in refPts]
     
     return refPts
 
@@ -313,31 +326,35 @@ def sampleGrid(imagePoints, gridSize = (5,3),imagePath = None,gridDims = [(-40,4
     
     points2d = np.vstack((vec0,vec1,vec2))
 
-        
-
-    test =1 
-
-
-
-
-    
-
-
-
-
-
-
-
-
-
-    
-
-
-
-
     return points2d, points3d
 
+def manualExtrinsicCalibration(videoPath,gridDims3d,cameraParametersPath,
+                               savePathList):
 
+    # pop an image
+    utilsChecker.video2Images(videoPath, nImages=2, tSingleImage=.1, 
+                              filePrefix='output', outputFolder='default')
+    
+    imagePath = os.path.join(os.path.dirname(videoPath),'output0.png')
+    
+    picked2dPoints = pickPointsFromImage(imagePath,6)
+    
+    points2d, points3d = sampleGrid(picked2dPoints, gridDims = gridDims3d)
+    
+    # load in some camera params for intrinsics
+    CameraParams = utils.loadCameraParameters(cameraParametersPath)
+    
+    # pass to calibration function
+    manualCameraParams = utilsChecker.calcExtrinsics(imagePath, CameraParams, None,
+                                                   points2d=points2d,points3d=points3d)
+    
+    # save these custom extrinsics to both camera folder and Calibration folder
+    
+    for savePath in savePathList:
+        utilsChecker.saveCameraParameters(savePath,manualCameraParams)
+        print('Camera parameters saved to ' + savePath)
+        
+    return manualCameraParams
 # %% 
 def getTrialNames(path):
     # get all the folder names in the path
