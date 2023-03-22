@@ -46,6 +46,7 @@ dataBaseDir = 'C:\SharedGdrive/HPL_MASPL/'
 overwriteRestructuring = True
 deleteFolders = False
 copyVideos = False # true to copy into new structure
+saveCameraVolumeAnimation = False
 
 
 # The dataset includes 2 sessions per subject.The first session includes
@@ -98,6 +99,7 @@ for subject in subjects:
                 pass
         utilsMocap.moveFilesToOpenCapStructure(pathRawVideos, outPath, 
                                                camList, calibration=True,
+                                               saveAnimation=saveCameraVolumeAnimation,
                                                copyVideos=copyVideos)
 
     # Save metadata if not already done
@@ -136,12 +138,12 @@ def process_trial(trial_name=None, session_name=None, isDocker=False,
 # Hard-coded way through for now
 
 sessionName = 'S1003'
-cam2Use = ['Cam' + str(i) for i in [0, 1, 2]]
-markerDataFolderNameSuffix = '3-cameras-012'
+cam2Use = ['Cam' + str(i) for i in [0, 1, 2,3, 4]]
+markerDataFolderNameSuffix = '5-camera'
 dataDir = 'C:/SharedGdrive/HPL_MASPL/OpenCap'
 
 # specify trialNames
-trialNames = ['DLSQUATS','DROPLANDING_03']
+trialNames = ['DROPLANDING_01']
 trialNames = [sessionName + '_' + t for t in trialNames]
 
 # get all

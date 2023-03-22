@@ -33,7 +33,8 @@ import utils
 import utilsChecker
 
 # %% 
-def moveFilesToOpenCapStructure(inputDirectory,outputDirectory,camList=None,calibration=False,copyVideos=True): 
+def moveFilesToOpenCapStructure(inputDirectory,outputDirectory,camList=None,
+                                saveAnimation=False,calibration=False,copyVideos=True): 
     # find all avi files of a certain name in a directory
     files = glob.glob(os.path.join(inputDirectory, '*.avi'))
     trialNames = [os.path.split(string[:string.find('.')])[1] for string in files]
@@ -78,8 +79,7 @@ def moveFilesToOpenCapStructure(inputDirectory,outputDirectory,camList=None,cali
         # Convert calibrations and save
         xcpToCameraParameters(outCalibrationPath,camList,
                               saveBasePath=os.path.join(outputDirectory,'Videos'),
-                              visualizeCameras=True)
-        
+                              visualizeCameras=True,saveAnimation=saveAnimation)        
                
     return
 
@@ -93,6 +93,7 @@ def createMetadata(outputDirectory, height=1.7, mass=75, subjectID='default'):
     sessionMetadata["subjectID"] = subjectID
     sessionMetadata["mass_kg"] = float(mass)
     sessionMetadata["height_m"] = float(height)
+    sessionMetadata["openSimModel"] = 'LaiArnoldModified2017_poly_withArms_weldHand_ACL'  
     
     sessionYamlPath = os.path.join(outputDirectory,'sessionMetadata.yaml')
     with open(sessionYamlPath, 'w') as file:
@@ -101,7 +102,7 @@ def createMetadata(outputDirectory, height=1.7, mass=75, subjectID='default'):
     return
 
 # %% 
-def xcpToCameraParameters(xcpPath,cameraIDs='Vue',saveBasePath=None,visualizeCameras=False):
+def xcpToCameraParameters(xcpPath,cameraIDs='Vue',saveBasePath=None,visualizeCameras=False,saveAnimation=False):
     # CameraIDs is a dict of ids, or a type of camera, which will use all cameras
     # of this type.
     
@@ -175,13 +176,17 @@ def xcpToCameraParameters(xcpPath,cameraIDs='Vue',saveBasePath=None,visualizeCam
         cameraParametersAll.append(cameraParameters)
     
     if visualizeCameras:
-        plotCameras(cameraParametersAll)
+        if saveAnimation:
+            saveAnimationPath = os.path.join(os.path.dirname(xcpPath),'cameraVolume.gif')
+        else:
+            saveAnimationPath=None
+        plotCameras(cameraParametersAll,saveAnimationPath = saveAnimationPath)
 
     return cameraParametersAll  
 
 # %% 3D plot of cameras in the world
 
-def plotCameras(CameraParameters):
+def plotCameras(CameraParameters,saveAnimationPath):
 
     class Arrow3D(FancyArrowPatch):
         def __init__(self, xs, ys, zs, *args, **kwargs):
@@ -213,6 +218,7 @@ def plotCameras(CameraParameters):
 
 
     fig = plt.figure()
+    plt.figure(figsize=(10,6))
     ax1 = fig.add_subplot(111, projection='3d')
     arrow_prop_dict = dict(mutation_scale=20, arrowstyle='->', shrinkA=0, shrinkB=0)
 
@@ -232,11 +238,36 @@ def plotCameras(CameraParameters):
         plotRt(R, t, ax1, arrow_prop_dict)
         
         # add text with Cam # and coordinates of t in world frame rounded to one decimal
-        ax1.text(t[0], t[1], t[2], 'Cam' + str(i) + ' ' + str(np.round(t,1)))
+        ax1.text(t[0], t[1], t[2], 'Cam' + str(i))           
 
     ax1.axes.set_xlim3d(left=-5, right=5) 
     ax1.axes.set_ylim3d(bottom=-5, top=5) 
     ax1.axes.set_zlim3d(bottom=-5, top=5)
+
+    if saveAnimationPath is not None:    
+        print('Saving animation of camera setup. This is slow, disable if not needed.')
+        # animate rotation of 3d projection
+        def animate(i):
+            ax1.view_init(elev=15, azim=i*4)
+            return fig,
+    
+        # Init only required for blitting to give a clean slate.
+        def init():
+            ax1.view_init(elev=15, azim=0)
+            return fig,
+    
+        # Animate
+        anim = mpl.animation.FuncAnimation(fig, animate,
+                                       frames=90, interval=5, blit=False)  
+        
+        # writing camera setup video
+        
+        writervideo = mpl.animation.FFMpegWriter(fps=10)
+        anim.save(saveAnimationPath, writer=writervideo)
+        
+        plt.close()
+        
+        return
 
     plt.show()
     
