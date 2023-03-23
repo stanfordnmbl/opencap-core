@@ -55,7 +55,7 @@ API_TOKEN = getToken()
 # Enter the identifier(s) of the session(s) you want to reprocess. This is a list of one
 # or more session identifiers. The identifier is found as the 36-character string at the
 # end of the session url: app.opencap.ai/session/<session_id>
-session_ids = ['ea0cfa3f-58bc-4ead-a3bc-12e17a7d8884']
+session_ids = ['30eb2791-dd65-4f6b-af62-b793ee2aec3d']
 
 poseDetector = 'OpenPose'
 
