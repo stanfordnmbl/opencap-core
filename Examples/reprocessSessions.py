@@ -110,3 +110,5 @@ deleteLocalFolder = False
 batchReprocess(session_ids,calib_id,static_id,dynamic_ids,
                resolutionPoseDetection=resolutionPoseDetection,
                deleteLocalFolder=deleteLocalFolder,poseDetector=poseDetector)
+
+test = 1
