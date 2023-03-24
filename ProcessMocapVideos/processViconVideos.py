@@ -57,7 +57,7 @@ sessionNames = ['1003']
 
 # TODO -> do this systematically
 height = 1.75
-mass = 65.8 
+mass = 63.2 
 subjectID = '1003'
 
 # We only support OpenPose on Windows.
@@ -138,8 +138,8 @@ def process_trial(trial_name=None, session_name=None, isDocker=False,
 # Hard-coded way through for now
 
 sessionName = 'S1003'
-cam2Use = ['Cam' + str(i) for i in [0, 1, 4]]
-markerDataFolderNameSuffix = '3-cameras-014'
+cam2Use = ['Cam' + str(i) for i in [0, 1]]
+markerDataFolderNameSuffix = '2-cameras-01'
 dataDir = 'C:/SharedGdrive/HPL_MASPL/OpenCap'
 
 
@@ -148,16 +148,15 @@ dataDir = 'C:/SharedGdrive/HPL_MASPL/OpenCap'
 # trialNames = utilsMocap.getTrialNames(os.path.join(dataDir, 'Data', sessionName, 'Videos', 'Cam0', 'InputMedia'))
 
 # specify trialNames
-trialNames = ['SLSQUATS_R','SLSQUATS_L']
-trialNames = []
+trialNames = ['SLSQUATS_R']
 trialNames = [sessionName + '_' + t for t in trialNames]
 
 
 # for Scaling
 scaleModel = [True]
 staticTrial = [sessionName + '_DLSQUATS']
-# scaleModel = []
-# staticTrial = []
+scaleModel = []
+staticTrial = []
 trials = staticTrial + trialNames
 scaleModel = scaleModel + [False for i in range(len(trialNames))]
 

@@ -177,7 +177,7 @@ def xcpToCameraParameters(xcpPath,cameraIDs='Vue',saveBasePath=None,visualizeCam
     
     if visualizeCameras:
         if saveAnimation:
-            saveAnimationPath = os.path.join(os.path.dirname(xcpPath),'cameraVolume.gif')
+            saveAnimationPath = os.path.join(os.path.dirname(xcpPath),'cameraVolume.mp4')
         else:
             saveAnimationPath=None
         plotCameras(cameraParametersAll,saveAnimationPath = saveAnimationPath)
