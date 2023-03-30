@@ -138,18 +138,21 @@ def process_trial(trial_name=None, session_name=None, isDocker=False,
 # Hard-coded way through for now
 
 sessionName = 'S1003'
-cam2Use = ['Cam' + str(i) for i in [0, 1]]
-markerDataFolderNameSuffix = '2-cameras-01'
+cam2Use = ['Cam' + str(i) for i in [2,3,4]]
+markerDataFolderNameSuffix = '3-cameras-234'
 dataDir = 'C:/SharedGdrive/HPL_MASPL/OpenCap'
 
 
 
 # get all
-# trialNames = utilsMocap.getTrialNames(os.path.join(dataDir, 'Data', sessionName, 'Videos', 'Cam0', 'InputMedia'))
+trialNames = utilsMocap.getTrialNames(os.path.join(dataDir, 'Data', sessionName, 'Videos', 'Cam0', 'InputMedia'))
+trialTypes = ['JOG','CROSS','SLHOP','TRIPLE']
+trialNames = [tName for tName in trialNames if any(tType in tName for tType in trialTypes)]
+
 
 # specify trialNames
-trialNames = ['SLSQUATS_R']
-trialNames = [sessionName + '_' + t for t in trialNames]
+# trialNames = ['SLSQUATS_R']
+# trialNames = [sessionName + '_' + t for t in trialNames]
 
 
 # for Scaling
