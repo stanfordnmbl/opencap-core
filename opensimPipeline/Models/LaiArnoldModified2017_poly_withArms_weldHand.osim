@@ -23,12 +23,7 @@
 		<!--Credits (e.g., model author names) associated with the model.-->
 		<credits>Rajagopal et al. (2016), Lai et al. (2017), Uhlrich et al. (2022)</credits>
 		<!--Publications and references associated with the model.-->
-		<publications>Rajagopal, A., Dembia, C.L., DeMers, M.S., Delp, D.D., Hicks, J.L., Delp, S.L. (2016) 
-		Full-body musculoskeletal model for muscle-driven simulation of human gait. IEEE Transactions on Biomedical Engineering.</publications>
-		<publications>Lai, A.K.M., Arnold, A.S., Wakeling, J.M. (2017) 
-		Why are antagonist muscles co-activated in my simulation? A musculoskeletal model for analysing human locomotor tasks. Annals of Biomedical Engineering</publications>
-		<publications>Uhlrich, S.D., Jackson, R.W., Seth, A., Kolesar, J.A., Delp, S.L. (2022) 
-		Muscle coordination retraining inspired by musculoskeletal simulations reduces knee contact force. Scientific Reports</publications>
+		<publications>Rajagopal, A., Dembia, C.L., DeMers, M.S., Delp, D.D., Hicks, J.L., Delp, S.L. (2016) Full-body musculoskeletal model for muscle-driven simulation of human gait. IEEE Transactions on Biomedical Engineering.</publications>
 		<!--Units for all lengths.-->
 		<length_units>meters</length_units>
 		<!--Units for all forces.-->
@@ -3177,7 +3172,7 @@
 							<!--The speed value of this coordinate before any value has been set. Rotational coordinate value is in rad/s and Translational in m/s.-->
 							<default_speed_value>0</default_speed_value>
 							<!--The minimum and maximum values that the coordinate can range between. Rotational coordinate range in radians and Translational in meters.-->
-							<range>-6.283185307179586 6.283185307179586</range>
+							<range>-6.2831853071795862 6.2831853071795862</range>
 							<!--Flag indicating whether or not the values of the coordinates should be limited to the range, above.-->
 							<clamped>true</clamped>
 							<!--Flag indicating whether or not the values of the coordinates should be constrained to the current (e.g. default) value, above.-->
@@ -3568,7 +3563,7 @@
 							<!--Transform function of the generalized coordinates used to        represent the amount of displacement along a specified axis.-->
 							<PolynomialFunction name="function">
 								<!--Coefficients of a polynomial function, from highest to lowest order.Polynomial order is n-1, where n is the number of coefficients.-->
-								<coefficients>0.010832094539863    -0.025218325501241    -0.032847810398852    0.079100011967027    -1.473252350900463e-08</coefficients>
+								<coefficients>0.010832094539863 -0.025218325501241 -0.032847810398851998 0.079100011967026998 -1.4732523509004629e-08</coefficients>
 							</PolynomialFunction>
 						</TransformAxis>
 						<TransformAxis name="rotation3">
@@ -3579,7 +3574,7 @@
 							<!--Transform function of the generalized coordinates used to        represent the amount of displacement along a specified axis.-->
 							<PolynomialFunction name="function">
 								<!--Coefficients of a polynomial function, from highest to lowest order.Polynomial order is n-1, where n is the number of coefficients.-->
-								<coefficients>0.025165762727423    -0.169480051390540    0.369499348688249    -4.430358308836305e-08</coefficients>
+								<coefficients>0.025165762727423002 -0.16948005139054001 0.36949934868824902 -4.4303583088363053e-08</coefficients>
 							</PolynomialFunction>
 						</TransformAxis>
 						<!--3 Axes for translations are listed next.-->
@@ -3591,7 +3586,7 @@
 							<!--Transform function of the generalized coordinates used to        represent the amount of displacement along a specified axis.-->
 							<PolynomialFunction name="function">
 								<!--Coefficients of a polynomial function, from highest to lowest order.Polynomial order is n-1, where n is the number of coefficients.-->
-								<coefficients>1.590447878850381e-04    -0.001015149915669    0.001817510974968    2.641426645199230e-05    -7.746563532471892e-07</coefficients>
+								<coefficients>0.00015904478788503811 -0.001015149915669 0.001817510974968 2.6414266451992301e-05 -7.7465635324718924e-07</coefficients>
 							</PolynomialFunction>
 						</TransformAxis>
 						<TransformAxis name="translation2">
@@ -3602,7 +3597,7 @@
 							<!--Transform function of the generalized coordinates used to        represent the amount of displacement along a specified axis.-->
 							<PolynomialFunction name="function">
 								<!--Coefficients of a polynomial function, from highest to lowest order.Polynomial order is n-1, where n is the number of coefficients.-->
-								<coefficients>-5.796878052338684e-04    0.005079765745626    -0.011442375726364    0.003936908668844    -2.516350383213525e-05</coefficients>
+								<coefficients>-0.00057968780523386836 0.0050797657456260002 -0.011442375726364 0.0039369086688440004 -2.5163503832135249e-05</coefficients>
 							</PolynomialFunction>
 						</TransformAxis>
 						<TransformAxis name="translation3">
@@ -3613,7 +3608,7 @@
 							<!--Transform function of the generalized coordinates used to        represent the amount of displacement along a specified axis.-->
 							<PolynomialFunction name="function">
 								<!--Coefficients of a polynomial function, from highest to lowest order.Polynomial order is n-1, where n is the number of coefficients.-->
-								<coefficients>0.001208086889206    -0.004453611224706    6.116494072981739e-04    0.006265429606387    -1.461912533723326e-05</coefficients>
+								<coefficients>0.001208086889206 -0.004453611224706 0.00061164940729817395 0.006265429606387 -1.461912533723326e-05</coefficients>
 							</PolynomialFunction>
 						</TransformAxis>
 					</SpatialTransform>
@@ -3873,7 +3868,7 @@
 							<!--The speed value of this coordinate before any value has been set. Rotational coordinate value is in rad/s and Translational in m/s.-->
 							<default_speed_value>0</default_speed_value>
 							<!--The minimum and maximum values that the coordinate can range between. Rotational coordinate range in radians and Translational in meters.-->
-							<range>-0.7853981633974483 0.52359878000000004</range>
+							<range>-0.78539816339744828 0.52359878000000004</range>
 							<!--Flag indicating whether or not the values of the coordinates should be limited to the range, above.-->
 							<clamped>true</clamped>
 							<!--Flag indicating whether or not the values of the coordinates should be constrained to the current (e.g. default) value, above.-->
@@ -4151,7 +4146,7 @@
 							<!--Transform function of the generalized coordinates used to        represent the amount of displacement along a specified axis.-->
 							<PolynomialFunction name="function">
 								<!--Coefficients of a polynomial function, from highest to lowest order.Polynomial order is n-1, where n is the number of coefficients.-->
-								<coefficients>0.010832094539863    -0.025218325501241    -0.032847810398852    0.079100011967027    -1.473252350900463e-08</coefficients>
+								<coefficients>0.010832094539863 -0.025218325501241 -0.032847810398851998 0.079100011967026998 -1.4732523509004629e-08</coefficients>
 							</PolynomialFunction>
 						</TransformAxis>
 						<TransformAxis name="rotation3">
@@ -4162,7 +4157,7 @@
 							<!--Transform function of the generalized coordinates used to        represent the amount of displacement along a specified axis.-->
 							<PolynomialFunction name="function">
 								<!--Coefficients of a polynomial function, from highest to lowest order.Polynomial order is n-1, where n is the number of coefficients.-->
-								<coefficients>-0.025165762727423    0.169480051390540    -0.369499348688249    4.430358308836305e-08</coefficients>
+								<coefficients>-0.025165762727423002 0.16948005139054001 -0.36949934868824902 4.4303583088363053e-08</coefficients>
 							</PolynomialFunction>
 						</TransformAxis>
 						<!--3 Axes for translations are listed next.-->
@@ -4174,7 +4169,7 @@
 							<!--Transform function of the generalized coordinates used to        represent the amount of displacement along a specified axis.-->
 							<PolynomialFunction name="function">
 								<!--Coefficients of a polynomial function, from highest to lowest order.Polynomial order is n-1, where n is the number of coefficients.-->
-								<coefficients>1.590447878850381e-04    -0.001015149915669    0.001817510974968    2.641426645199230e-05    -7.746563532471892e-07</coefficients>
+								<coefficients>0.00015904478788503811 -0.001015149915669 0.001817510974968 2.6414266451992301e-05 -7.7465635324718924e-07</coefficients>
 							</PolynomialFunction>
 						</TransformAxis>
 						<TransformAxis name="translation2">
@@ -4185,7 +4180,7 @@
 							<!--Transform function of the generalized coordinates used to        represent the amount of displacement along a specified axis.-->
 							<PolynomialFunction name="function">
 								<!--Coefficients of a polynomial function, from highest to lowest order.Polynomial order is n-1, where n is the number of coefficients.-->
-								<coefficients>-5.796878052338684e-04    0.005079765745626    -0.011442375726364    0.003936908668844    -2.516350383213525e-05</coefficients>
+								<coefficients>-0.00057968780523386836 0.0050797657456260002 -0.011442375726364 0.0039369086688440004 -2.5163503832135249e-05</coefficients>
 							</PolynomialFunction>
 						</TransformAxis>
 						<TransformAxis name="translation3">
@@ -4196,7 +4191,7 @@
 							<!--Transform function of the generalized coordinates used to        represent the amount of displacement along a specified axis.-->
 							<PolynomialFunction name="function">
 								<!--Coefficients of a polynomial function, from highest to lowest order.Polynomial order is n-1, where n is the number of coefficients.-->
-								<coefficients>-0.001208086889206    0.004453611224706    -6.116494072981739e-04    -0.006265429606387    1.461912533723326e-05</coefficients>
+								<coefficients>-0.001208086889206 0.004453611224706 -0.00061164940729817395 -0.006265429606387 1.461912533723326e-05</coefficients>
 							</PolynomialFunction>
 						</TransformAxis>
 					</SpatialTransform>
@@ -4456,7 +4451,7 @@
 							<!--The speed value of this coordinate before any value has been set. Rotational coordinate value is in rad/s and Translational in m/s.-->
 							<default_speed_value>0</default_speed_value>
 							<!--The minimum and maximum values that the coordinate can range between. Rotational coordinate range in radians and Translational in meters.-->
-							<range>-0.7853981633974483 0.52359878000000004</range>
+							<range>-0.78539816339744828 0.52359878000000004</range>
 							<!--Flag indicating whether or not the values of the coordinates should be limited to the range, above.-->
 							<clamped>true</clamped>
 							<!--Flag indicating whether or not the values of the coordinates should be constrained to the current (e.g. default) value, above.-->
@@ -4616,161 +4611,6 @@
 						<TransformAxis name="rotation3">
 							<!--Names of the coordinates that serve as the independent variables         of the transform function.-->
 							<coordinates>lumbar_rotation</coordinates>
-							<!--Rotation or translation axis for the transform.-->
-							<axis>0 1 0</axis>
-							<!--Transform function of the generalized coordinates used to        represent the amount of displacement along a specified axis.-->
-							<LinearFunction name="function">
-								<coefficients> 1 0</coefficients>
-							</LinearFunction>
-						</TransformAxis>
-						<!--3 Axes for translations are listed next.-->
-						<TransformAxis name="translation1">
-							<!--Names of the coordinates that serve as the independent variables         of the transform function.-->
-							<coordinates></coordinates>
-							<!--Rotation or translation axis for the transform.-->
-							<axis>1 0 0</axis>
-							<!--Transform function of the generalized coordinates used to        represent the amount of displacement along a specified axis.-->
-							<Constant name="function">
-								<value>0</value>
-							</Constant>
-						</TransformAxis>
-						<TransformAxis name="translation2">
-							<!--Names of the coordinates that serve as the independent variables         of the transform function.-->
-							<coordinates></coordinates>
-							<!--Rotation or translation axis for the transform.-->
-							<axis>0 1 0</axis>
-							<!--Transform function of the generalized coordinates used to        represent the amount of displacement along a specified axis.-->
-							<Constant name="function">
-								<value>0</value>
-							</Constant>
-						</TransformAxis>
-						<TransformAxis name="translation3">
-							<!--Names of the coordinates that serve as the independent variables         of the transform function.-->
-							<coordinates></coordinates>
-							<!--Rotation or translation axis for the transform.-->
-							<axis>0 0 1</axis>
-							<!--Transform function of the generalized coordinates used to        represent the amount of displacement along a specified axis.-->
-							<Constant name="function">
-								<value>0</value>
-							</Constant>
-						</TransformAxis>
-					</SpatialTransform>
-				</CustomJoint>
-				<CustomJoint name="acromial_r">
-					<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The parent frame for the joint.).-->
-					<socket_parent_frame>torso_offset</socket_parent_frame>
-					<!--Path to a Component that satisfies the Socket 'child_frame' of type PhysicalFrame (description: The child frame for the joint.).-->
-					<socket_child_frame>humerus_r_offset</socket_child_frame>
-					<!--List containing the generalized coordinates (q's) that parameterize this joint.-->
-					<coordinates>
-						<Coordinate name="arm_flex_r">
-							<!--The value of this coordinate before any value has been set. Rotational coordinate value is in radians and Translational in meters.-->
-							<default_value>0</default_value>
-							<!--The speed value of this coordinate before any value has been set. Rotational coordinate value is in rad/s and Translational in m/s.-->
-							<default_speed_value>0</default_speed_value>
-							<!--The minimum and maximum values that the coordinate can range between. Rotational coordinate range in radians and Translational in meters.-->
-							<range>-10 10</range>
-							<!--Flag indicating whether or not the values of the coordinates should be limited to the range, above.-->
-							<clamped>true</clamped>
-							<!--Flag indicating whether or not the values of the coordinates should be constrained to the current (e.g. default) value, above.-->
-							<locked>false</locked>
-							<!--If specified, the coordinate can be prescribed by a function of time. It can be any OpenSim Function with valid second order derivatives.-->
-							<prescribed_function />
-							<!--Flag indicating whether or not the values of the coordinates should be prescribed according to the function above. It is ignored if the no prescribed function is specified.-->
-							<prescribed>false</prescribed>
-						</Coordinate>
-						<Coordinate name="arm_add_r">
-							<!--The value of this coordinate before any value has been set. Rotational coordinate value is in radians and Translational in meters.-->
-							<default_value>0</default_value>
-							<!--The speed value of this coordinate before any value has been set. Rotational coordinate value is in rad/s and Translational in m/s.-->
-							<default_speed_value>0</default_speed_value>
-							<!--The minimum and maximum values that the coordinate can range between. Rotational coordinate range in radians and Translational in meters.-->
-							<range>-10 10</range>
-							<!--Flag indicating whether or not the values of the coordinates should be limited to the range, above.-->
-							<clamped>true</clamped>
-							<!--Flag indicating whether or not the values of the coordinates should be constrained to the current (e.g. default) value, above.-->
-							<locked>false</locked>
-							<!--If specified, the coordinate can be prescribed by a function of time. It can be any OpenSim Function with valid second order derivatives.-->
-							<prescribed_function />
-							<!--Flag indicating whether or not the values of the coordinates should be prescribed according to the function above. It is ignored if the no prescribed function is specified.-->
-							<prescribed>false</prescribed>
-						</Coordinate>
-						<Coordinate name="arm_rot_r">
-							<!--The value of this coordinate before any value has been set. Rotational coordinate value is in radians and Translational in meters.-->
-							<default_value>0</default_value>
-							<!--The speed value of this coordinate before any value has been set. Rotational coordinate value is in rad/s and Translational in m/s.-->
-							<default_speed_value>0</default_speed_value>
-							<!--The minimum and maximum values that the coordinate can range between. Rotational coordinate range in radians and Translational in meters.-->
-							<range>-10 10</range>
-							<!--Flag indicating whether or not the values of the coordinates should be limited to the range, above.-->
-							<clamped>true</clamped>
-							<!--Flag indicating whether or not the values of the coordinates should be constrained to the current (e.g. default) value, above.-->
-							<locked>false</locked>
-							<!--If specified, the coordinate can be prescribed by a function of time. It can be any OpenSim Function with valid second order derivatives.-->
-							<prescribed_function />
-							<!--Flag indicating whether or not the values of the coordinates should be prescribed according to the function above. It is ignored if the no prescribed function is specified.-->
-							<prescribed>false</prescribed>
-						</Coordinate>
-					</coordinates>
-					<!--Physical offset frames owned by the Joint that are typically used to satisfy the owning Joint's parent and child frame connections (sockets). PhysicalOffsetFrames are often used to describe the fixed transformation from a Body's origin to another location of interest on the Body (e.g., the joint center). When the joint is deleted, so are the PhysicalOffsetFrame components in this list.-->
-					<frames>
-						<PhysicalOffsetFrame name="torso_offset">
-							<!--The geometry used to display the axes of this Frame.-->
-							<FrameGeometry name="frame_geometry">
-								<!--Path to a Component that satisfies the Socket 'frame' of type Frame.-->
-								<socket_frame>..</socket_frame>
-								<!--Scale factors in X, Y, Z directions respectively.-->
-								<scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
-							</FrameGeometry>
-							<!--Path to a Component that satisfies the Socket 'parent' of type C (description: The parent frame to this frame.).-->
-							<socket_parent>/bodyset/torso</socket_parent>
-							<!--Translational offset (in meters) of this frame's origin from the parent frame's origin, expressed in the parent frame.-->
-							<translation>0.0031549999999999998 0.3715 0.17000000000000001</translation>
-							<!--Orientation offset (in radians) of this frame in its parent frame, expressed as a frame-fixed x-y-z rotation sequence.-->
-							<orientation>0 0 0</orientation>
-						</PhysicalOffsetFrame>
-						<PhysicalOffsetFrame name="humerus_r_offset">
-							<!--The geometry used to display the axes of this Frame.-->
-							<FrameGeometry name="frame_geometry">
-								<!--Path to a Component that satisfies the Socket 'frame' of type Frame.-->
-								<socket_frame>..</socket_frame>
-								<!--Scale factors in X, Y, Z directions respectively.-->
-								<scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
-							</FrameGeometry>
-							<!--Path to a Component that satisfies the Socket 'parent' of type C (description: The parent frame to this frame.).-->
-							<socket_parent>/bodyset/humerus_r</socket_parent>
-							<!--Translational offset (in meters) of this frame's origin from the parent frame's origin, expressed in the parent frame.-->
-							<translation>0 0 0</translation>
-							<!--Orientation offset (in radians) of this frame in its parent frame, expressed as a frame-fixed x-y-z rotation sequence.-->
-							<orientation>0 0 0</orientation>
-						</PhysicalOffsetFrame>
-					</frames>
-					<!--Defines how the child body moves with respect to the parent as a function of the generalized coordinates.-->
-					<SpatialTransform>
-						<!--3 Axes for rotations are listed first.-->
-						<TransformAxis name="rotation1">
-							<!--Names of the coordinates that serve as the independent variables         of the transform function.-->
-							<coordinates>arm_flex_r</coordinates>
-							<!--Rotation or translation axis for the transform.-->
-							<axis>0 0 1</axis>
-							<!--Transform function of the generalized coordinates used to        represent the amount of displacement along a specified axis.-->
-							<LinearFunction name="function">
-								<coefficients> 1 0</coefficients>
-							</LinearFunction>
-						</TransformAxis>
-						<TransformAxis name="rotation2">
-							<!--Names of the coordinates that serve as the independent variables         of the transform function.-->
-							<coordinates>arm_add_r</coordinates>
-							<!--Rotation or translation axis for the transform.-->
-							<axis>1 0 0</axis>
-							<!--Transform function of the generalized coordinates used to        represent the amount of displacement along a specified axis.-->
-							<LinearFunction name="function">
-								<coefficients> 1 0</coefficients>
-							</LinearFunction>
-						</TransformAxis>
-						<TransformAxis name="rotation3">
-							<!--Names of the coordinates that serve as the independent variables         of the transform function.-->
-							<coordinates>arm_rot_r</coordinates>
 							<!--Rotation or translation axis for the transform.-->
 							<axis>0 1 0</axis>
 							<!--Transform function of the generalized coordinates used to        represent the amount of displacement along a specified axis.-->
@@ -5121,6 +4961,161 @@
 						</TransformAxis>
 					</SpatialTransform>
 				</CustomJoint>
+				<CustomJoint name="glenohumeral_r">
+					<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The parent frame for the joint.).-->
+					<socket_parent_frame>torso_offset</socket_parent_frame>
+					<!--Path to a Component that satisfies the Socket 'child_frame' of type PhysicalFrame (description: The child frame for the joint.).-->
+					<socket_child_frame>humerus_offset</socket_child_frame>
+					<!--List containing the generalized coordinates (q's) that parameterize this joint.-->
+					<coordinates>
+						<Coordinate name="shoulder_elev_r">
+							<!--The value of this coordinate before any value has been set. Rotational coordinate value is in radians and Translational in meters.-->
+							<default_value>0.17453292518999999</default_value>
+							<!--The speed value of this coordinate before any value has been set. Rotational coordinate value is in rad/s and Translational in m/s.-->
+							<default_speed_value>0</default_speed_value>
+							<!--The minimum and maximum values that the coordinate can range between. Rotational coordinate range in radians and Translational in meters.-->
+							<range>-3.1400000000000001 3.1400000000000001</range>
+							<!--Flag indicating whether or not the values of the coordinates should be limited to the range, above.-->
+							<clamped>false</clamped>
+							<!--Flag indicating whether or not the values of the coordinates should be constrained to the current (e.g. default) value, above.-->
+							<locked>false</locked>
+							<!--If specified, the coordinate can be prescribed by a function of time. It can be any OpenSim Function with valid second order derivatives.-->
+							<prescribed_function />
+							<!--Flag indicating whether or not the values of the coordinates should be prescribed according to the function above. It is ignored if the no prescribed function is specified.-->
+							<prescribed>false</prescribed>
+						</Coordinate>
+						<Coordinate name="plane_elev_r">
+							<!--The value of this coordinate before any value has been set. Rotational coordinate value is in radians and Translational in meters.-->
+							<default_value>0</default_value>
+							<!--The speed value of this coordinate before any value has been set. Rotational coordinate value is in rad/s and Translational in m/s.-->
+							<default_speed_value>0</default_speed_value>
+							<!--The minimum and maximum values that the coordinate can range between. Rotational coordinate range in radians and Translational in meters.-->
+							<range>-1.57079632679 3.665</range>
+							<!--Flag indicating whether or not the values of the coordinates should be limited to the range, above.-->
+							<clamped>true</clamped>
+							<!--Flag indicating whether or not the values of the coordinates should be constrained to the current (e.g. default) value, above.-->
+							<locked>false</locked>
+							<!--If specified, the coordinate can be prescribed by a function of time. It can be any OpenSim Function with valid second order derivatives.-->
+							<prescribed_function />
+							<!--Flag indicating whether or not the values of the coordinates should be prescribed according to the function above. It is ignored if the no prescribed function is specified.-->
+							<prescribed>false</prescribed>
+						</Coordinate>
+						<Coordinate name="axial_rot_r">
+							<!--The value of this coordinate before any value has been set. Rotational coordinate value is in radians and Translational in meters.-->
+							<default_value>0</default_value>
+							<!--The speed value of this coordinate before any value has been set. Rotational coordinate value is in rad/s and Translational in m/s.-->
+							<default_speed_value>0</default_speed_value>
+							<!--The minimum and maximum values that the coordinate can range between. Rotational coordinate range in radians and Translational in meters.-->
+							<range>-3.1415926500000002 3.1415926500000002</range>
+							<!--Flag indicating whether or not the values of the coordinates should be limited to the range, above.-->
+							<clamped>true</clamped>
+							<!--Flag indicating whether or not the values of the coordinates should be constrained to the current (e.g. default) value, above.-->
+							<locked>false</locked>
+							<!--If specified, the coordinate can be prescribed by a function of time. It can be any OpenSim Function with valid second order derivatives.-->
+							<prescribed_function />
+							<!--Flag indicating whether or not the values of the coordinates should be prescribed according to the function above. It is ignored if the no prescribed function is specified.-->
+							<prescribed>false</prescribed>
+						</Coordinate>
+					</coordinates>
+					<!--Physical offset frames owned by the Joint that are typically used to satisfy the owning Joint's parent and child frame connections (sockets). PhysicalOffsetFrames are often used to describe the fixed transformation from a Body's origin to another location of interest on the Body (e.g., the joint center). When the joint is deleted, so are the PhysicalOffsetFrame components in this list.-->
+					<frames>
+						<PhysicalOffsetFrame name="torso_offset">
+							<!--The geometry used to display the axes of this Frame.-->
+							<FrameGeometry name="frame_geometry">
+								<!--Path to a Component that satisfies the Socket 'frame' of type Frame.-->
+								<socket_frame>..</socket_frame>
+								<!--Scale factors in X, Y, Z directions respectively.-->
+								<scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
+							</FrameGeometry>
+							<!--Path to a Component that satisfies the Socket 'parent' of type C (description: The parent frame to this frame.).-->
+							<socket_parent>/bodyset/torso</socket_parent>
+							<!--Translational offset (in meters) of this frame's origin from the parent frame's origin, expressed in the parent frame.-->
+							<translation>0.0031549999999999998 0.3715 0.17000000000000001</translation>
+							<!--Orientation offset (in radians) of this frame in its parent frame, expressed as a frame-fixed x-y-z rotation sequence.-->
+							<orientation>0 0 0</orientation>
+						</PhysicalOffsetFrame>
+						<PhysicalOffsetFrame name="humerus_offset">
+							<!--The geometry used to display the axes of this Frame.-->
+							<FrameGeometry name="frame_geometry">
+								<!--Path to a Component that satisfies the Socket 'frame' of type Frame.-->
+								<socket_frame>..</socket_frame>
+								<!--Scale factors in X, Y, Z directions respectively.-->
+								<scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
+							</FrameGeometry>
+							<!--Path to a Component that satisfies the Socket 'parent' of type C (description: The parent frame to this frame.).-->
+							<socket_parent>/bodyset/humerus_r</socket_parent>
+							<!--Translational offset (in meters) of this frame's origin from the parent frame's origin, expressed in the parent frame.-->
+							<translation>0 0 0</translation>
+							<!--Orientation offset (in radians) of this frame in its parent frame, expressed as a frame-fixed x-y-z rotation sequence.-->
+							<orientation>0 0 0</orientation>
+						</PhysicalOffsetFrame>
+					</frames>
+					<!--Defines how the child body moves with respect to the parent as a function of the generalized coordinates.-->
+					<SpatialTransform>
+						<!--3 Axes for rotations are listed first.-->
+						<TransformAxis name="rotation1">
+							<!--Names of the coordinates that serve as the independent variables         of the transform function.-->
+							<coordinates>plane_elev_r</coordinates>
+							<!--Rotation or translation axis for the transform.-->
+							<axis>0 1 0</axis>
+							<!--Transform function of the generalized coordinates used to        represent the amount of displacement along a specified axis.-->
+							<LinearFunction name="function">
+								<coefficients> 1 0</coefficients>
+							</LinearFunction>
+						</TransformAxis>
+						<TransformAxis name="rotation2">
+							<!--Names of the coordinates that serve as the independent variables         of the transform function.-->
+							<coordinates>shoulder_elev_r</coordinates>
+							<!--Rotation or translation axis for the transform.-->
+							<axis>-1 0 0</axis>
+							<!--Transform function of the generalized coordinates used to        represent the amount of displacement along a specified axis.-->
+							<LinearFunction name="function">
+								<coefficients> 1 0</coefficients>
+							</LinearFunction>
+						</TransformAxis>
+						<TransformAxis name="rotation3">
+							<!--Names of the coordinates that serve as the independent variables         of the transform function.-->
+							<coordinates>axial_rot_r</coordinates>
+							<!--Rotation or translation axis for the transform.-->
+							<axis>-0.084599999999900005 0.99470000000000003 -0.058400000000000001</axis>
+							<!--Transform function of the generalized coordinates used to        represent the amount of displacement along a specified axis.-->
+							<LinearFunction name="function">
+								<coefficients> 1 0</coefficients>
+							</LinearFunction>
+						</TransformAxis>
+						<!--3 Axes for translations are listed next.-->
+						<TransformAxis name="translation1">
+							<!--Names of the coordinates that serve as the independent variables         of the transform function.-->
+							<coordinates></coordinates>
+							<!--Rotation or translation axis for the transform.-->
+							<axis>1 0 0</axis>
+							<!--Transform function of the generalized coordinates used to        represent the amount of displacement along a specified axis.-->
+							<Constant name="function">
+								<value>0</value>
+							</Constant>
+						</TransformAxis>
+						<TransformAxis name="translation2">
+							<!--Names of the coordinates that serve as the independent variables         of the transform function.-->
+							<coordinates></coordinates>
+							<!--Rotation or translation axis for the transform.-->
+							<axis>0 1 0</axis>
+							<!--Transform function of the generalized coordinates used to        represent the amount of displacement along a specified axis.-->
+							<Constant name="function">
+								<value>0</value>
+							</Constant>
+						</TransformAxis>
+						<TransformAxis name="translation3">
+							<!--Names of the coordinates that serve as the independent variables         of the transform function.-->
+							<coordinates></coordinates>
+							<!--Rotation or translation axis for the transform.-->
+							<axis>0 0 1</axis>
+							<!--Transform function of the generalized coordinates used to        represent the amount of displacement along a specified axis.-->
+							<Constant name="function">
+								<value>0</value>
+							</Constant>
+						</TransformAxis>
+					</SpatialTransform>
+				</CustomJoint>
 				<PinJoint name="elbow_l">
 					<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The parent frame for the joint.).-->
 					<socket_parent_frame>humerus_l_offset</socket_parent_frame>
@@ -5413,14 +5408,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="addbrev_r_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="addbrev_r_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -5512,14 +5507,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="addlong_r_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="addlong_r_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -5611,14 +5606,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="addmagDist_r_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="addmagDist_r_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -5710,14 +5705,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="addmagIsch_r_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="addmagIsch_r_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -5809,14 +5804,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="addmagMid_r_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="addmagMid_r_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -5908,14 +5903,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="addmagProx_r_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="addmagProx_r_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -6004,14 +5999,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="bflh_r_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="bflh_r_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -6103,14 +6098,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="bfsh_r_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="bfsh_r_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -6217,14 +6212,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="edl_r_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="edl_r_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -6343,14 +6338,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="ehl_r_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="ehl_r_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -6469,14 +6464,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="fdl_r_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="fdl_r_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -6589,14 +6584,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="fhl_r_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="fhl_r_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -6696,14 +6691,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="gaslat_r_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="gaslat_r_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -6803,14 +6798,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="gasmed_r_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="gasmed_r_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -6914,14 +6909,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="glmax1_r_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="glmax1_r_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -7025,14 +7020,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="glmax2_r_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="glmax2_r_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -7136,14 +7131,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="glmax3_r_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="glmax3_r_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -7157,13 +7152,13 @@
 									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
 									<socket_parent_frame>/bodyset/pelvis</socket_parent_frame>
 									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>-0.049 0.026 0.115</location>
+									<location>-0.049000000000000002 0.025999999999999999 0.115</location>
 								</PathPoint>
 								<PathPoint name="glmed1_r-P2_0">
 									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
 									<socket_parent_frame>/bodyset/femur_r</socket_parent_frame>
 									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>-0.014 -0.018 0.059</location>
+									<location>-0.014 -0.017999999999999999 0.058999999999999997</location>
 								</PathPoint>
 							</objects>
 							<groups />
@@ -7184,9 +7179,9 @@
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>1093.4667688</max_isometric_force>
 					<!--Optimal length of the muscle fibers-->
-					<optimal_fiber_length>0.0765</optimal_fiber_length>
+					<optimal_fiber_length>0.076499999999999999</optimal_fiber_length>
 					<!--Resting length of the tendon-->
-					<tendon_slack_length>0.0585</tendon_slack_length>
+					<tendon_slack_length>0.058500000000000003</tendon_slack_length>
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.31655591</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
@@ -7226,14 +7221,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="glmed1_r_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="glmed1_r_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -7247,13 +7242,13 @@
 									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
 									<socket_parent_frame>/bodyset/pelvis</socket_parent_frame>
 									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>-0.085 0.055 0.082</location>
+									<location>-0.085000000000000006 0.055 0.082000000000000003</location>
 								</PathPoint>
 								<PathPoint name="glmed2_r-P2_0">
 									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
 									<socket_parent_frame>/bodyset/femur_r</socket_parent_frame>
 									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>-0.022 -0.01 0.056</location>
+									<location>-0.021999999999999999 -0.01 0.056000000000000001</location>
 								</PathPoint>
 							</objects>
 							<groups />
@@ -7274,9 +7269,9 @@
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>765.09166159999995</max_isometric_force>
 					<!--Optimal length of the muscle fibers-->
-					<optimal_fiber_length>0.084</optimal_fiber_length>
+					<optimal_fiber_length>0.084000000000000005</optimal_fiber_length>
 					<!--Resting length of the tendon-->
-					<tendon_slack_length>0.07545</tendon_slack_length>
+					<tendon_slack_length>0.075450000000000003</tendon_slack_length>
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.31655591</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
@@ -7316,14 +7311,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="glmed2_r_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="glmed2_r_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -7337,13 +7332,13 @@
 									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
 									<socket_parent_frame>/bodyset/pelvis</socket_parent_frame>
 									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>-0.1 0.016 0.064</location>
+									<location>-0.10000000000000001 0.016 0.064000000000000001</location>
 								</PathPoint>
 								<PathPoint name="glmed3_r-P2_0">
 									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
 									<socket_parent_frame>/bodyset/femur_r</socket_parent_frame>
 									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>-0.0309 -0.0047 0.0518</location>
+									<location>-0.0309 -0.0047000000000000002 0.051799999999999999</location>
 								</PathPoint>
 							</objects>
 							<groups />
@@ -7364,9 +7359,9 @@
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>871.19926420000002</max_isometric_force>
 					<!--Optimal length of the muscle fibers-->
-					<optimal_fiber_length>0.0781</optimal_fiber_length>
+					<optimal_fiber_length>0.078100000000000003</optimal_fiber_length>
 					<!--Resting length of the tendon-->
-					<tendon_slack_length>0.0484</tendon_slack_length>
+					<tendon_slack_length>0.048399999999999999</tendon_slack_length>
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.31655591</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
@@ -7406,14 +7401,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="glmed3_r_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="glmed3_r_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -7427,13 +7422,13 @@
 									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
 									<socket_parent_frame>/bodyset/pelvis</socket_parent_frame>
 									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>-0.03 -0.0 0.118</location>
+									<location>-0.029999999999999999 -0 0.11799999999999999</location>
 								</PathPoint>
 								<PathPoint name="glmin1_r-P2">
 									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
 									<socket_parent_frame>/bodyset/femur_r</socket_parent_frame>
 									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>0.005 -0.015 0.056</location>
+									<location>0.0050000000000000001 -0.014999999999999999 0.056000000000000001</location>
 								</PathPoint>
 							</objects>
 							<groups />
@@ -7454,9 +7449,9 @@
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>374.04590163934398</max_isometric_force>
 					<!--Optimal length of the muscle fibers-->
-					<optimal_fiber_length>0.0813</optimal_fiber_length>
+					<optimal_fiber_length>0.081299999999999997</optimal_fiber_length>
 					<!--Resting length of the tendon-->
-					<tendon_slack_length>0.0193</tendon_slack_length>
+					<tendon_slack_length>0.019300000000000001</tendon_slack_length>
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.17453293</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
@@ -7496,14 +7491,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="glmin1_r_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="glmin1_r_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -7517,13 +7512,13 @@
 									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
 									<socket_parent_frame>/bodyset/pelvis</socket_parent_frame>
 									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>-0.0616 0.01 0.101</location>
+									<location>-0.061600000000000002 0.01 0.10100000000000001</location>
 								</PathPoint>
 								<PathPoint name="glmin2_r-P2">
 									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
 									<socket_parent_frame>/bodyset/femur_r</socket_parent_frame>
 									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>0.004 -0.009 0.052</location>
+									<location>0.0040000000000000001 -0.0089999999999999993 0.051999999999999998</location>
 								</PathPoint>
 							</objects>
 							<groups />
@@ -7544,7 +7539,7 @@
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>394.81967213114802</max_isometric_force>
 					<!--Optimal length of the muscle fibers-->
-					<optimal_fiber_length>0.0687</optimal_fiber_length>
+					<optimal_fiber_length>0.068699999999999997</optimal_fiber_length>
 					<!--Resting length of the tendon-->
 					<tendon_slack_length>0.03202</tendon_slack_length>
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
@@ -7586,14 +7581,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="glmin2_r_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="glmin2_r_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -7607,13 +7602,13 @@
 									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
 									<socket_parent_frame>/bodyset/pelvis</socket_parent_frame>
 									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>-0.0789 -0.0155 0.0798</location>
+									<location>-0.078899999999999998 -0.0155 0.079799999999999996</location>
 								</PathPoint>
 								<PathPoint name="glmin3_r-P2">
 									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
 									<socket_parent_frame>/bodyset/femur_r</socket_parent_frame>
 									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>-0.004 -0.001 0.051</location>
+									<location>-0.0040000000000000001 -0.001 0.050999999999999997</location>
 								</PathPoint>
 							</objects>
 							<groups />
@@ -7634,9 +7629,9 @@
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>446.77377049180399</max_isometric_force>
 					<!--Optimal length of the muscle fibers-->
-					<optimal_fiber_length>0.0353</optimal_fiber_length>
+					<optimal_fiber_length>0.035299999999999998</optimal_fiber_length>
 					<!--Resting length of the tendon-->
-					<tendon_slack_length>0.0472</tendon_slack_length>
+					<tendon_slack_length>0.047199999999999999</tendon_slack_length>
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.01745329</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
@@ -7676,14 +7671,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="glmin3_r_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="glmin3_r_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -7781,14 +7776,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="grac_r_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="grac_r_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -7892,14 +7887,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="iliacus_r_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="iliacus_r_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -8000,14 +7995,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="perbrev_r_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="perbrev_r_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -8120,14 +8115,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="perlong_r_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="perlong_r_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -8216,14 +8211,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="piri_r_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="piri_r_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -8327,14 +8322,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="psoas_r_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="psoas_r_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -8444,14 +8439,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="recfem_r_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="recfem_r_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -8552,14 +8547,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="sart_r_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="sart_r_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -8651,14 +8646,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="semimem_r_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="semimem_r_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -8756,14 +8751,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="semiten_r_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="semiten_r_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -8846,14 +8841,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="soleus_r_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="soleus_r_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -8867,25 +8862,25 @@
 									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
 									<socket_parent_frame>/bodyset/pelvis</socket_parent_frame>
 									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>-0.02 0.011 0.129</location>
+									<location>-0.02 0.010999999999999999 0.129</location>
 								</PathPoint>
 								<PathPoint name="tfl_r-P2">
 									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
 									<socket_parent_frame>/bodyset/femur_r</socket_parent_frame>
 									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>0.0294 -0.0995 0.0597</location>
+									<location>0.029399999999999999 -0.099500000000000005 0.059700000000000003</location>
 								</PathPoint>
 								<PathPoint name="tfl_r-P3">
 									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
 									<socket_parent_frame>/bodyset/femur_r</socket_parent_frame>
 									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>0.0107 -0.405 0.0324</location>
+									<location>0.010699999999999999 -0.40500000000000003 0.032399999999999998</location>
 								</PathPoint>
 								<PathPoint name="tfl_r-P4">
 									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
 									<socket_parent_frame>/bodyset/tibia_r</socket_parent_frame>
 									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>0.0108 -0.041 0.0346</location>
+									<location>0.010800000000000001 -0.041000000000000002 0.034599999999999999</location>
 								</PathPoint>
 							</objects>
 							<groups />
@@ -8906,9 +8901,9 @@
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>411.20655737704999</max_isometric_force>
 					<!--Optimal length of the muscle fibers-->
-					<optimal_fiber_length>0.09315</optimal_fiber_length>
+					<optimal_fiber_length>0.093149999999999997</optimal_fiber_length>
 					<!--Resting length of the tendon-->
-					<tendon_slack_length>0.44075</tendon_slack_length>
+					<tendon_slack_length>0.44074999999999998</tendon_slack_length>
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.052359879999999998</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
@@ -8948,14 +8943,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="tfl_r_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="tfl_r_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -9050,14 +9045,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="tibant_r_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="tibant_r_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -9152,14 +9147,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="tibpost_r_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="tibpost_r_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -9269,14 +9264,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="vasint_r_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="vasint_r_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -9386,14 +9381,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="vaslat_r_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="vaslat_r_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -9503,14 +9498,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="vasmed_r_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="vasmed_r_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -9602,14 +9597,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="addbrev_l_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="addbrev_l_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -9701,14 +9696,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="addlong_l_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="addlong_l_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -9800,14 +9795,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="addmagDist_l_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="addmagDist_l_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -9899,14 +9894,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="addmagIsch_l_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="addmagIsch_l_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -9998,14 +9993,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="addmagMid_l_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="addmagMid_l_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -10097,14 +10092,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="addmagProx_l_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="addmagProx_l_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -10193,14 +10188,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="bflh_l_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="bflh_l_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -10292,14 +10287,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="bfsh_l_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="bfsh_l_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -10406,14 +10401,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="edl_l_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="edl_l_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -10532,14 +10527,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="ehl_l_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="ehl_l_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -10658,14 +10653,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="fdl_l_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="fdl_l_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -10778,14 +10773,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="fhl_l_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="fhl_l_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -10885,14 +10880,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="gaslat_l_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="gaslat_l_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -10992,14 +10987,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="gasmed_l_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="gasmed_l_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -11103,14 +11098,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="glmax1_l_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="glmax1_l_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -11214,14 +11209,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="glmax2_l_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="glmax2_l_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -11325,14 +11320,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="glmax3_l_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="glmax3_l_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -11346,13 +11341,13 @@
 									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
 									<socket_parent_frame>/bodyset/pelvis</socket_parent_frame>
 									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>-0.049 0.026 -0.115</location>
+									<location>-0.049000000000000002 0.025999999999999999 -0.115</location>
 								</PathPoint>
 								<PathPoint name="glmed1_l-P2">
 									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
 									<socket_parent_frame>/bodyset/femur_l</socket_parent_frame>
 									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>-0.014 -0.018 -0.059</location>
+									<location>-0.014 -0.017999999999999999 -0.058999999999999997</location>
 								</PathPoint>
 							</objects>
 							<groups />
@@ -11373,9 +11368,9 @@
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>1093.4667688</max_isometric_force>
 					<!--Optimal length of the muscle fibers-->
-					<optimal_fiber_length>0.0765</optimal_fiber_length>
+					<optimal_fiber_length>0.076499999999999999</optimal_fiber_length>
 					<!--Resting length of the tendon-->
-					<tendon_slack_length>0.0585</tendon_slack_length>
+					<tendon_slack_length>0.058500000000000003</tendon_slack_length>
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.31655591</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
@@ -11415,14 +11410,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="glmed1_l_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="glmed1_l_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -11436,13 +11431,13 @@
 									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
 									<socket_parent_frame>/bodyset/pelvis</socket_parent_frame>
 									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>-0.085 0.055 -0.082</location>
+									<location>-0.085000000000000006 0.055 -0.082000000000000003</location>
 								</PathPoint>
 								<PathPoint name="glmed2_l-P2">
 									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
 									<socket_parent_frame>/bodyset/femur_l</socket_parent_frame>
 									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>-0.022 -0.01 -0.056</location>
+									<location>-0.021999999999999999 -0.01 -0.056000000000000001</location>
 								</PathPoint>
 							</objects>
 							<groups />
@@ -11463,9 +11458,9 @@
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>765.09166159999995</max_isometric_force>
 					<!--Optimal length of the muscle fibers-->
-					<optimal_fiber_length>0.084</optimal_fiber_length>
+					<optimal_fiber_length>0.084000000000000005</optimal_fiber_length>
 					<!--Resting length of the tendon-->
-					<tendon_slack_length>0.07545</tendon_slack_length>
+					<tendon_slack_length>0.075450000000000003</tendon_slack_length>
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.31655591</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
@@ -11505,14 +11500,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="glmed2_l_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="glmed2_l_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -11526,13 +11521,13 @@
 									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
 									<socket_parent_frame>/bodyset/pelvis</socket_parent_frame>
 									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>-0.1 0.016 -0.064</location>
+									<location>-0.10000000000000001 0.016 -0.064000000000000001</location>
 								</PathPoint>
 								<PathPoint name="glmed3_l-P2">
 									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
 									<socket_parent_frame>/bodyset/femur_l</socket_parent_frame>
 									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>-0.0309 -0.0047 -0.0518</location>
+									<location>-0.0309 -0.0047000000000000002 -0.051799999999999999</location>
 								</PathPoint>
 							</objects>
 							<groups />
@@ -11553,9 +11548,9 @@
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>871.19926420000002</max_isometric_force>
 					<!--Optimal length of the muscle fibers-->
-					<optimal_fiber_length>0.0781</optimal_fiber_length>
+					<optimal_fiber_length>0.078100000000000003</optimal_fiber_length>
 					<!--Resting length of the tendon-->
-					<tendon_slack_length>0.0484</tendon_slack_length>
+					<tendon_slack_length>0.048399999999999999</tendon_slack_length>
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.31655591</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
@@ -11595,14 +11590,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="glmed3_l_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="glmed3_l_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -11616,13 +11611,13 @@
 									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
 									<socket_parent_frame>/bodyset/pelvis</socket_parent_frame>
 									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>-0.03 0 -0.118</location>
+									<location>-0.029999999999999999 0 -0.11799999999999999</location>
 								</PathPoint>
 								<PathPoint name="glmin1_l-P2">
 									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
 									<socket_parent_frame>/bodyset/femur_l</socket_parent_frame>
 									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>0.005 -0.015 -0.056</location>
+									<location>0.0050000000000000001 -0.014999999999999999 -0.056000000000000001</location>
 								</PathPoint>
 							</objects>
 							<groups />
@@ -11643,9 +11638,9 @@
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>374.04590163934398</max_isometric_force>
 					<!--Optimal length of the muscle fibers-->
-					<optimal_fiber_length>0.0813</optimal_fiber_length>
+					<optimal_fiber_length>0.081299999999999997</optimal_fiber_length>
 					<!--Resting length of the tendon-->
-					<tendon_slack_length>0.0193</tendon_slack_length>
+					<tendon_slack_length>0.019300000000000001</tendon_slack_length>
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.17453293</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
@@ -11685,14 +11680,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="glmin1_l_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="glmin1_l_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -11706,13 +11701,13 @@
 									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
 									<socket_parent_frame>/bodyset/pelvis</socket_parent_frame>
 									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>-0.0616 0.01 -0.101</location>
+									<location>-0.061600000000000002 0.01 -0.10100000000000001</location>
 								</PathPoint>
 								<PathPoint name="glmin2_l-P2">
 									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
 									<socket_parent_frame>/bodyset/femur_l</socket_parent_frame>
 									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>0.004 -0.009 -0.052</location>
+									<location>0.0040000000000000001 -0.0089999999999999993 -0.051999999999999998</location>
 								</PathPoint>
 							</objects>
 							<groups />
@@ -11733,7 +11728,7 @@
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>394.81967213114802</max_isometric_force>
 					<!--Optimal length of the muscle fibers-->
-					<optimal_fiber_length>0.0687</optimal_fiber_length>
+					<optimal_fiber_length>0.068699999999999997</optimal_fiber_length>
 					<!--Resting length of the tendon-->
 					<tendon_slack_length>0.03202</tendon_slack_length>
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
@@ -11775,14 +11770,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="glmin2_l_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="glmin2_l_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -11796,13 +11791,13 @@
 									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
 									<socket_parent_frame>/bodyset/pelvis</socket_parent_frame>
 									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>-0.0789 -0.0155 -0.0798</location>
+									<location>-0.078899999999999998 -0.0155 -0.079799999999999996</location>
 								</PathPoint>
 								<PathPoint name="glmin3_l-P2">
 									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
 									<socket_parent_frame>/bodyset/femur_l</socket_parent_frame>
 									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>-0.004 -0.001 -0.051</location>
+									<location>-0.0040000000000000001 -0.001 -0.050999999999999997</location>
 								</PathPoint>
 							</objects>
 							<groups />
@@ -11823,9 +11818,9 @@
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>446.77377049180399</max_isometric_force>
 					<!--Optimal length of the muscle fibers-->
-					<optimal_fiber_length>0.0353</optimal_fiber_length>
+					<optimal_fiber_length>0.035299999999999998</optimal_fiber_length>
 					<!--Resting length of the tendon-->
-					<tendon_slack_length>0.0472</tendon_slack_length>
+					<tendon_slack_length>0.047199999999999999</tendon_slack_length>
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.01745329</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
@@ -11865,14 +11860,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="glmin3_l_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="glmin3_l_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -11970,14 +11965,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="grac_l_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="grac_l_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -12081,14 +12076,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="iliacus_l_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="iliacus_l_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -12189,14 +12184,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="perbrev_l_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="perbrev_l_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -12309,14 +12304,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="perlong_l_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="perlong_l_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -12405,14 +12400,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="piri_l_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="piri_l_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -12516,14 +12511,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="psoas_l_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="psoas_l_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -12633,14 +12628,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="recfem_l_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="recfem_l_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -12741,14 +12736,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="sart_l_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="sart_l_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -12840,14 +12835,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="semimem_l_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="semimem_l_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -12945,14 +12940,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="semiten_l_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="semiten_l_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -13035,14 +13030,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="soleus_l_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="soleus_l_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -13056,25 +13051,25 @@
 									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
 									<socket_parent_frame>/bodyset/pelvis</socket_parent_frame>
 									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>-0.02 0.011 -0.129</location>
+									<location>-0.02 0.010999999999999999 -0.129</location>
 								</PathPoint>
 								<PathPoint name="tfl_l-P2">
 									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
 									<socket_parent_frame>/bodyset/femur_l</socket_parent_frame>
 									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>0.0294 -0.0995 -0.0597</location>
+									<location>0.029399999999999999 -0.099500000000000005 -0.059700000000000003</location>
 								</PathPoint>
 								<PathPoint name="tfl_l-P3">
 									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
 									<socket_parent_frame>/bodyset/femur_l</socket_parent_frame>
 									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>0.0107 -0.405 -0.0324</location>
+									<location>0.010699999999999999 -0.40500000000000003 -0.032399999999999998</location>
 								</PathPoint>
 								<PathPoint name="tfl_l-P4">
 									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
 									<socket_parent_frame>/bodyset/tibia_l</socket_parent_frame>
 									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>0.0108 -0.041 -0.0346</location>
+									<location>0.010800000000000001 -0.041000000000000002 -0.034599999999999999</location>
 								</PathPoint>
 							</objects>
 							<groups />
@@ -13095,9 +13090,9 @@
 					<!--Maximum isometric force that the fibers can generate-->
 					<max_isometric_force>411.20655737704999</max_isometric_force>
 					<!--Optimal length of the muscle fibers-->
-					<optimal_fiber_length>0.09315</optimal_fiber_length>
+					<optimal_fiber_length>0.093149999999999997</optimal_fiber_length>
 					<!--Resting length of the tendon-->
-					<tendon_slack_length>0.44075</tendon_slack_length>
+					<tendon_slack_length>0.44074999999999998</tendon_slack_length>
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.052359879999999998</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
@@ -13137,14 +13132,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="tfl_l_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="tfl_l_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -13239,14 +13234,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="tibant_l_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="tibant_l_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -13341,14 +13336,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="tibpost_l_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="tibpost_l_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -13458,14 +13453,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="vasint_l_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="vasint_l_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -13575,14 +13570,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="vaslat_l_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="vaslat_l_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -13692,14 +13687,14 @@
 						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
 					</ForceVelocityCurve>
 					<!--Passive-force-length curve.-->
-					<FiberForceLengthCurve>
+					<FiberForceLengthCurve name="vasmed_l_FiberForceLengthCurve">
 						<!--Fiber strain at zero force-->
 						<strain_at_zero_force>0</strain_at_zero_force>
 						<!--Fiber strain at a tension of 1 normalized force-->
-						<strain_at_one_norm_force>0.7</strain_at_one_norm_force>
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
-					<TendonForceLengthCurve>
+					<TendonForceLengthCurve name="vasmed_l_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -13733,33 +13728,33 @@
 					<!--The maximum generalized force produced by this actuator.-->
 					<optimal_force>10</optimal_force>
 				</CoordinateActuator>
-				<CoordinateActuator name="shoulder_flex_r">
+				<CoordinateActuator name="shoulder_elev_r">
 					<!--Minimum allowed value for control signal. Used primarily when solving for control values.-->
 					<min_control>-Inf</min_control>
 					<!--Maximum allowed value for control signal. Used primarily when solving for control values.-->
 					<max_control>Inf</max_control>
 					<!--Name of the generalized coordinate to which the actuator applies.-->
-					<coordinate>arm_flex_r</coordinate>
+					<coordinate>shoulder_elev_r</coordinate>
 					<!--The maximum generalized force produced by this actuator.-->
 					<optimal_force>10</optimal_force>
 				</CoordinateActuator>
-				<CoordinateActuator name="shoulder_add_r">
+				<CoordinateActuator name="plane_elev_r">
 					<!--Minimum allowed value for control signal. Used primarily when solving for control values.-->
 					<min_control>-Inf</min_control>
 					<!--Maximum allowed value for control signal. Used primarily when solving for control values.-->
 					<max_control>Inf</max_control>
 					<!--Name of the generalized coordinate to which the actuator applies.-->
-					<coordinate>arm_add_r</coordinate>
+					<coordinate>plane_elev_r</coordinate>
 					<!--The maximum generalized force produced by this actuator.-->
 					<optimal_force>10</optimal_force>
 				</CoordinateActuator>
-				<CoordinateActuator name="shoulder_rot_r">
+				<CoordinateActuator name="axial_rot_r">
 					<!--Minimum allowed value for control signal. Used primarily when solving for control values.-->
 					<min_control>-Inf</min_control>
 					<!--Maximum allowed value for control signal. Used primarily when solving for control values.-->
 					<max_control>Inf</max_control>
 					<!--Name of the generalized coordinate to which the actuator applies.-->
-					<coordinate>arm_rot_r</coordinate>
+					<coordinate>axial_rot_r</coordinate>
 					<!--The maximum generalized force produced by this actuator.-->
 					<optimal_force>10</optimal_force>
 				</CoordinateActuator>
