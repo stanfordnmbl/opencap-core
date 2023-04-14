@@ -3,10 +3,13 @@ import glob
 import shutil
 import requests
 import json
+import logging
+import socket
 
 from main import main
 from utils import getDataDirectory
 from utils import getTrialName
+from utils import getTrialJson
 from utils import downloadVideosFromServer
 from utils import switchCalibrationForCamera
 from utils import deleteCalibrationFiles
@@ -18,7 +21,8 @@ from utils import getModelAndMetadata
 from utils import writeCalibrationOptionsToAPI
 from utils import postMotionData
 from utils import getNeutralTrialID
-from utils import  getCalibrationTrialID
+from utils import getCalibrationTrialID
+from utils import sendStatusEmail    
 from utilsAuth import getToken
 from utilsAPI import getAPIURL
 
@@ -328,3 +332,35 @@ def batchReprocess(session_ids,calib_id,static_id,dynamic_ids,poseDetector='Open
                 statusData = {'status':'error'}
                 _ = requests.patch("https://api.opencap.ai/trials/{}/".format(static_id_toProcess), data=statusData,
                          headers = {"Authorization": "Token {}".format(API_TOKEN)})
+
+def runTestSession(pose='all',isDocker=True):
+    trials = {}
+    
+    if 'dev.opencap' not in API_URL: # prod trials
+        trials['openpose'] = '3f2960c7-ca29-45b0-9be5-8d74db6131e5' # session ae2d50f1-537a-44f1-96a5-f5b7717452a3 
+        trials['hrnet'] = '299ca938-8765-4a84-9adf-6bdf0e072451' # session faef80d3-0c26-452c-a7be-28dbfe04178e
+        # trials['failure'] = '698162c8-3980-46e5-a3c5-8d4f081db4c4' # failed trial for testing
+    else: # dev trials
+        trials['openpose'] = '89d77579-8371-4760-a019-95f2c793622c' # session acd0e19c-6c86-4ba4-95fd-94b97229a926
+     
+    if pose == 'all':
+        trialList = list(trials.values())
+    else:
+        try: 
+            trialList = [trials[pose]]
+        except:
+            trialList = list(trials.values())
+        
+    try: 
+        for trial_id in trialList:
+            trial = getTrialJson(trial_id)
+            logging.info("Running status check on trial name: " + trial['name'] + "\n\n")
+            processTrial(trial["session"], trial_id, trial_type='static', isDocker=isDocker)
+    except:
+        logging.info("test trial failed. stopping machine.")
+        # send email
+        message = "A backend OpenCap machine failed the status check: " + socket.gethostname() + ". It has been stopped."
+        sendStatusEmail(message=message)
+        raise Exception('Failed status check. Stopped.')
+        
+    logging.info("\n\n\nStatus check succeeded. \n\n")

@@ -11,6 +11,7 @@ import glob
 import mimetypes
 import subprocess
 import zipfile
+import time
 
 import numpy as np
 import pandas as pd
@@ -1213,3 +1214,40 @@ def getVideoExtension(pathFileWithoutExtension):
             extension = '.' + file.rsplit('.', 1)[1]
             
     return extension
+
+# check how much time has passed since last status check
+def checkTime(t,minutesElapsed=30):
+    t2 = time.localtime()
+    return (t2.tm_hour - t.tm_hour) * 60 + (t2.tm_min - t.tm_min) >= minutesElapsed
+
+# send status email
+def sendStatusEmail(message=None,subject=None):
+    import smtplib, ssl
+    from utilsAPI import getStatusEmails
+    from email.message import EmailMessage
+    
+    emailInfo = getStatusEmails()
+    if emailInfo is None:
+        return('No email info or wrong email info in env file.')
+       
+    if message is None:
+        message = "A backend server is down and has been stopped."
+    if subject is None:
+        subject = "OpenCap backend server down"
+        
+    port = 465  # For SSL
+    smtp_server = "smtp.gmail.com"  
+    context = ssl.create_default_context()
+    with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
+        server.login(emailInfo['fromEmail'], emailInfo['password'])
+        for toEmail in emailInfo['toEmails']:
+            # server.(emailInfo['fromEmail'], toEmail, message)
+            msg = EmailMessage()
+            msg['Subject'] = subject
+            msg['From'] = emailInfo['fromEmail']
+            msg['To'] = toEmail
+            msg.set_content(message)
+            server.send_message(msg)
+        server.quit()
+
+    
