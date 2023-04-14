@@ -3,14 +3,14 @@ import time
 import json
 import os
 import shutil
-from utilsServer import processTrial
+from utilsServer import processTrial, runTestSession
 import traceback
 import logging
 import glob
 import numpy as np
 from utilsAPI import getAPIURL, getWorkerType
 from utilsAuth import getToken
-from utils import getDataDirectory
+from utils import getDataDirectory, checkTime
 
 logging.basicConfig(level=logging.INFO)
 
@@ -19,12 +19,21 @@ API_URL = getAPIURL()
 workerType = getWorkerType()
 
 # if true, will delete entire data directory when finished with a trial
-isDocker = True
+isDocker = False
+
+# get start time
+t = time.localtime()
 
 while True:
+    
+    # Run test trial at a given frequency to check status of machine. Stop machine if fails.
+    if checkTime(t,minutesElapsed=30):
+        runTestSession(pose='all', isDocker=isDocker)           
+        t = time.localtime()
+    
     # workerType = 'calibration' -> just processes calibration and neutral
     # workerType = 'all' -> processes all types of trials
-    # no query string -> defaults to 'all'
+    # no query string -> defaults to 'all'    
     queue_path = "trials/dequeue/?workerType=" + workerType
     try:
         r = requests.get("{}{}".format(API_URL, queue_path),
@@ -94,3 +103,9 @@ while True:
         for f in folders:         
             shutil.rmtree(f)
             logging.info('deleting ' + f)
+
+
+        
+        
+        
+        
