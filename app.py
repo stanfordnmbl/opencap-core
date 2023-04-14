@@ -28,7 +28,7 @@ while True:
     
     # Run test trial at a given frequency to check status of machine. Stop machine if fails.
     if checkTime(t,minutesElapsed=30):
-        runTestSession(pose='all', isDocker=isDocker)           
+        runTestSession(isDocker=isDocker)           
         t = time.localtime()
     
     # workerType = 'calibration' -> just processes calibration and neutral

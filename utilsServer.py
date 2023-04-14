@@ -361,6 +361,8 @@ def runTestSession(pose='all',isDocker=True):
         message = "A backend OpenCap machine failed the status check: " + socket.gethostname() + ". It has been stopped."
         sendStatusEmail(message=message)
         raise Exception('Failed status check. Stopped.')
+        
+    logging.info("\n\n\nStatus check succeeded. \n\n")
             
             
             
