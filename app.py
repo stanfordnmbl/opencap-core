@@ -33,7 +33,7 @@ while True:
     
     # workerType = 'calibration' -> just processes calibration and neutral
     # workerType = 'all' -> processes all types of trials
-    # no query string -> defaults to 'all'    
+    # no query string -> defaults to 'all'
     queue_path = "trials/dequeue/?workerType=" + workerType
     try:
         r = requests.get("{}{}".format(API_URL, queue_path),
@@ -103,9 +103,3 @@ while True:
         for f in folders:         
             shutil.rmtree(f)
             logging.info('deleting ' + f)
-
-
-        
-        
-        
-        

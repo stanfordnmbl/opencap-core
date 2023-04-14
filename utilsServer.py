@@ -363,28 +363,3 @@ def runTestSession(pose='all',isDocker=True):
         raise Exception('Failed status check. Stopped.')
         
     logging.info("\n\n\nStatus check succeeded. \n\n")
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            

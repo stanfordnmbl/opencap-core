@@ -1225,7 +1225,6 @@ def sendStatusEmail(message=None,subject=None):
     import smtplib, ssl
     from utilsAPI import getStatusEmails
     from email.message import EmailMessage
-
     
     emailInfo = getStatusEmails()
     if emailInfo is None:
