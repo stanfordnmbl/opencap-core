@@ -19,7 +19,7 @@ API_URL = getAPIURL()
 workerType = getWorkerType()
 
 # if true, will delete entire data directory when finished with a trial
-isDocker = True
+isDocker = False
 
 # get start time
 t = time.localtime()
@@ -32,8 +32,7 @@ while True:
         runTestSession(isDocker=isDocker)           
         t = time.localtime()
         initialStatusCheck = True
-        
-    
+           
     # workerType = 'calibration' -> just processes calibration and neutral
     # workerType = 'all' -> processes all types of trials
     # no query string -> defaults to 'all'
