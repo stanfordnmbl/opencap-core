@@ -23,13 +23,16 @@ isDocker = True
 
 # get start time
 t = time.localtime()
+initialStatusCheck = False
 
 while True:
     
     # Run test trial at a given frequency to check status of machine. Stop machine if fails.
-    if checkTime(t,minutesElapsed=30):
+    if checkTime(t,minutesElapsed=30) or not initialStatusCheck:
         runTestSession(isDocker=isDocker)           
         t = time.localtime()
+        initialStatusCheck = True
+        
     
     # workerType = 'calibration' -> just processes calibration and neutral
     # workerType = 'all' -> processes all types of trials
