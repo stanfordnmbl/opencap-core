@@ -33,7 +33,7 @@ def augmentTRC(pathInputTRCFile, subject_mass, subject_height,
         augmenterModelType_all = [augmenterModelType_lower, augmenterModelType_upper]
         feature_markers_all = [feature_markers_lower, feature_markers_upper]
         response_markers_all = [response_markers_lower, response_markers_upper]
-    elif augmenter_model == 'v0.3' or augmenter_model == 'v0.4' or augmenter_model == 'v0.5' or augmenter_model == 'v0.6' or augmenter_model == 'v0.7':
+    else:
         # Lower body           
         augmenterModelType_lower = '{}_lower'.format(augmenter_model)
         from utils import getOpenPoseMarkers_lowerExtremity2
@@ -45,8 +45,8 @@ def augmentTRC(pathInputTRCFile, subject_mass, subject_height,
         augmenterModelType_all = [augmenterModelType_lower, augmenterModelType_upper]
         feature_markers_all = [feature_markers_lower, feature_markers_upper]
         response_markers_all = [response_markers_lower, response_markers_upper]
-    else:
-        raise ValueError('Augmenter model not recognized.')
+    # else:
+    #     raise ValueError('Augmenter model not recognized.')
     
     print('Augmenter model: {}'.format(augmenter_model))
     

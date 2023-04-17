@@ -34,7 +34,7 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
          calibrationOptions=None,
          markerDataFolderNameSuffix=None, imageUpsampleFactor=4,
          poseDetector='OpenPose', resolutionPoseDetection='default', 
-         scaleModel=False, bbox_thr=0.8, augmenter_model='v0.7',
+         scaleModel=False, bbox_thr=0.8, augmenter_model='v0.29',
          genericFolderNames=False, offset=True, benchmark=False,
          dataDir=None):
 
