@@ -148,21 +148,22 @@
 			</Marker>
 			<Marker name="r_shoulder_study">
 				<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame to which this station is fixed.).-->
-				<socket_parent_frame>/bodyset/torso</socket_parent_frame>
+				<socket_parent_frame>/bodyset/humerus_r</socket_parent_frame>
 				<!--The fixed location of the station expressed in its parent frame.-->
-				<location>0 0.41799999999999998 0.14199999999999999</location>
+				<location>0.0018871 0.0471068 -0.0282601</location>
 				<!--Flag (true or false) specifying whether the marker is fixed in its parent frame during the marker placement step of scaling.  If false, the marker is free to move within its parent Frame to match its experimental counterpart.-->
 				<fixed>false</fixed>
 			</Marker>
 			<Marker name="L_shoulder_study">
 				<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame to which this station is fixed.).-->
-				<socket_parent_frame>/bodyset/torso</socket_parent_frame>
+				<socket_parent_frame>/bodyset/humerus_l</socket_parent_frame>
 				<!--The fixed location of the station expressed in its parent frame.-->
-				<location>0 0.41799999999999998 -0.14199999999999999</location>
+				<location>0.0018871 0.0471068 0.0282601</location>
 				<!--Flag (true or false) specifying whether the marker is fixed in its parent frame during the marker placement step of scaling.  If false, the marker is free to move within its parent Frame to match its experimental counterpart.-->
 				<fixed>false</fixed>
 			</Marker>
 			<Marker name="C7_study">
+				<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame to which this station is fixed.).-->
 				<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame to which this station is fixed.).-->
 				<socket_parent_frame>/bodyset/torso</socket_parent_frame>
 				<!--The fixed location of the station expressed in its parent frame.-->
