@@ -116,6 +116,11 @@ def getSessionJson(session_id):
     sessionJson['trials'].sort(key=getCreatedAt)
     
     return sessionJson
+
+def getSubjectJson(subject_id):
+    subjectJson = requests.get(API_URL + "subjects/{}/".format(subject_id),
+                       headers = {"Authorization": "Token {}".format(API_TOKEN)}).json()
+    return subjectJson
     
 def getTrialName(trial_id):
     trial = getTrialJson(trial_id)
@@ -374,13 +379,25 @@ def getMetadataFromServer(session_id,justCheckerParams=False):
     session = getSessionJson(session_id)
     if session['meta'] is not None:
         if not justCheckerParams:
-            session_desc["subjectID"] = session['meta']['subject']['id']
-            session_desc["mass_kg"] = float(session['meta']['subject']['mass'])
-            session_desc["height_m"] = float(session['meta']['subject']['height'])
-            try:
-                session_desc["posemodel"] = session['meta']['subject']['posemodel']
-            except:
-                session_desc["posemodel"] = 'openpose'
+            # Backward compatibility
+            if 'subject' in session['meta']:
+                session_desc["subjectID"] = session['meta']['subject']['id']
+                session_desc["mass_kg"] = float(session['meta']['subject']['mass'])
+                session_desc["height_m"] = float(session['meta']['subject']['height'])
+                try:
+                    session_desc["posemodel"] = session['meta']['subject']['posemodel']
+                except:
+                    session_desc["posemodel"] = 'openpose'
+            else:                
+                subject_info = getSubjectJson(session['subject'])                
+                session_desc["subjectID"] = subject_info['name']
+                session_desc["mass_kg"] = subject_info['weight']
+                session_desc["height_m"] = subject_info['height']
+                try:
+                    session_desc["posemodel"] = session['meta']['settings']['posemodel']
+                except:
+                    session_desc["posemodel"] = 'openpose'
+
         if 'sessionWithCalibration' in session['meta'] and 'checkerboard' not in session['meta']:
             newSessionId = session['meta']['sessionWithCalibration']['id']
             session = getSessionJson(newSessionId)
