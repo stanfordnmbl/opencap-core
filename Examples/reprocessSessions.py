@@ -55,7 +55,7 @@ API_TOKEN = getToken()
 # Enter the identifier(s) of the session(s) you want to reprocess. This is a list of one
 # or more session identifiers. The identifier is found as the 36-character string at the
 # end of the session url: app.opencap.ai/session/<session_id>
-session_ids = ['23d52d41-69fe-47cf-8b60-838e4268dd50']
+session_ids = ['a460334c-b2c6-48b4-858d-c998e3cb6d0a']
 
 
 
@@ -68,8 +68,8 @@ session_ids = ['23d52d41-69fe-47cf-8b60-838e4268dd50']
 # select specific reprocessed. Only one trial (str) is allowed for calib_id and
 # static_id. A list of strings is allowed for dynamic_ids.
 
-calib_id = [] # None (auto-selected trial), [] (skip), or string of specific trial_id
-static_id = [] # None (auto-selected trial), [] (skip), or string of specific trial_id
+calib_id = None # None (auto-selected trial), [] (skip), or string of specific trial_id
+static_id = None # None (auto-selected trial), [] (skip), or string of specific trial_id
 dynamic_trialNames = None # None (all dynamic trials), [] (skip), or list of trial names
 
 # extract trial ids from trial names
