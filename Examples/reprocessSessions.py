@@ -57,7 +57,7 @@ API_TOKEN = getToken()
 # end of the session url: app.opencap.ai/session/<session_id>
 session_ids = [
                # 'b5ced333-b8c7-4fbf-8d9f-5e1d2c627d08'# , # matt
-               'ea0cfa3f-58bc-4ead-a3bc-12e17a7d8884', # shoulder benchmarks
+               # 'ea0cfa3f-58bc-4ead-a3bc-12e17a7d8884', # shoulder benchmarks
                # '8f050692-27f5-42d5-a5ad-663d7fedb7da', # mariners
                 '03284efb-2244-4a48-aec9-abc34afdffc8', # overground
                 '62500c22-6e52-4ea4-b294-bc91e06eb805', # treadmill
@@ -78,7 +78,7 @@ poseDetector = 'OpenPose'
 # static_id. A list of strings is allowed for dynamic_ids.
 
 calib_id = [] # None (auto-selected trial), [] (skip), or string of specific trial_id
-static_id = [] # None (auto-selected trial), [] (skip), or string of specific trial_id
+static_id = None # None (auto-selected trial), [] (skip), or string of specific trial_id
 dynamic_trialNames = None # None (all dynamic trials), [] (skip), or list of trial names
 
 # extract trial ids from trial names
