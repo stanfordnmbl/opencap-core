@@ -25,6 +25,10 @@ isDocker = True
 t = time.localtime()
 initialStatusCheck = False
 
+# test that tensorflow can use the gpu
+# import tensorflow as tf; 
+# logging.info(tf.config.list_physical_devices('GPU'))
+
 while True:
     
     # Run test trial at a given frequency to check status of machine. Stop machine if fails.
