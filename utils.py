@@ -752,11 +752,12 @@ def getModelAndMetadata(session_id,session_path,simplePath=False):
 def postFileToTrial(filePath,trial_id,tag,device_id):
         
     # get S3 link
-    r = requests.get(API_URL + "/sessions/null/get_presigned_url/").json()
+    r = requests.get(API_URL + "sessions/null/get_presigned_url/").json()
     
     # upload to S3
     files = {'file': open(filePath, 'rb')}
     r1 = requests.post(r['url'], data=r['fields'],files=files)   
+    files["file"].close()
 
     
     # post link to and data to results   
@@ -764,12 +765,11 @@ def postFileToTrial(filePath,trial_id,tag,device_id):
         "trial": trial_id,
         "tag": tag,
         "device_id" : device_id,
-        "video_url" : r['fields']['key']
+        "media_url0" : r['fields']['key']
     }
     
-    requests.post(API_URL + "results/", data=data,
+    rAPI = requests.post(API_URL + "results/", data=data,
                   headers = {"Authorization": "Token {}".format(API_TOKEN)})
-    files["media"].close()
     
     return
 
