@@ -1267,4 +1267,20 @@ def sendStatusEmail(message=None,subject=None):
             server.send_message(msg)
         server.quit()
 
+def checkResourceUsage():
+    import psutil
     
+    resourceUsage = {}
+    
+    memory_info = psutil.virtual_memory()
+    resourceUsage['memory_gb'] = memory_info.used / (1024 ** 3)
+    resourceUsage['memory_perc'] = memory_info.percent 
+
+    # Get the disk usage information of the root directory
+    disk_usage = psutil.disk_usage('/')
+
+    # Get the percentage of disk usage
+    resourceUsage['disk_gb'] = disk_usage.used / (1024 ** 3)
+    resourceUsage['disk_perc'] = disk_usage.percent
+    
+    return resourceUsage

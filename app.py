@@ -10,7 +10,7 @@ import glob
 import numpy as np
 from utilsAPI import getAPIURL, getWorkerType
 from utilsAuth import getToken
-from utils import getDataDirectory, checkTime
+from utils import getDataDirectory, checkTime, checkResourceUsage
 
 logging.basicConfig(level=logging.INFO)
 
@@ -58,6 +58,10 @@ while True:
         logging.info("API unresponsive. Status code = {:.0f}.".format(r.status_code))
         time.sleep(5)
         continue
+    
+    # Check resource usage
+    resourceUsage = checkResourceUsage()
+    logging.info(json.dumps(resourceUsage))
 
     logging.info(r.text)
     
