@@ -765,7 +765,7 @@ def postFileToTrial(filePath,trial_id,tag,device_id):
         "trial": trial_id,
         "tag": tag,
         "device_id" : device_id,
-        "media_url0" : r['fields']['key']
+        "media_url" : r['fields']['key']
     }
     
     rAPI = requests.post(API_URL + "results/", data=data,
