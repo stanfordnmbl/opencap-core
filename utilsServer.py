@@ -31,7 +31,8 @@ def processTrial(session_id, trial_id, trial_type = 'dynamic',
                  isDocker = True, resolutionPoseDetection='default',
                  extrinsicTrialName = 'calibration',
                  deleteLocalFolder = True,
-                 hasWritePermissions=True):
+                 hasWritePermissions=True,
+                 genericFolderNames=True):
 
     # Get session directory
     session_name = session_id 
@@ -51,7 +52,7 @@ def processTrial(session_id, trial_id, trial_type = 'dynamic',
         # run calibration
         try:
             main(session_name, trial_name, trial_id, isDocker=isDocker, extrinsicsTrial=True,
-                 imageUpsampleFactor=imageUpsampleFactor,genericFolderNames = True,
+                 imageUpsampleFactor=imageUpsampleFactor,genericFolderNames=genericFolderNames,
                  poseDetector=poseDetector)
         except Exception as e:
             error_msg = {}
@@ -76,7 +77,7 @@ def processTrial(session_id, trial_id, trial_type = 'dynamic',
         
     elif trial_type == 'static':
         # delete static files if they exist.
-        deleteStaticFiles(session_path, staticTrialName = 'neutral')
+        # deleteStaticFiles(session_path, staticTrialName = 'neutral')
         
         # Check for calibration to use on django, if not, check for switch calibrations and post result.
         calibrationOptions = getCalibration(session_id,session_path,trial_type=trial_type,getCalibrationOptions=True)   
@@ -92,7 +93,7 @@ def processTrial(session_id, trial_id, trial_type = 'dynamic',
                  imageUpsampleFactor=imageUpsampleFactor,
                  scaleModel = True,
                  resolutionPoseDetection = resolutionPoseDetection,
-                 genericFolderNames = True,
+                 genericFolderNames = genericFolderNames,
                  calibrationOptions = calibrationOptions)
         except Exception as e:            
             error_msg = {}
@@ -144,7 +145,7 @@ def processTrial(session_id, trial_id, trial_type = 'dynamic',
                  poseDetector=poseDetector,
                  imageUpsampleFactor=imageUpsampleFactor,
                  resolutionPoseDetection = resolutionPoseDetection,
-                 genericFolderNames = True)
+                 genericFolderNames = genericFolderNames)
         except Exception as e:
             error_msg = {}
             error_msg['error_msg'] = e.args[0]
@@ -248,7 +249,7 @@ def newSessionSameSetup(session_id_old,session_id_new,extrinsicTrialName='calibr
     
 def batchReprocess(session_ids,calib_id,static_id,dynamic_ids,poseDetector='OpenPose', 
                    resolutionPoseDetection='default',deleteLocalFolder=True,
-                   isServer=False):
+                   isServer=False, genericFolderNames=True):
 
     if (type(calib_id) == str or type(static_id) == str or type(dynamic_ids) == str or 
         (type(dynamic_ids)==list and len(dynamic_ids)>0)) and len(session_ids) >1:
@@ -275,7 +276,8 @@ def batchReprocess(session_ids,calib_id,static_id,dynamic_ids,poseDetector='Open
                           poseDetector = poseDetector,
                           deleteLocalFolder = deleteLocalFolder,
                           isDocker=isServer,
-                          hasWritePermissions = hasWritePermissions)
+                          hasWritePermissions = hasWritePermissions,
+                          genericFolderNames = genericFolderNames)
         
         if static_id == None:
             static_id_toProcess = getNeutralTrialID(session_id)
@@ -291,7 +293,8 @@ def batchReprocess(session_ids,calib_id,static_id,dynamic_ids,poseDetector='Open
                               poseDetector = poseDetector,
                               deleteLocalFolder = deleteLocalFolder,
                               isDocker=isServer,
-                              hasWritePermissions = hasWritePermissions)
+                              hasWritePermissions = hasWritePermissions,
+                            genericFolderNames = genericFolderNames)
                 statusData = {'status':'done'}
                 _ = requests.patch(API_URL + "trials/{}/".format(static_id_toProcess), data=statusData,
                          headers = {"Authorization": "Token {}".format(API_TOKEN)})
@@ -320,7 +323,8 @@ def batchReprocess(session_ids,calib_id,static_id,dynamic_ids,poseDetector='Open
                           poseDetector = poseDetector,
                           deleteLocalFolder = deleteLocalFolder,
                           isDocker=isServer,
-                          hasWritePermissions = hasWritePermissions)
+                          hasWritePermissions = hasWritePermissions,
+                          genericFolderNames = genericFolderNames)
                 
                 statusData = {'status':'done'}
                 _ = requests.patch(API_URL + "trials/{}/".format(dID), data=statusData,

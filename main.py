@@ -34,7 +34,7 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
          calibrationOptions=None,
          markerDataFolderNameSuffix=None, imageUpsampleFactor=4,
          poseDetector='OpenPose', resolutionPoseDetection='default', 
-         scaleModel=False, bbox_thr=0.8, augmenter_model='v0.29',
+         scaleModel=False, bbox_thr=0.8, augmenter_model='v0.1',
          genericFolderNames=False, offset=True, benchmark=False,
          dataDir=None):
 
@@ -380,7 +380,7 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
             openSimFolderName = 'OpenSimData'
         else:
             openSimFolderName = os.path.join('OpenSimData', 
-                                             poseDetector + suff_pd)
+                                             poseDetector + suff_pd + '_' + augmenter_model)
             if not markerDataFolderNameSuffix is None:
                 openSimFolderName = os.path.join(openSimFolderName,
                                                  markerDataFolderNameSuffix)

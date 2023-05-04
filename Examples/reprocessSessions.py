@@ -106,5 +106,6 @@ deleteLocalFolder = False
 # %% Process data.
 batchReprocess(session_ids,calib_id,static_id,dynamic_ids,
                resolutionPoseDetection=resolutionPoseDetection,
-               deleteLocalFolder=deleteLocalFolder)
+               deleteLocalFolder=deleteLocalFolder,
+               genericFolderNames=True)
 test=1
