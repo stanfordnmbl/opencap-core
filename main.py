@@ -438,7 +438,10 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
                                             "_scaled.osim")
             if os.path.exists(pathScaledModel):
                 # Path setup file.
-                genericSetupFile4IKName = 'Setup_IK.xml'
+                if 'isb_shoulder' in sessionMetadata['openSimModel']:
+                    genericSetupFile4IKName = 'Setup_IK_isb_shoulder.xml'
+                else:
+                    genericSetupFile4IKName = 'Setup_IK.xml'
                 pathGenericSetupFile4IK = os.path.join(
                     openSimPipelineDir, 'IK', genericSetupFile4IKName)
                 # Path TRC file.

@@ -388,6 +388,10 @@ def getMetadataFromServer(session_id,justCheckerParams=False):
                     session_desc["posemodel"] = session['meta']['subject']['posemodel']
                 except:
                     session_desc["posemodel"] = 'openpose'
+                try:
+                    session_desc["openSimModel"] = session['meta']['subject']['mskmodel']
+                except:
+                    session_desc["openSimModel"] = 'LaiArnoldModified2017_poly_withArms_weldHand'
             else:                
                 subject_info = getSubjectJson(session['subject'])                
                 session_desc["subjectID"] = subject_info['name']
@@ -397,6 +401,10 @@ def getMetadataFromServer(session_id,justCheckerParams=False):
                     session_desc["posemodel"] = session['meta']['settings']['posemodel']
                 except:
                     session_desc["posemodel"] = 'openpose'
+                try:
+                    session_desc["openSimModel"] = session['meta']['settings']['mskmodel']
+                except:
+                    session_desc["openSimModel"] = 'LaiArnoldModified2017_poly_withArms_weldHand'
 
         if 'sessionWithCalibration' in session['meta'] and 'checkerboard' not in session['meta']:
             newSessionId = session['meta']['sessionWithCalibration']['id']
