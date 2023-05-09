@@ -438,8 +438,8 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
                                             "_scaled.osim")
             if os.path.exists(pathScaledModel):
                 # Path setup file.
-                if 'isb_shoulder' in sessionMetadata['openSimModel']:
-                    genericSetupFile4IKName = 'Setup_IK_isb_shoulder.xml'
+                if 'shoulder' in sessionMetadata['openSimModel']:
+                    genericSetupFile4IKName = 'Setup_IK_shoulder.xml'
                 else:
                     genericSetupFile4IKName = 'Setup_IK.xml'
                 pathGenericSetupFile4IK = os.path.join(

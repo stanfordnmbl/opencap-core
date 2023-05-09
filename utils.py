@@ -391,7 +391,7 @@ def getMetadataFromServer(session_id,justCheckerParams=False):
                 try:
                     session_desc["openSimModel"] = session['meta']['subject']['mskmodel']
                 except:
-                    session_desc["openSimModel"] = 'LaiArnoldModified2017_poly_withArms_weldHand'
+                    session_desc["openSimModel"] = 'LaiUhlrich2022'
             else:                
                 subject_info = getSubjectJson(session['subject'])                
                 session_desc["subjectID"] = subject_info['name']
@@ -404,7 +404,7 @@ def getMetadataFromServer(session_id,justCheckerParams=False):
                 try:
                     session_desc["openSimModel"] = session['meta']['settings']['mskmodel']
                 except:
-                    session_desc["openSimModel"] = 'LaiArnoldModified2017_poly_withArms_weldHand'
+                    session_desc["openSimModel"] = 'LaiUhlrich2022'
 
         if 'sessionWithCalibration' in session['meta'] and 'checkerboard' not in session['meta']:
             newSessionId = session['meta']['sessionWithCalibration']['id']
