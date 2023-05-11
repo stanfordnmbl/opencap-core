@@ -759,7 +759,6 @@ def postFileToTrial(filePath,trial_id,tag,device_id):
     r1 = requests.post(r['url'], data=r['fields'],files=files)   
     files["file"].close()
 
-    
     # post link to and data to results   
     data = {
         "trial": trial_id,
@@ -771,6 +770,7 @@ def postFileToTrial(filePath,trial_id,tag,device_id):
     rAPI = requests.post(API_URL + "results/", data=data,
                   headers = {"Authorization": "Token {}".format(API_TOKEN)})
     
+    test = 1
     return
 
 def getSyncdVideos(trial_id,session_path):
