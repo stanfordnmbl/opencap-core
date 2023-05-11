@@ -152,24 +152,9 @@ def writeMediaToAPI(API_URL,media_path,trial_id,tag=None,deleteOldMedia=False):
                 
                 else:
                     device_id = None
-                
-                files = {'media': open(fullpath, 'rb')}
-                data = {
-                    "trial": trial_id,
-                    "tag": tag,
-                    "device_id" : device_id
-                }
-        
-                r= requests.post("{}{}".format(API_URL, "results/"), files=files, data=data,
-                         headers = {"Authorization": "Token {}".format(API_TOKEN)})
-                files["media"].close()
-                
-                if r.status_code != 201:
-                    print('server response was + ' + str(r.status_code))
-                else:
-                    print('Media results sent to API')
-            
-        
+                               
+                postFileToTrial(fullpath,trial_id,tag,device_id)
+
     return
 
 
@@ -752,11 +737,12 @@ def getModelAndMetadata(session_id,session_path,simplePath=False):
 def postFileToTrial(filePath,trial_id,tag,device_id):
         
     # get S3 link
-    r = requests.get(API_URL + "sessions/null/get_presigned_url/").json()
+    data = {'fileName':os.path.split(filePath)[1]}
+    r = requests.get(API_URL + "sessions/null/get_presigned_url/",data=data).json()
     
     # upload to S3
     files = {'file': open(filePath, 'rb')}
-    r1 = requests.post(r['url'], data=r['fields'],files=files)   
+    requests.post(r['url'], data=r['fields'],files=files)   
     files["file"].close()
 
     # post link to and data to results   
@@ -767,10 +753,14 @@ def postFileToTrial(filePath,trial_id,tag,device_id):
         "media_url" : r['fields']['key']
     }
     
-    rAPI = requests.post(API_URL + "results/", data=data,
+    rResult = requests.post(API_URL + "results/", data=data,
                   headers = {"Authorization": "Token {}".format(API_TOKEN)})
     
-    test = 1
+    if rResult.status_code != 201:
+        print('server response was + ' + str(r.status_code))
+    else:
+        print('Result posted to S3.')
+    
     return
 
 def getSyncdVideos(trial_id,session_path):

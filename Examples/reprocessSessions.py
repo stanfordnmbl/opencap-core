@@ -69,8 +69,8 @@ session_ids = ['5cd41683-3411-41a4-82c0-0131b75fa192']
 # static_id. A list of strings is allowed for dynamic_ids.
 
 calib_id = None # None (auto-selected trial), [] (skip), or string of specific trial_id
-static_id = [] # None (auto-selected trial), [] (skip), or string of specific trial_id
-dynamic_trialNames = [] # None (all dynamic trials), [] (skip), or list of trial names
+static_id = None # None (auto-selected trial), [] (skip), or string of specific trial_id
+dynamic_trialNames = None # None (all dynamic trials), [] (skip), or list of trial names
 
 # extract trial ids from trial names
 if dynamic_trialNames is not None and len(dynamic_trialNames)>0:
@@ -109,5 +109,3 @@ deleteLocalFolder = False
 batchReprocess(session_ids,calib_id,static_id,dynamic_ids,
                resolutionPoseDetection=resolutionPoseDetection,
                deleteLocalFolder=deleteLocalFolder)
-
-test = 1
