@@ -1294,7 +1294,7 @@ def getSubjectNumber(subjectName):
     if len(sNum)>1:
         print(len(sNum) + ' subjects with the name ' + subjectName + '.')   
     elif len(sNum) == 0:
-        print('no subject found with this name.')
+        raise Exception('no subject found with this name.')
         
     return sNum[0]
 

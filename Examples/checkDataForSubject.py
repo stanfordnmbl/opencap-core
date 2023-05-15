@@ -1,6 +1,6 @@
 """
 ---------------------------------------------------------------------------
-OpenCap: batchDownloadData.py
+OpenCap: checkDataForSubjects.py
 ---------------------------------------------------------------------------
 
 Copyright 2022 Stanford University and the Authors
@@ -20,6 +20,9 @@ limitations under the License.
 
 This script checks if all videos are uploaded and not error for a subject 
 across however many sessions are associated with them.
+
+Note: this script does not run without updating the subject name and trialnames
+for your own data.
 
 
 You will need login credentials from app.opencap.ai to run this script. You 
