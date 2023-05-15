@@ -28,7 +28,7 @@ for your own data.
 You will need login credentials from app.opencap.ai to run this script. You 
 can quickly create credentials from the home page: https://app.opencap.ai. 
 We recommend first running the Examples/createAuthenticationEnvFile.py script
-prior to running this script. Otherwise, you will need to to login every time 
+prior to running this script. Otherwise, you will need to login every time 
 you run the script.
 """
 

@@ -1292,7 +1292,7 @@ def getSubjectNumber(subjectName):
                            headers = {"Authorization": "Token {}".format(API_TOKEN)}).json()
     sNum = [s['id'] for s in subjects if s['name'] == subjectName]
     if len(sNum)>1:
-        print(len(sNum) + ' subjects with the name ' + subjectName + '.')   
+        print(len(sNum) + ' subjects with the name ' + subjectName + '. Will use the first one.')   
     elif len(sNum) == 0:
         raise Exception('no subject found with this name.')
         
