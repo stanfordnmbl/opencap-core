@@ -52,7 +52,7 @@ trialNames = [
 
 # %% main
 
-subjectSessions = utils.getParticipantSessions(subjectName)
+subjectSessions = utils.getSubjectSessions(subjectName)
 if len(subjectSessions) == 0:
     raise Exception('no sessions for this subject')
     

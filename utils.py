@@ -1303,7 +1303,7 @@ def getUserSessions():
                            headers = {"Authorization": "Token {}".format(API_TOKEN)}).json()
     return sessionJson
 
-def getParticipantSessions(subjectName):
+def getSubjectSessions(subjectName):
     sessions = getUserSessions()
     subNum = getSubjectNumber(subjectName)
     sessions2 = [s for s in sessions if (s['subject'] == subNum)]
