@@ -1284,3 +1284,59 @@ def checkResourceUsage():
     resourceUsage['disk_perc'] = disk_usage.percent
     
     return resourceUsage
+
+# %% Some functions for loading subject data
+
+def getSubjectNumber(subjectName):
+    subjects = requests.get(API_URL + "subjects/",
+                           headers = {"Authorization": "Token {}".format(API_TOKEN)}).json()
+    sNum = [s['id'] for s in subjects if s['name'] == subjectName]
+    if len(sNum)>1:
+        print(len(sNum) + ' subjects with the name ' + subjectName + '. Will use the first one.')   
+    elif len(sNum) == 0:
+        raise Exception('no subject found with this name.')
+        
+    return sNum[0]
+
+def getUserSessions():
+    sessionJson = requests.get(API_URL + "sessions/valid/",
+                           headers = {"Authorization": "Token {}".format(API_TOKEN)}).json()
+    return sessionJson
+
+def getSubjectSessions(subjectName):
+    sessions = getUserSessions()
+    subNum = getSubjectNumber(subjectName)
+    sessions2 = [s for s in sessions if (s['subject'] == subNum)]
+    
+    return sessions2
+
+def getTrialNames(session):
+    trialNames = [t['name'] for t in session['trials']]
+    return trialNames
+
+def findSessionWithTrials(subjectTrialNames,trialNames):
+    hasTrials = []
+    for trials in trialNames:
+        hasTrials.append(None)
+        for i,sTrials in enumerate(subjectTrialNames):
+            if all(elem in sTrials for elem in trials):
+                hasTrials[-1] = i
+                break
+            
+    return hasTrials
+
+def get_entry_with_largest_number(trialList):
+    max_entry = None
+    max_number = float('-inf')
+
+    for entry in trialList:
+        # Extract the number from the string
+        try:
+            number = int(entry.split('_')[-1])
+            if number > max_number:
+                max_number = number
+                max_entry = entry
+        except ValueError:
+            continue
+
+    return max_entry
