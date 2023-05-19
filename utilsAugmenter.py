@@ -8,7 +8,7 @@ import json
 
 def augmentTRC(pathInputTRCFile, subject_mass, subject_height,
                pathOutputTRCFile, augmenterDir, augmenterModelName="LSTM",
-               augmenter_model='v0.7', offset=True):
+               augmenter_model='v0.54', offset=True):
     
     # This is by default - might need to be adjusted in the future.
     featureHeight = True
