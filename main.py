@@ -86,8 +86,6 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
         else:
             poseDetector = 'OpenPose'
 
-    poseDetector = 'OpenPose'
-
     # %% Paths to pose detector folder for local testing.
     if poseDetector == 'OpenPose':
         poseDetectorDirectory = getOpenPoseDirectory(isDocker)
@@ -380,7 +378,7 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
             openSimFolderName = 'OpenSimData'
         else:
             openSimFolderName = os.path.join('OpenSimData', 
-                                             poseDetector + suff_pd + '_' + augmenter_model)
+                                             poseDetector + suff_pd)
             if not markerDataFolderNameSuffix is None:
                 openSimFolderName = os.path.join(openSimFolderName,
                                                  markerDataFolderNameSuffix)
