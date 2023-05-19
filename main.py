@@ -270,6 +270,9 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
                 
         for missing_video in missing_videos:
             cameras2Use_t.remove(missing_video)
+            
+        # Hack
+        cameras2Use_t = ['Cam0', 'Cam1']
              
         # Run pose detection algorithm.
         try:        
@@ -313,6 +316,12 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
                     data collection and https://www.opencap.ai/troubleshooting for 
                     potential causes for a failed trial."""
                 raise Exception(exception, traceback.format_exc())
+        
+    if calibrationOptions is not None:
+        allCams = list(calibrationOptions.keys())
+        for cam_t in allCams:
+            if not cam_t in cameras2Use:
+                calibrationOptions.pop(cam_t)
                 
     if scaleModel and calibrationOptions is not None and alternateExtrinsics is None:
         # Automatically select the camera calibration to use

@@ -645,6 +645,16 @@ def postMotionData(trial_id,session_path,trial_name=None,isNeutral=False):
     # If we parallelize this, this will be redundant, and we will want to delete this posting of pickles
     deleteResult(trial_id, tag='pose_pickle')
     camDirs = glob.glob(os.path.join(session_path,'Videos','Cam*'))
+    
+    # Hack
+    cameras2Use = ['Cam0', 'Cam1']
+    for c, camDir in enumerate(camDirs):
+        # Slit the path
+        _,camName = os.path.split(camDir)
+        if not camName in cameras2Use:
+            # Remove the camera from the list
+            camDirs.remove(camDir)
+    
     for camDir in camDirs:
         outputPklFolder = glob.glob(os.path.join(camDir,'OutputPkl*'))[0]
         pklPath = glob.glob(os.path.join(outputPklFolder,trial_name,'*.pkl'))[0]
