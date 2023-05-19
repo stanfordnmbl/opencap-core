@@ -3,10 +3,13 @@ import glob
 import shutil
 import requests
 import json
+import logging
+import socket
 
 from main import main
 from utils import getDataDirectory
 from utils import getTrialName
+from utils import getTrialJson
 from utils import downloadVideosFromServer
 from utils import switchCalibrationForCamera
 from utils import deleteCalibrationFiles
@@ -18,7 +21,8 @@ from utils import getModelAndMetadata
 from utils import writeCalibrationOptionsToAPI
 from utils import postMotionData
 from utils import getNeutralTrialID
-from utils import  getCalibrationTrialID
+from utils import getCalibrationTrialID
+from utils import sendStatusEmail    
 from utilsAuth import getToken
 from utilsAPI import getAPIURL
 
@@ -31,8 +35,7 @@ def processTrial(session_id, trial_id, trial_type = 'dynamic',
                  isDocker = True, resolutionPoseDetection='default',
                  extrinsicTrialName = 'calibration',
                  deleteLocalFolder = True,
-                 hasWritePermissions=True,
-                 genericFolderNames=True):
+                 hasWritePermissions=True):
 
     # Get session directory
     session_name = session_id 
@@ -52,7 +55,7 @@ def processTrial(session_id, trial_id, trial_type = 'dynamic',
         # run calibration
         try:
             main(session_name, trial_name, trial_id, isDocker=isDocker, extrinsicsTrial=True,
-                 imageUpsampleFactor=imageUpsampleFactor,genericFolderNames=genericFolderNames,
+                 imageUpsampleFactor=imageUpsampleFactor,genericFolderNames = True,
                  poseDetector=poseDetector)
         except Exception as e:
             error_msg = {}
@@ -73,11 +76,10 @@ def processTrial(session_id, trial_id, trial_type = 'dynamic',
         # Write calibration solutions to django
         writeCalibrationOptionsToAPI(session_path,session_id,calibration_id = trial_id,
                                      trialName = extrinsicTrialName)
-        return
         
     elif trial_type == 'static':
         # delete static files if they exist.
-        # deleteStaticFiles(session_path, staticTrialName = 'neutral')
+        deleteStaticFiles(session_path, staticTrialName = 'neutral')
         
         # Check for calibration to use on django, if not, check for switch calibrations and post result.
         calibrationOptions = getCalibration(session_id,session_path,trial_type=trial_type,getCalibrationOptions=True)   
@@ -93,7 +95,7 @@ def processTrial(session_id, trial_id, trial_type = 'dynamic',
                  imageUpsampleFactor=imageUpsampleFactor,
                  scaleModel = True,
                  resolutionPoseDetection = resolutionPoseDetection,
-                 genericFolderNames = genericFolderNames,
+                 genericFolderNames = True,
                  calibrationOptions = calibrationOptions)
         except Exception as e:            
             error_msg = {}
@@ -145,7 +147,7 @@ def processTrial(session_id, trial_id, trial_type = 'dynamic',
                  poseDetector=poseDetector,
                  imageUpsampleFactor=imageUpsampleFactor,
                  resolutionPoseDetection = resolutionPoseDetection,
-                 genericFolderNames = genericFolderNames)
+                 genericFolderNames = True)
         except Exception as e:
             error_msg = {}
             error_msg['error_msg'] = e.args[0]
@@ -175,12 +177,11 @@ def processTrial(session_id, trial_id, trial_type = 'dynamic',
         
     else:
         raise Exception('Wrong trial type. Options: calibration, static, dynamic.')
-        
+    
     # Remove data
-
     if deleteLocalFolder:
         shutil.rmtree(session_path)
-      
+        
         
 def getCalibrationImagePath(session_id,isDocker=True):
     session_name = session_id # TODO We may want to name this on server side?
@@ -249,7 +250,7 @@ def newSessionSameSetup(session_id_old,session_id_new,extrinsicTrialName='calibr
     
 def batchReprocess(session_ids,calib_id,static_id,dynamic_ids,poseDetector='OpenPose', 
                    resolutionPoseDetection='default',deleteLocalFolder=True,
-                   isServer=False, genericFolderNames=True):
+                   isServer=False):
 
     if (type(calib_id) == str or type(static_id) == str or type(dynamic_ids) == str or 
         (type(dynamic_ids)==list and len(dynamic_ids)>0)) and len(session_ids) >1:
@@ -276,8 +277,7 @@ def batchReprocess(session_ids,calib_id,static_id,dynamic_ids,poseDetector='Open
                           poseDetector = poseDetector,
                           deleteLocalFolder = deleteLocalFolder,
                           isDocker=isServer,
-                          hasWritePermissions = hasWritePermissions,
-                          genericFolderNames = genericFolderNames)
+                          hasWritePermissions = hasWritePermissions)
         
         if static_id == None:
             static_id_toProcess = getNeutralTrialID(session_id)
@@ -293,8 +293,7 @@ def batchReprocess(session_ids,calib_id,static_id,dynamic_ids,poseDetector='Open
                               poseDetector = poseDetector,
                               deleteLocalFolder = deleteLocalFolder,
                               isDocker=isServer,
-                              hasWritePermissions = hasWritePermissions,
-                            genericFolderNames = genericFolderNames)
+                              hasWritePermissions = hasWritePermissions)
                 statusData = {'status':'done'}
                 _ = requests.patch(API_URL + "trials/{}/".format(static_id_toProcess), data=statusData,
                          headers = {"Authorization": "Token {}".format(API_TOKEN)})
@@ -323,14 +322,45 @@ def batchReprocess(session_ids,calib_id,static_id,dynamic_ids,poseDetector='Open
                           poseDetector = poseDetector,
                           deleteLocalFolder = deleteLocalFolder,
                           isDocker=isServer,
-                          hasWritePermissions = hasWritePermissions,
-                          genericFolderNames = genericFolderNames)
+                          hasWritePermissions = hasWritePermissions)
                 
                 statusData = {'status':'done'}
-                _ = requests.patch(API_URL + "trials/{}/".format(dID), data=statusData,
+                _ = requests.patch(API_URL + "/trials/{}/".format(dID), data=statusData,
                          headers = {"Authorization": "Token {}".format(API_TOKEN)})
             except Exception as e:
                 print(e)
                 statusData = {'status':'error'}
-                _ = requests.patch(API_URL + "trials/{}/".format(static_id_toProcess), data=statusData,
+                _ = requests.patch(API_URL + "/trials/{}/".format(static_id_toProcess), data=statusData,
                          headers = {"Authorization": "Token {}".format(API_TOKEN)})
+
+def runTestSession(pose='all',isDocker=True):
+    trials = {}
+    
+    if not any(s in API_URL for s in ['dev.opencap', '127.0']) : # prod trials
+        trials['openpose'] = '3f2960c7-ca29-45b0-9be5-8d74db6131e5' # session ae2d50f1-537a-44f1-96a5-f5b7717452a3 
+        trials['hrnet'] = '299ca938-8765-4a84-9adf-6bdf0e072451' # session faef80d3-0c26-452c-a7be-28dbfe04178e
+        # trials['failure'] = '698162c8-3980-46e5-a3c5-8d4f081db4c4' # failed trial for testing
+    else: # dev trials
+        trials['openpose'] = '89d77579-8371-4760-a019-95f2c793622c' # session acd0e19c-6c86-4ba4-95fd-94b97229a926
+     
+    if pose == 'all':
+        trialList = list(trials.values())
+    else:
+        try: 
+            trialList = [trials[pose]]
+        except:
+            trialList = list(trials.values())
+        
+    try: 
+        for trial_id in trialList:
+            trial = getTrialJson(trial_id)
+            logging.info("Running status check on trial name: " + trial['name'] + "\n\n")
+            processTrial(trial["session"], trial_id, trial_type='static', isDocker=isDocker)
+    except:
+        logging.info("test trial failed. stopping machine.")
+        # send email
+        message = "A backend OpenCap machine failed the status check: " + socket.gethostname() + ". It has been stopped."
+        sendStatusEmail(message=message)
+        raise Exception('Failed status check. Stopped.')
+        
+    logging.info("\n\n\nStatus check succeeded. \n\n")

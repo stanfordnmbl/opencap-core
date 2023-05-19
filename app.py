@@ -1,54 +1,42 @@
 import requests
 import time
 import json
-from utilsServer import processTrial
+import os
+import shutil
+from utilsServer import processTrial, runTestSession
 import traceback
 import logging
+import glob
 import numpy as np
-from utilsAPI import getAPIURL
+from utilsAPI import getAPIURL, getWorkerType
 from utilsAuth import getToken
+from utils import getDataDirectory, checkTime, checkResourceUsage
 
 logging.basicConfig(level=logging.INFO)
 
 API_TOKEN = getToken()
 API_URL = getAPIURL()
+workerType = getWorkerType()
 
-def trc2json(trc_path, output_path):
-    with open(trc_path, "r") as file_motion:
-        lines = file_motion.readlines()
+# if true, will delete entire data directory when finished with a trial
+isDocker = True
 
-    start = 0
-    while lines[start][:6] != "Frame#":
-        start += 1
-
-    markers = lines[start].split("\t")[2:]
-    columns = lines[start+1].split("\t")[2:]
-
-    times = []
-    observations = []
-    
-    for line in lines[start+2:]:
-        line_elements = line.rstrip().split("\t")
-        if len(line_elements) < 5:
-            continue
-        times.append(float(line_elements[1]))
-        observations.append(list(map(float, line_elements[2:])))
-
-    res = {
-        "framerate": 60,
-        "time": times,
-        "markers": markers,
-        "colnames": columns,        
-        "data": observations
-    }
- 
-    with open(output_path, "w") as file_output:
-        file_output.write(json.dumps(res))
-        
-    return output_path
+# get start time
+t = time.localtime()
+initialStatusCheck = False
 
 while True:
-    queue_path = "trials/dequeue/"
+    
+    # Run test trial at a given frequency to check status of machine. Stop machine if fails.
+    if checkTime(t,minutesElapsed=30) or not initialStatusCheck:
+        runTestSession(isDocker=isDocker)           
+        t = time.localtime()
+        initialStatusCheck = True
+           
+    # workerType = 'calibration' -> just processes calibration and neutral
+    # workerType = 'all' -> processes all types of trials
+    # no query string -> defaults to 'all'
+    queue_path = "trials/dequeue/?workerType=" + workerType
     try:
         r = requests.get("{}{}".format(API_URL, queue_path),
                          headers = {"Authorization": "Token {}".format(API_TOKEN)})
@@ -58,14 +46,18 @@ while True:
         continue
 
     if r.status_code == 404:
-        logging.info(".")
-        time.sleep(0.5)
+        logging.info("...pulling " + workerType + " trials.")
+        time.sleep(1)
         continue
     
     if np.floor(r.status_code/100) == 5: # 5xx codes are server faults
         logging.info("API unresponsive. Status code = {:.0f}.".format(r.status_code))
         time.sleep(5)
         continue
+    
+    # Check resource usage
+    resourceUsage = checkResourceUsage()
+    logging.info(json.dumps(resourceUsage))
 
     logging.info(r.text)
     
@@ -98,15 +90,22 @@ while True:
     logging.info("processTrial({},{},trial_type={})".format(trial["session"], trial["id"], trial_type))
 
     try:
-        processTrial(trial["session"], trial["id"], trial_type=trial_type, isDocker=True)   
+        processTrial(trial["session"], trial["id"], trial_type=trial_type, isDocker=isDocker)   
         # note a result needs to be posted for the API to know we finished, but we are posting them 
         # automatically thru procesTrial now
         r = requests.patch(trial_url, data={"status": "done"},
                          headers = {"Authorization": "Token {}".format(API_TOKEN)})
         
-        print('0.5s pause if need to restart.')
+        logging.info('0.5s pause if need to restart.')
         time.sleep(0.5)
     except:
         r = requests.patch(trial_url, data={"status": "error"},
                          headers = {"Authorization": "Token {}".format(API_TOKEN)})
         traceback.print_exc()
+    
+    # Clean data directory
+    if isDocker:
+        folders = glob.glob(os.path.join(getDataDirectory(isDocker=True),'Data','*'))
+        for f in folders:         
+            shutil.rmtree(f)
+            logging.info('deleting ' + f)
