@@ -18,3 +18,24 @@ def getAPIURL():
         API_URL= API_URL + '/'
 
     return API_URL
+
+def getWorkerType():
+    try: # look in environment file
+        workerType = config("WORKER_TYPE")
+    except: # default
+        workerType = "all"
+    
+    return workerType
+
+def getStatusEmails():
+    import json
+    emailInfo = {}
+    try:
+        emailInfo['fromEmail'] = config("STATUS_EMAIL_FROM")
+        emailInfo['password'] = config("STATUS_EMAIL_FROM_PW")
+        emailInfo['toEmails'] = json.loads(config("STATUS_EMAIL_TO"))
+    except:
+        emailInfo = None
+    
+    return emailInfo
+        

@@ -11,6 +11,7 @@ import glob
 import mimetypes
 import subprocess
 import zipfile
+import time
 
 import numpy as np
 import pandas as pd
@@ -115,6 +116,11 @@ def getSessionJson(session_id):
     sessionJson['trials'].sort(key=getCreatedAt)
     
     return sessionJson
+
+def getSubjectJson(subject_id):
+    subjectJson = requests.get(API_URL + "subjects/{}/".format(subject_id),
+                       headers = {"Authorization": "Token {}".format(API_TOKEN)}).json()
+    return subjectJson
     
 def getTrialName(trial_id):
     trial = getTrialJson(trial_id)
@@ -146,24 +152,9 @@ def writeMediaToAPI(API_URL,media_path,trial_id,tag=None,deleteOldMedia=False):
                 
                 else:
                     device_id = None
-                
-                files = {'media': open(fullpath, 'rb')}
-                data = {
-                    "trial": trial_id,
-                    "tag": tag,
-                    "device_id" : device_id
-                }
-        
-                r= requests.post("{}{}".format(API_URL, "results/"), files=files, data=data,
-                         headers = {"Authorization": "Token {}".format(API_TOKEN)})
-                files["media"].close()
-                
-                if r.status_code != 201:
-                    print('server response was + ' + str(r.status_code))
-                else:
-                    print('Media results sent to API')
-            
-        
+                               
+                postFileToTrial(fullpath,trial_id,tag,device_id)
+
     return
 
 
@@ -373,13 +364,25 @@ def getMetadataFromServer(session_id,justCheckerParams=False):
     session = getSessionJson(session_id)
     if session['meta'] is not None:
         if not justCheckerParams:
-            session_desc["subjectID"] = session['meta']['subject']['id']
-            session_desc["mass_kg"] = float(session['meta']['subject']['mass'])
-            session_desc["height_m"] = float(session['meta']['subject']['height'])
-            try:
-                session_desc["posemodel"] = session['meta']['subject']['posemodel']
-            except:
-                session_desc["posemodel"] = 'openpose'
+            # Backward compatibility
+            if 'subject' in session['meta']:
+                session_desc["subjectID"] = session['meta']['subject']['id']
+                session_desc["mass_kg"] = float(session['meta']['subject']['mass'])
+                session_desc["height_m"] = float(session['meta']['subject']['height'])
+                try:
+                    session_desc["posemodel"] = session['meta']['subject']['posemodel']
+                except:
+                    session_desc["posemodel"] = 'openpose'
+            else:                
+                subject_info = getSubjectJson(session['subject'])                
+                session_desc["subjectID"] = subject_info['name']
+                session_desc["mass_kg"] = subject_info['weight']
+                session_desc["height_m"] = subject_info['height']
+                try:
+                    session_desc["posemodel"] = session['meta']['settings']['posemodel']
+                except:
+                    session_desc["posemodel"] = 'openpose'
+
         if 'sessionWithCalibration' in session['meta'] and 'checkerboard' not in session['meta']:
             newSessionId = session['meta']['sessionWithCalibration']['id']
             session = getSessionJson(newSessionId)
@@ -732,16 +735,31 @@ def getModelAndMetadata(session_id,session_path,simplePath=False):
     return
     
 def postFileToTrial(filePath,trial_id,tag,device_id):
-    files = {'media': open(filePath, 'rb')}
+        
+    # get S3 link
+    data = {'fileName':os.path.split(filePath)[1]}
+    r = requests.get(API_URL + "sessions/null/get_presigned_url/",data=data).json()
+    
+    # upload to S3
+    files = {'file': open(filePath, 'rb')}
+    requests.post(r['url'], data=r['fields'],files=files)   
+    files["file"].close()
+
+    # post link to and data to results   
     data = {
         "trial": trial_id,
         "tag": tag,
-        "device_id" : device_id
+        "device_id" : device_id,
+        "media_url" : r['fields']['key']
     }
-
-    requests.post(API_URL + "results/", files=files, data=data,
+    
+    rResult = requests.post(API_URL + "results/", data=data,
                   headers = {"Authorization": "Token {}".format(API_TOKEN)})
-    files["media"].close()
+    
+    if rResult.status_code != 201:
+        print('server response was + ' + str(r.status_code))
+    else:
+        print('Result posted to S3.')
     
     return
 
@@ -1213,3 +1231,112 @@ def getVideoExtension(pathFileWithoutExtension):
             extension = '.' + file.rsplit('.', 1)[1]
             
     return extension
+
+# check how much time has passed since last status check
+def checkTime(t,minutesElapsed=30):
+    t2 = time.localtime()
+    return (t2.tm_hour - t.tm_hour) * 60 + (t2.tm_min - t.tm_min) >= minutesElapsed
+
+# send status email
+def sendStatusEmail(message=None,subject=None):
+    import smtplib, ssl
+    from utilsAPI import getStatusEmails
+    from email.message import EmailMessage
+    
+    emailInfo = getStatusEmails()
+    if emailInfo is None:
+        return('No email info or wrong email info in env file.')
+       
+    if message is None:
+        message = "A backend server is down and has been stopped."
+    if subject is None:
+        subject = "OpenCap backend server down"
+        
+    port = 465  # For SSL
+    smtp_server = "smtp.gmail.com"  
+    context = ssl.create_default_context()
+    with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
+        server.login(emailInfo['fromEmail'], emailInfo['password'])
+        for toEmail in emailInfo['toEmails']:
+            # server.(emailInfo['fromEmail'], toEmail, message)
+            msg = EmailMessage()
+            msg['Subject'] = subject
+            msg['From'] = emailInfo['fromEmail']
+            msg['To'] = toEmail
+            msg.set_content(message)
+            server.send_message(msg)
+        server.quit()
+
+def checkResourceUsage():
+    import psutil
+    
+    resourceUsage = {}
+    
+    memory_info = psutil.virtual_memory()
+    resourceUsage['memory_gb'] = memory_info.used / (1024 ** 3)
+    resourceUsage['memory_perc'] = memory_info.percent 
+
+    # Get the disk usage information of the root directory
+    disk_usage = psutil.disk_usage('/')
+
+    # Get the percentage of disk usage
+    resourceUsage['disk_gb'] = disk_usage.used / (1024 ** 3)
+    resourceUsage['disk_perc'] = disk_usage.percent
+    
+    return resourceUsage
+
+# %% Some functions for loading subject data
+
+def getSubjectNumber(subjectName):
+    subjects = requests.get(API_URL + "subjects/",
+                           headers = {"Authorization": "Token {}".format(API_TOKEN)}).json()
+    sNum = [s['id'] for s in subjects if s['name'] == subjectName]
+    if len(sNum)>1:
+        print(len(sNum) + ' subjects with the name ' + subjectName + '. Will use the first one.')   
+    elif len(sNum) == 0:
+        raise Exception('no subject found with this name.')
+        
+    return sNum[0]
+
+def getUserSessions():
+    sessionJson = requests.get(API_URL + "sessions/valid/",
+                           headers = {"Authorization": "Token {}".format(API_TOKEN)}).json()
+    return sessionJson
+
+def getSubjectSessions(subjectName):
+    sessions = getUserSessions()
+    subNum = getSubjectNumber(subjectName)
+    sessions2 = [s for s in sessions if (s['subject'] == subNum)]
+    
+    return sessions2
+
+def getTrialNames(session):
+    trialNames = [t['name'] for t in session['trials']]
+    return trialNames
+
+def findSessionWithTrials(subjectTrialNames,trialNames):
+    hasTrials = []
+    for trials in trialNames:
+        hasTrials.append(None)
+        for i,sTrials in enumerate(subjectTrialNames):
+            if all(elem in sTrials for elem in trials):
+                hasTrials[-1] = i
+                break
+            
+    return hasTrials
+
+def get_entry_with_largest_number(trialList):
+    max_entry = None
+    max_number = float('-inf')
+
+    for entry in trialList:
+        # Extract the number from the string
+        try:
+            number = int(entry.split('_')[-1])
+            if number > max_number:
+                max_number = number
+                max_entry = entry
+        except ValueError:
+            continue
+
+    return max_entry
