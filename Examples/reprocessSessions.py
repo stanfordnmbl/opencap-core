@@ -55,57 +55,72 @@ API_TOKEN = getToken()
 # Enter the identifier(s) of the session(s) you want to reprocess. This is a list of one
 # or more session identifiers. The identifier is found as the 36-character string at the
 # end of the session url: app.opencap.ai/session/<session_id>
-session_ids = ['23d52d41-69fe-47cf-8b60-838e4268dd50']
 
+session_idss = [['34cd32a0-2398-4e56-a4dc-879fb331e12d'],
+                ['89e1063c-7ac6-458a-8416-d347c794a356'],
+                ['a269984f-0a9e-4d6f-b88c-8eef9e462027'],
+                ['a52cce9e-52db-4a42-8c5a-ef2ee2ca5dc0'],
+                ['59b912fb-f5e2-42d8-a18e-331a2166e3f8'],
+                ['3b7fbb9a-1083-497f-8de3-6b2d5e1d30c3'],
+                ['6a8ebc43-9976-4f6a-9e1b-ba88a138915c'],
+                ['bc82fdc7-b342-4b07-89ab-c9fdd6d8966f'],
+                ['1a39d188-6b7c-42c4-b7d7-d821656ae257'],
+                ['059b2b0d-8d83-4cde-b856-fde0d031be21']]
 
+# session_idss = [['34cd32a0-2398-4e56-a4dc-879fb331e12d'],
+#                 ['059b2b0d-8d83-4cde-b856-fde0d031be21']]
 
-# Select which trials to reprocess. You can reprocess all trials in the session 
-# by entering None in all fields below. The correct calibration and static
-# trials will be automatically selected if None, and all dynamic trials will be
-# processed if None. If you do not want to process one of the trial types, 
-# enter []. If you specify multiple sessions above, all of the fields
-# below must be None or []. If you selected only one session_id above, you may
-# select specific reprocessed. Only one trial (str) is allowed for calib_id and
-# static_id. A list of strings is allowed for dynamic_ids.
+for session_ids in session_idss:
 
-calib_id = [] # None (auto-selected trial), [] (skip), or string of specific trial_id
-static_id = [] # None (auto-selected trial), [] (skip), or string of specific trial_id
-dynamic_trialNames = None # None (all dynamic trials), [] (skip), or list of trial names
+    # Select which trials to reprocess. You can reprocess all trials in the session 
+    # by entering None in all fields below. The correct calibration and static
+    # trials will be automatically selected if None, and all dynamic trials will be
+    # processed if None. If you do not want to process one of the trial types, 
+    # enter []. If you specify multiple sessions above, all of the fields
+    # below must be None or []. If you selected only one session_id above, you may
+    # select specific reprocessed. Only one trial (str) is allowed for calib_id and
+    # static_id. A list of strings is allowed for dynamic_ids.
 
-# extract trial ids from trial names
-if dynamic_trialNames is not None and len(dynamic_trialNames)>0:
-    trialNames = getTrialNameIdMapping(session_ids[0])
-    dynamic_ids = [trialNames[name]['id'] for name in dynamic_trialNames]
-else:
-    dynamic_ids = dynamic_trialNames
+    calib_id = [] # None (auto-selected trial), [] (skip), or string of specific trial_id
+    static_id = None # None (auto-selected trial), [] (skip), or string of specific trial_id
+    dynamic_trialNames = None # None (all dynamic trials), [] (skip), or list of trial names
+    
+    # extract trial ids from trial names
+    if dynamic_trialNames is not None and len(dynamic_trialNames)>0:
+        trialNames = getTrialNameIdMapping(session_ids[0])
+        dynamic_ids = [trialNames[name]['id'] for name in dynamic_trialNames]
+    else:
+        dynamic_ids = dynamic_trialNames
+    
+    # # Optional: Uncomment this section to create a list of dynamic_ids to reprocess.
+    # dynamic_ids = None # None (all dynamic trials), [] (skip), or list of trial_id strings
+    
+    # The resolution at which the videos are processed by OpenPose can be adjusted.
+    # The finer the resolution the more accurate the results (typically) but also
+    # the more GPU memory is required and the more time it takes to process the video.
+    # OpenCap supports the following four resolutionPoseDetection options (ordered
+    # from lower to higher resolution/required memory):
+    #   - 'default': 1x368 resolution, default in OpenPose (we were able to run with a GPU with 4GB memory).
+    #   - '1x736': 1x736 resolution, default in OpenCap (we were able to run with a GPU with 4GB memory).
+    #   - '1x736_2scales': 1x736 resolution with 2 scales (gap = 0.75). (may help with people larger in the frame. (we were able to run with a GPU with 8GB memory)
+    #       - Please visit https://github.com/CMU-Perceptual-Computing-Lab/openpose/blob/master/include/openpose/flags.hpp#L112
+    #         to learn more about scales. The conversation in this issue is also
+    #         relevant: https://github.com/CMU-Perceptual-Computing-Lab/openpose/issues/622
+    #   - '1x1008_4scales': 1x1008 resolution with 4 scales (gap = 0.25). (we were only able to run with a GPU with 24GB memory)
+    #       - This is the highest resolution/settings we could use with a 24GB
+    #         GPU without running into memory issues.
+    resolutionPoseDetection = '1x1008_4scales'
+    
+    
+    # Set deleteLocalFolder to False to keep a local copy of the data. If you are 
+    # reprocessing a session that you collected, data will get written to the database
+    # regardless of your selection. If True, the local copy will be deleted.
+    deleteLocalFolder = False
+          
+    
+    # %% Process data.
+    batchReprocess(session_ids,calib_id,static_id,dynamic_ids,
+                   resolutionPoseDetection=resolutionPoseDetection,
+                   deleteLocalFolder=deleteLocalFolder)
 
-# # Optional: Uncomment this section to create a list of dynamic_ids to reprocess.
-# dynamic_ids = None # None (all dynamic trials), [] (skip), or list of trial_id strings
-
-# The resolution at which the videos are processed by OpenPose can be adjusted.
-# The finer the resolution the more accurate the results (typically) but also
-# the more GPU memory is required and the more time it takes to process the video.
-# OpenCap supports the following four resolutionPoseDetection options (ordered
-# from lower to higher resolution/required memory):
-#   - 'default': 1x368 resolution, default in OpenPose (we were able to run with a GPU with 4GB memory).
-#   - '1x736': 1x736 resolution, default in OpenCap (we were able to run with a GPU with 4GB memory).
-#   - '1x736_2scales': 1x736 resolution with 2 scales (gap = 0.75). (may help with people larger in the frame. (we were able to run with a GPU with 8GB memory)
-#       - Please visit https://github.com/CMU-Perceptual-Computing-Lab/openpose/blob/master/include/openpose/flags.hpp#L112
-#         to learn more about scales. The conversation in this issue is also
-#         relevant: https://github.com/CMU-Perceptual-Computing-Lab/openpose/issues/622
-#   - '1x1008_4scales': 1x1008 resolution with 4 scales (gap = 0.25). (we were only able to run with a GPU with 24GB memory)
-#       - This is the highest resolution/settings we could use with a 24GB
-#         GPU without running into memory issues.
-resolutionPoseDetection = 'default'
-
-
-# Set deleteLocalFolder to False to keep a local copy of the data. If you are 
-# reprocessing a session that you collected, data will get written to the database
-# regardless of your selection. If True, the local copy will be deleted.
-deleteLocalFolder = False
-      
-
-# %% Process data.
-batchReprocess(session_ids,calib_id,static_id,dynamic_ids,
-               resolutionPoseDetection=resolutionPoseDetection,
-               deleteLocalFolder=deleteLocalFolder)
+test=1

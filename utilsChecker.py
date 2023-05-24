@@ -1017,8 +1017,11 @@ def synchronizeVideoKeypoints(keypointList, confidenceList,
     else:
         syncActivity = 'general'
         
+    # Force gait sync
+    if (not 'neutral' in trialName) and (not 'llc' in trialName.lower()) and (not 'rlc' in trialName.lower()):
+        syncActivity= 'gait'
+        
     print('Using ' + syncActivity + ' sync function.')
-    
     
     # Select filtering frequency based on if it is gait
     if syncActivity == 'gait': 

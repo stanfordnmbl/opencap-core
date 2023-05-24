@@ -79,7 +79,7 @@ def processTrial(session_id, trial_id, trial_type = 'dynamic',
         
     elif trial_type == 'static':
         # delete static files if they exist.
-        deleteStaticFiles(session_path, staticTrialName = 'neutral')
+        # deleteStaticFiles(session_path, staticTrialName = 'neutral')
         
         # Check for calibration to use on django, if not, check for switch calibrations and post result.
         calibrationOptions = getCalibration(session_id,session_path,trial_type=trial_type,getCalibrationOptions=True)   
