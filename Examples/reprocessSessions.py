@@ -60,9 +60,9 @@ session_ids = [
                 'ea0cfa3f-58bc-4ead-a3bc-12e17a7d8884', # shoulder benchmarks
                # '8f050692-27f5-42d5-a5ad-663d7fedb7da', # mariners
                # '03284efb-2244-4a48-aec9-abc34afdffc8', # overground
-                '62500c22-6e52-4ea4-b294-bc91e06eb805', # treadmill
-                '039b9d88-b3a5-4199-94b2-c687d2f180ac', # UE
-                '30eb2791-dd65-4f6b-af62-b793ee2aec3d' # my pitch
+               # '62500c22-6e52-4ea4-b294-bc91e06eb805', # treadmill
+               # '039b9d88-b3a5-4199-94b2-c687d2f180ac', # UE
+               # '30eb2791-dd65-4f6b-af62-b793ee2aec3d' # my pitch
                ] 
 
 poseDetector = 'OpenPose'
