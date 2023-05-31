@@ -651,7 +651,7 @@ def changeSessionMetadata(session_ids,newMetaDict):
                 metaYaml[key] = newMetaDict[key]
                 addedKey[key] = newMetaDict[key]
             if type(metaYaml[key]) is dict:
-                for key2 in metaYaml[key].keys():                   
+                for key2 in metaYaml[key].keys():
                     if key2 in newMetaDict.keys():
                         metaYaml[key][key2] = newMetaDict[key2] 
                         addedKey[key2] = newMetaDict[key2]
