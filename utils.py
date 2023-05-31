@@ -370,14 +370,14 @@ def getMetadataFromServer(session_id,justCheckerParams=False):
                 session_desc["mass_kg"] = float(session['meta']['subject']['mass'])
                 session_desc["height_m"] = float(session['meta']['subject']['height'])
                 # Before implementing the subject feature, the posemodel was stored
-                # in the session['meta']['subject']. After implementing the subject
-                # feature, the posemodel is stored in the session['meta']['settings']
+                # in session['meta']['subject']. After implementing the subject
+                # feature, the posemodel is stored in session['meta']['settings']
                 # and there is no session['meta']['subject'].
                 try:
                     session_desc["posemodel"] = session['meta']['subject']['posemodel']
                 except:
                     session_desc["posemodel"] = 'openpose'
-                # This case might happen if openSimModel changed post collection.
+                # This might happen if openSimModel was changed post data collection.
                 if 'settings' in session['meta']:
                     try:
                         session_desc["openSimModel"] = session['meta']['settings']['openSimModel']
@@ -652,9 +652,9 @@ def changeSessionMetadata(session_ids,newMetaDict):
                 addedKey[key] = newMetaDict[key]
             if type(metaYaml[key]) is dict:
                 for key2 in metaYaml[key].keys():                   
-                    if key in newMetaDict.keys():
-                        metaYaml[key][key2] = newMetaDict[key] 
-                        addedKey[key] = newMetaDict[key_t]
+                    if key2 in newMetaDict.keys():
+                        metaYaml[key][key2] = newMetaDict[key2] 
+                        addedKey[key2] = newMetaDict[key2]
                         
         for newMeta in newMetaDict:
             if not newMeta in addedKey:

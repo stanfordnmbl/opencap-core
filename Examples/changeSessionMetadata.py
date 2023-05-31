@@ -30,13 +30,9 @@ from utils import changeSessionMetadata
 
 session_ids = ['67d80999-f59d-46f1-bd9d-c97432c0173d']
 
-# Dictionary of metadata fields to change.
+# Dictionary of metadata fields to change (see sessionMetadata.yaml).
 newMetadata = {'openSimModel':'LaiUhlrich2022_shoulder',
                'posemodel': 'openpose',
                'mass_kg': '80',
-               'height_m': '1.96'} # dict of meta fields to change
-# newMetadata= {'mass':83}
-
+               'height_m': '1.96'}
 changeSessionMetadata(session_ids,newMetadata)
-
-test=1
