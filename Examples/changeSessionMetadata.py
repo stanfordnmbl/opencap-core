@@ -28,10 +28,15 @@ sys.path.append(os.path.abspath('./..'))
 
 from utils import changeSessionMetadata
 
-session_ids = ['0d46adef-62cb-455f-9ff3-8116717cc2fe']
+session_ids = ['67d80999-f59d-46f1-bd9d-c97432c0173d']
 
 # Dictionary of metadata fields to change.
-newMetadata = {'posemodel':'openpose'} # dict of meta fields to change
+newMetadata = {'openSimModel':'LaiUhlrich2022_shoulder',
+               'posemodel': 'openpose',
+               'mass_kg': '80',
+               'height_m': '1.96'} # dict of meta fields to change
 # newMetadata= {'mass':83}
 
 changeSessionMetadata(session_ids,newMetadata)
+
+test=1
