@@ -152,24 +152,9 @@ def writeMediaToAPI(API_URL,media_path,trial_id,tag=None,deleteOldMedia=False):
                 
                 else:
                     device_id = None
-                
-                files = {'media': open(fullpath, 'rb')}
-                data = {
-                    "trial": trial_id,
-                    "tag": tag,
-                    "device_id" : device_id
-                }
-        
-                r= requests.post("{}{}".format(API_URL, "results/"), files=files, data=data,
-                         headers = {"Authorization": "Token {}".format(API_TOKEN)})
-                files["media"].close()
-                
-                if r.status_code != 201:
-                    print('server response was + ' + str(r.status_code))
-                else:
-                    print('Media results sent to API')
-            
-        
+                               
+                postFileToTrial(fullpath,trial_id,tag,device_id)
+
     return
 
 
@@ -758,16 +743,31 @@ def getModelAndMetadata(session_id,session_path,simplePath=False):
     return
     
 def postFileToTrial(filePath,trial_id,tag,device_id):
-    files = {'media': open(filePath, 'rb')}
+        
+    # get S3 link
+    data = {'fileName':os.path.split(filePath)[1]}
+    r = requests.get(API_URL + "sessions/null/get_presigned_url/",data=data).json()
+    
+    # upload to S3
+    files = {'file': open(filePath, 'rb')}
+    requests.post(r['url'], data=r['fields'],files=files)   
+    files["file"].close()
+
+    # post link to and data to results   
     data = {
         "trial": trial_id,
         "tag": tag,
-        "device_id" : device_id
+        "device_id" : device_id,
+        "media_url" : r['fields']['key']
     }
-
-    requests.post(API_URL + "results/", files=files, data=data,
+    
+    rResult = requests.post(API_URL + "results/", data=data,
                   headers = {"Authorization": "Token {}".format(API_TOKEN)})
-    files["media"].close()
+    
+    if rResult.status_code != 201:
+        print('server response was + ' + str(r.status_code))
+    else:
+        print('Result posted to S3.')
     
     return
 
@@ -1292,3 +1292,59 @@ def checkResourceUsage():
     resourceUsage['disk_perc'] = disk_usage.percent
     
     return resourceUsage
+
+# %% Some functions for loading subject data
+
+def getSubjectNumber(subjectName):
+    subjects = requests.get(API_URL + "subjects/",
+                           headers = {"Authorization": "Token {}".format(API_TOKEN)}).json()
+    sNum = [s['id'] for s in subjects if s['name'] == subjectName]
+    if len(sNum)>1:
+        print(len(sNum) + ' subjects with the name ' + subjectName + '. Will use the first one.')   
+    elif len(sNum) == 0:
+        raise Exception('no subject found with this name.')
+        
+    return sNum[0]
+
+def getUserSessions():
+    sessionJson = requests.get(API_URL + "sessions/valid/",
+                           headers = {"Authorization": "Token {}".format(API_TOKEN)}).json()
+    return sessionJson
+
+def getSubjectSessions(subjectName):
+    sessions = getUserSessions()
+    subNum = getSubjectNumber(subjectName)
+    sessions2 = [s for s in sessions if (s['subject'] == subNum)]
+    
+    return sessions2
+
+def getTrialNames(session):
+    trialNames = [t['name'] for t in session['trials']]
+    return trialNames
+
+def findSessionWithTrials(subjectTrialNames,trialNames):
+    hasTrials = []
+    for trials in trialNames:
+        hasTrials.append(None)
+        for i,sTrials in enumerate(subjectTrialNames):
+            if all(elem in sTrials for elem in trials):
+                hasTrials[-1] = i
+                break
+            
+    return hasTrials
+
+def get_entry_with_largest_number(trialList):
+    max_entry = None
+    max_number = float('-inf')
+
+    for entry in trialList:
+        # Extract the number from the string
+        try:
+            number = int(entry.split('_')[-1])
+            if number > max_number:
+                max_number = number
+                max_entry = entry
+        except ValueError:
+            continue
+
+    return max_entry
