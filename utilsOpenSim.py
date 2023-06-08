@@ -10,7 +10,8 @@ from utils import storage2numpy
 def runScaleTool(pathGenericSetupFile, pathGenericModel, subjectMass,
                  pathTRCFile, timeRange, pathOutputFolder, 
                  scaledModelName='not_specified', subjectHeight=0,
-                 createModelWithContacts=False, fixed_markers=False):
+                 createModelWithContacts=False, fixed_markers=False,
+                 suffix_model=''):
     
     dirGenericModel, scaledModelNameA = os.path.split(pathGenericModel)
     
@@ -28,20 +29,20 @@ def runScaleTool(pathGenericSetupFile, pathGenericModel, subjectMass,
     
     # Marker set.
     _, setupFileName = os.path.split(pathGenericSetupFile)
-    if 'Lai' in scaledModelName or 'Rajagopal' in scaledModelName:        
-        if 'Mocap' in setupFileName:        
-            markerSetFileName = 'RajagopalModified2016_markers_mocap.xml'
+    if 'Lai' in scaledModelName or 'Rajagopal' in scaledModelName:
+        if 'Mocap' in setupFileName:
+            markerSetFileName = 'RajagopalModified2016_markers_mocap{}.xml'.format(suffix_model)
         elif 'openpose' in setupFileName:
             markerSetFileName = 'RajagopalModified2016_markers_openpose.xml'
         elif 'mmpose' in setupFileName:
-            markerSetFileName = 'RajagopalModified2016_markers_mmpose.xml'    
+            markerSetFileName = 'RajagopalModified2016_markers_mmpose.xml'
         else:
             if fixed_markers:
                 markerSetFileName = 'RajagopalModified2016_markers_augmenter_fixed.xml'
             else:
-                markerSetFileName = 'RajagopalModified2016_markers_augmenter.xml'
+                markerSetFileName = 'RajagopalModified2016_markers_augmenter{}.xml'.format(suffix_model)
     elif 'gait2392' in scaledModelName:
-         if 'Mocap' in setupFileName:  
+         if 'Mocap' in setupFileName:
              markerSetFileName = 'gait2392_markers_mocap.xml'
          else:
             markerSetFileName = 'gait2392_markers_augmenter.xml'
