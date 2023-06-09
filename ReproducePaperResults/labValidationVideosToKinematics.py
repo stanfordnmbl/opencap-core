@@ -125,7 +125,7 @@ for subject in subjects:
         # Adjust model name
         sessionMetadata = importMetadata(pathMetadataNew)
         sessionMetadata['openSimModel'] = (
-            'LaiArnoldModified2017_poly_withArms_weldHand')
+            'LaiUhlrich2022')
         with open(pathMetadataNew, 'w') as file:
                 yaml.dump(sessionMetadata, file)        
         for cam in os.listdir(pathSession):
