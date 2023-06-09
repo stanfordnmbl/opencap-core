@@ -96,7 +96,7 @@ else:
 #   - '1x1008_4scales': 1x1008 resolution with 4 scales (gap = 0.25). (we were only able to run with a GPU with 24GB memory)
 #       - This is the highest resolution/settings we could use with a 24GB
 #         GPU without running into memory issues.
-resolutionPoseDetection = '1x736'
+resolutionPoseDetection = 'default'
 
 
 # Set deleteLocalFolder to False to keep a local copy of the data. If you are 
