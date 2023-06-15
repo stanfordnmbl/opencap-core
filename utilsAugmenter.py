@@ -147,7 +147,7 @@ def augmentTRC(pathInputTRCFile, subject_mass, subject_height,
     if offset:
         trc_file.offset('y', -(min_y_pos-0.01))
         
-    # %% Return augmented .trc file   
+    # %% Return augmented .trc file  
     trc_file.write(pathOutputTRCFile)
     
     return min_y_pos

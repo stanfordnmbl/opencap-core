@@ -372,6 +372,7 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
         
     # %% OpenSim pipeline.
     if runOpenSimPipeline:
+        print ('Run opensim pipeline')
         openSimPipelineDir = os.path.join(baseDir, "opensimPipeline")        
         
         if genericFolderNames:
@@ -397,13 +398,17 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
             os.makedirs(outputScaledModelDir, exist_ok=True)
             # Path setup file.
             genericSetupFile4ScalingName = (
-                'Setup_scaling_RajagopalModified2016_withArms_KA.xml')
+                'Setup_scaling_MaleFullBodyModel_v2.0_OS4.xml')
             pathGenericSetupFile4Scaling = os.path.join(
                 openSimPipelineDir, 'Scaling', genericSetupFile4ScalingName)
+            print(pathGenericSetupFile4Scaling)
             # Path model file.
+            # pathGenericModel4Scaling = os.path.join(
+            #     openSimPipelineDir, 'Models', 
+            #     sessionMetadata['openSimModel'] + '.osim') 
             pathGenericModel4Scaling = os.path.join(
                 openSimPipelineDir, 'Models', 
-                sessionMetadata['openSimModel'] + '.osim')            
+                'LaiMaleFullBodyModel_v2.0_OS4_Nomarkers' + '.osim')            
             # Path TRC file.
             pathTRCFile4Scaling = pathAugmentedOutputFiles[trialName]
             # Get time range.
@@ -437,13 +442,21 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
         
         # Inverse kinematics.
         if not scaleModel:
+            print ('Run Inverse Kinematics')
             outputIKDir = os.path.join(openSimDir, 'Kinematics')
+            print(outputIKDir)
             os.makedirs(outputIKDir, exist_ok=True)
             # Check if there is a scaled model.
+            #Hard code model name 
+            # pathScaledModel = os.path.join(outputScaledModelDir, 
+            #                                 sessionMetadata['openSimModel'] + 
+            #                                 "_scaled.osim")
             pathScaledModel = os.path.join(outputScaledModelDir, 
-                                            sessionMetadata['openSimModel'] + 
+                                            'LaiMaleFullBodyModel_v2.0_OS4_Nomarkers' + 
                                             "_scaled.osim")
+            print(pathScaledModel)
             if os.path.exists(pathScaledModel):
+                print('Scale Model Exists')
                 # Path setup file.
                 genericSetupFile4IKName = 'Setup_IK{}.xml'.format(suffix_model)
                 pathGenericSetupFile4IK = os.path.join(
@@ -466,6 +479,7 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
                 raise ValueError("No scaled model available.")
         
         # Write body transforms to json for visualization.
+        print('Write body transforms to json for visualization.')
         outputJsonVisDir = os.path.join(sessionDir,'VisualizerJsons',
                                         trialName)
         os.makedirs(outputJsonVisDir,exist_ok=True)
@@ -477,6 +491,7 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
         
     # %% Dump settings in yaml.
     if not extrinsicsTrial:
+        print ('If not extrinsic trial')
         pathSettings = os.path.join(postAugmentationDir, 
                                     'Settings_' + trial_id + '.yaml')
         settings = {'poseDetector': poseDetector, 'resolutionPoseDetection':
@@ -487,3 +502,5 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
             settings['bbox_thr']: str(bbox_thr)
         with open(pathSettings, 'w') as file:
                 yaml.dump(settings, file)
+
+    print('Finished Main')
