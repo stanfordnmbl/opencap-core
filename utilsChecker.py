@@ -173,8 +173,8 @@ def calcIntrinsics(folderName, CheckerBoardParams=None, filenames=['*.jpg'],
             print("Couldn't find checkerboard in " + pathName)
   
     if len(twodpoints) < .5*len(imageFiles):
-       print('Checkerboard not detected in at least half of intrinsic images. Re-record video.')
-       return None
+        print('Checkerboard not detected in at least half of intrinsic images. Re-record video.')
+        return None
        
      
     # Perform camera calibration by 
@@ -285,8 +285,7 @@ def saveCameraParameters(filename,CameraParams):
 #%% 
 def getVideoRotation(videoPath):
     
-    
-    meta = ffmpeg.probe(videoPath)
+    meta = ffmpeg.probe(videoPath) 
     try:
         rotation = meta['format']['tags']['com.apple.quicktime.video-orientation']
     except:
@@ -348,24 +347,9 @@ def rotateIntrinsics(CamParams,videoPath):
 # %% 
 def calcExtrinsics(imageFileName, CameraParams, CheckerBoardParams,
                    imageScaleFactor=1,visualize=False,
-                   imageUpsampleFactor=1,useSecondExtrinsicsSolution=False):
-    # Camera parameters is a dictionary with intrinsics
-    
-    # stop the iteration when specified 
-    # accuracy, epsilon, is reached or 
-    # specified number of iterations are completed. 
-    criteria = (cv2.TERM_CRITERIA_EPS + 
-                cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001) 
-      
-    # Vector for 3D points 
-    threedpoints = [] 
-      
-    # Vector for 2D points 
-    twodpoints = [] 
-    
-    #  3D points real world coordinates. Assuming z=0
-    objectp3d = generate3Dgrid(CheckerBoardParams)
-    
+                   imageUpsampleFactor=1,useSecondExtrinsicsSolution=False,
+                   points2d=None,points3d=None):
+
     # Load and resize image - remember calibration image res needs to be same as all processing
     image = cv2.imread(imageFileName)
     if imageScaleFactor != 1:
@@ -378,64 +362,104 @@ def calcExtrinsics(imageFileName, CameraParams, CheckerBoardParams,
     else:
         imageUpsampled = image
 
+    # If searching for a checkerboard, not provided points
+    if points2d is None and points3d is None:
+        # Camera parameters is a dictionary with intrinsics
+        
+        # stop the iteration when specified 
+        # accuracy, epsilon, is reached or 
+        # specified number of iterations are completed. 
+        criteria = (cv2.TERM_CRITERIA_EPS + 
+                    cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001) 
+          
+        # Vector for 3D points 
+        threedpoints = [] 
+          
+        # Vector for 2D points 
+        twodpoints = [] 
+        
+        #  3D points real world coordinates. Assuming z=0
+        objectp3d = generate3Dgrid(CheckerBoardParams)
+                
+        # Find the chess board corners 
+        # If desired number of corners are 
+        # found in the image then ret = true 
+        
+        #TODO need to add a timeout to the findChessboardCorners function
+        grayColor = cv2.cvtColor(imageUpsampled, cv2.COLOR_BGR2GRAY)
+        
+        ## Contrast TESTING - openCV does thresholding already, but this may be a bit helpful for bumping contrast
+        # grayColor = grayColor.astype('float64')
+        # cv2.imshow('Grayscale', grayColor.astype('uint8'))
+        # savePath = os.path.join(os.path.dirname(imageFileName),'extrinsicGray.jpg')
+        # cv2.imwrite(savePath,grayColor)
+        
+        # grayContrast = np.power(grayColor,2)
+        # grayContrast = grayContrast/(np.max(grayContrast)/255)    
+        # # plt.figure()
+        # # plt.imshow(grayContrast, cmap='gray')
+        
+        # # cv2.imshow('ContrastEnhanced', grayContrast.astype('uint8'))
+        # savePath = os.path.join(os.path.dirname(imageFileName),'extrinsicGrayContrastEnhanced.jpg')
+        # cv2.imwrite(savePath,grayContrast)
+          
+        # grayContrast = grayContrast.astype('uint8')
+        # grayColor = grayColor.astype('uint8')
     
-    # Find the chess board corners 
-    # If desired number of corners are 
-    # found in the image then ret = true 
+        ## End contrast Testing
+        
+        ## Testing settings - slow and don't help 
+        # ret, corners = cv2.findChessboardCorners( 
+        #                 grayContrast, CheckerBoardParams['dimensions'],  
+        #                 cv2.CALIB_CB_ADAPTIVE_THRESH  
+        #                 + cv2.CALIB_CB_FAST_CHECK + 
+        #                 cv2.CALIB_CB_NORMALIZE_IMAGE) 
+        
+        # Note I tried findChessboardCornersSB here, but it didn't find chessboard as reliably
+        ret, corners = cv2.findChessboardCorners( 
+                    grayColor, CheckerBoardParams['dimensions'],  
+                    cv2.CALIB_CB_ADAPTIVE_THRESH) 
     
-    #TODO need to add a timeout to the findChessboardCorners function
-    grayColor = cv2.cvtColor(imageUpsampled, cv2.COLOR_BGR2GRAY)
-    
-    ## Contrast TESTING - openCV does thresholding already, but this may be a bit helpful for bumping contrast
-    # grayColor = grayColor.astype('float64')
-    # cv2.imshow('Grayscale', grayColor.astype('uint8'))
-    # savePath = os.path.join(os.path.dirname(imageFileName),'extrinsicGray.jpg')
-    # cv2.imwrite(savePath,grayColor)
-    
-    # grayContrast = np.power(grayColor,2)
-    # grayContrast = grayContrast/(np.max(grayContrast)/255)    
-    # # plt.figure()
-    # # plt.imshow(grayContrast, cmap='gray')
-    
-    # # cv2.imshow('ContrastEnhanced', grayContrast.astype('uint8'))
-    # savePath = os.path.join(os.path.dirname(imageFileName),'extrinsicGrayContrastEnhanced.jpg')
-    # cv2.imwrite(savePath,grayContrast)
+        # If desired number of corners can be detected then, 
+        # refine the pixel coordinates and display 
+        # them on the images of checker board 
+        if ret == True: 
+            # 3D points real world coordinates       
+            threedpoints.append(objectp3d) 
       
-    # grayContrast = grayContrast.astype('uint8')
-    # grayColor = grayColor.astype('uint8')
-
-    ## End contrast Testing
+            # Refining pixel coordinates 
+            # for given 2d points. 
+            corners2 = cv2.cornerSubPix( 
+                grayColor, corners, (11, 11), (-1, -1), criteria) / imageUpsampleFactor
+      
+            twodpoints.append(corners2) 
+      
+            # For testing: Draw and display the corners 
+            # image = cv2.drawChessboardCorners(image,  
+            #                                  CheckerBoardParams['dimensions'],  
+            #                                   corners2, ret) 
+            # Draw small dots instead
+            # Choose dot size based on size of squares in pixels
+            circleSize = 1
+            squareSize = np.linalg.norm((corners2[1,0,:] - corners2[0,0,:]).squeeze())
+            if squareSize >12:
+                circleSize = 2
     
-    ## Testing settings - slow and don't help 
-    # ret, corners = cv2.findChessboardCorners( 
-    #                 grayContrast, CheckerBoardParams['dimensions'],  
-    #                 cv2.CALIB_CB_ADAPTIVE_THRESH  
-    #                 + cv2.CALIB_CB_FAST_CHECK + 
-    #                 cv2.CALIB_CB_NORMALIZE_IMAGE) 
-    
-    # Note I tried findChessboardCornersSB here, but it didn't find chessboard as reliably
-    ret, corners = cv2.findChessboardCorners( 
-                grayColor, CheckerBoardParams['dimensions'],  
-                cv2.CALIB_CB_ADAPTIVE_THRESH) 
-
-    # If desired number of corners can be detected then, 
-    # refine the pixel coordinates and display 
-    # them on the images of checker board 
-    if ret == True: 
-        # 3D points real world coordinates       
-        threedpoints.append(objectp3d) 
-  
-        # Refining pixel coordinates 
-        # for given 2d points. 
-        corners2 = cv2.cornerSubPix( 
-            grayColor, corners, (11, 11), (-1, -1), criteria) / imageUpsampleFactor
-  
-        twodpoints.append(corners2) 
-  
-        # For testing: Draw and display the corners 
-        # image = cv2.drawChessboardCorners(image,  
-        #                                  CheckerBoardParams['dimensions'],  
-        #                                   corners2, ret) 
+            for iPoint in range(corners2.shape[0]):
+                thisPt = corners2[iPoint,:,:].squeeze()
+                cv2.circle(image, tuple(thisPt.astype(int)), circleSize, (255,255,0), 2) 
+            
+            #cv2.imshow('img', image) 
+            #cv2.waitKey(0) 
+      
+            #cv2.destroyAllWindows()
+        if ret == False:
+            print('No checkerboard detected. Will skip cam in triangulation.')
+            return None
+    else:
+        objectp3d = np.expand_dims(points3d,0)
+        corners2 = np.expand_dims(points2d,1)      
+        
         # Draw small dots instead
         # Choose dot size based on size of squares in pixels
         circleSize = 1
@@ -445,16 +469,7 @@ def calcExtrinsics(imageFileName, CameraParams, CheckerBoardParams,
 
         for iPoint in range(corners2.shape[0]):
             thisPt = corners2[iPoint,:,:].squeeze()
-            cv2.circle(image, tuple(thisPt.astype(int)), circleSize, (255,255,0), 2) 
-        
-        #cv2.imshow('img', image) 
-        #cv2.waitKey(0) 
-  
-        #cv2.destroyAllWindows()
-    if ret == False:
-        print('No checkerboard detected. Will skip cam in triangulation.')
-        return None
-        
+            cv2.circle(image, tuple(thisPt.astype(int)), circleSize, (255,255,0), 2)        
         
     # Find position and rotation of camera in board frame.
     # ret, rvec, tvec = cv2.solvePnP(objectp3d, corners2,
@@ -540,7 +555,10 @@ def calcExtrinsics(imageFileName, CameraParams, CheckerBoardParams,
         # save crop image to local camera file
         savePath2 = os.path.join(os.path.dirname(imageFileName), 
                                 'extrinsicCalib_soln{}.jpg'.format(iRet))
-        cv2.imwrite(savePath2,imageCropped)
+        if points3d is None: # for app with checkerboard
+            cv2.imwrite(savePath2,imageCropped) 
+        else: # manual selection
+            cv2.imwrite(savePath2,imageWithFrame)
           
         if visualize:   
             print('Close image window to continue')
