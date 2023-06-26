@@ -325,12 +325,12 @@ def batchReprocess(session_ids,calib_id,static_id,dynamic_ids,poseDetector='Open
                           hasWritePermissions = hasWritePermissions)
                 
                 statusData = {'status':'done'}
-                _ = requests.patch(API_URL + "/trials/{}/".format(dID), data=statusData,
+                _ = requests.patch(API_URL + "trials/{}/".format(dID), data=statusData,
                          headers = {"Authorization": "Token {}".format(API_TOKEN)})
             except Exception as e:
                 print(e)
                 statusData = {'status':'error'}
-                _ = requests.patch(API_URL + "/trials/{}/".format(static_id_toProcess), data=statusData,
+                _ = requests.patch(API_URL + "trials/{}/".format(static_id_toProcess), data=statusData,
                          headers = {"Authorization": "Token {}".format(API_TOKEN)})
 
 def runTestSession(pose='all',isDocker=True):

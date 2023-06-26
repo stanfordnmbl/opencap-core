@@ -369,10 +369,20 @@ def getMetadataFromServer(session_id,justCheckerParams=False):
                 session_desc["subjectID"] = session['meta']['subject']['id']
                 session_desc["mass_kg"] = float(session['meta']['subject']['mass'])
                 session_desc["height_m"] = float(session['meta']['subject']['height'])
+                # Before implementing the subject feature, the posemodel was stored
+                # in session['meta']['subject']. After implementing the subject
+                # feature, the posemodel is stored in session['meta']['settings']
+                # and there is no session['meta']['subject'].
                 try:
                     session_desc["posemodel"] = session['meta']['subject']['posemodel']
                 except:
                     session_desc["posemodel"] = 'openpose'
+                # This might happen if openSimModel was changed post data collection.
+                if 'settings' in session['meta']:
+                    try:
+                        session_desc["openSimModel"] = session['meta']['settings']['openSimModel']
+                    except:
+                        session_desc["openSimModel"] = 'LaiUhlrich2022'
             else:                
                 subject_info = getSubjectJson(session['subject'])                
                 session_desc["subjectID"] = subject_info['name']
@@ -382,6 +392,10 @@ def getMetadataFromServer(session_id,justCheckerParams=False):
                     session_desc["posemodel"] = session['meta']['settings']['posemodel']
                 except:
                     session_desc["posemodel"] = 'openpose'
+                try:
+                    session_desc["openSimModel"] = session['meta']['settings']['openSimModel']
+                except:
+                    session_desc["openSimModel"] = 'LaiUhlrich2022'
 
         if 'sessionWithCalibration' in session['meta'] and 'checkerboard' not in session['meta']:
             newSessionId = session['meta']['sessionWithCalibration']['id']
@@ -574,17 +588,45 @@ def changeSessionMetadata(session_ids,newMetaDict):
         session = getSessionJson(session_id)
         existingMeta = session['meta']
         
+        # change metadata
+        # Hack: wrong mapping between metadata and yaml
+        # mass in metadata is mass_kg in yaml
+        # height in metadata is height_m in yaml
+        mapping_metadata = {'mass': 'mass_kg',
+                            'height': 'height_m'}
+        addedKey= {}
         for key in existingMeta.keys():
-            if key in newMetaDict.keys():
-                existingMeta[key] = newMetaDict[key]
+            if key in mapping_metadata:
+                key_t = mapping_metadata[key]
+            else:
+                key_t = key
+            if key_t in newMetaDict.keys():
+                existingMeta[key] = newMetaDict[key_t]
+                addedKey[key_t] = newMetaDict[key_t]
             if type(existingMeta[key]) is dict:
-                for key2 in existingMeta[key].keys():
-                    if key2 in newMetaDict.keys():
-                        existingMeta[key][key2] = newMetaDict[key2]
+                for key2 in existingMeta[key].keys():                    
+                    if key2 in mapping_metadata:
+                        key_t = mapping_metadata[key2]
+                    else:
+                        key_t = key2                     
+                    if key_t in newMetaDict.keys():
+                        existingMeta[key][key2] = newMetaDict[key_t]
+                        addedKey[key_t] = newMetaDict[key_t]
+                        
+        # add metadata if not existing (eg, specifying OpenSim model)
+        # only entries in settings_fields below are supported.
+        for newMeta in newMetaDict:
+            if not newMeta in addedKey:
+                print("Could not find {} in existing metadata, trying to add it.".format(newMeta))
+                settings_fields = ['framerate', 'posemodel', 'openSimModel']
+                if newMeta in settings_fields:
+                    existingMeta['settings'][newMeta] = newMetaDict[newMeta]
+                    addedKey[newMeta] = newMetaDict[newMeta]
+                    print("Added {} to settings in metadata".format(newMetaDict[newMeta]))
+                else:
+                    print("Could not add {} to the metadata; not recognized".format(newMetaDict[newMeta]))
         
-        data = {
-                "meta":json.dumps(existingMeta)
-            }
+        data = {"meta":json.dumps(existingMeta)}
         
         r= requests.patch(session_url, data=data,
               headers = {"Authorization": "Token {}".format(API_TOKEN)})
@@ -603,13 +645,21 @@ def changeSessionMetadata(session_ids,newMetaDict):
         
         metaYaml = importMetadata(metaPath)
         
+        addedKey= {}
         for key in metaYaml.keys():
             if key in newMetaDict.keys():
                 metaYaml[key] = newMetaDict[key]
+                addedKey[key] = newMetaDict[key]
             if type(metaYaml[key]) is dict:
                 for key2 in metaYaml[key].keys():
                     if key2 in newMetaDict.keys():
                         metaYaml[key][key2] = newMetaDict[key2] 
+                        addedKey[key2] = newMetaDict[key2]
+                        
+        for newMeta in newMetaDict:
+            if not newMeta in addedKey:
+               print("Could not find {} in existing yaml, adding it.".format(newMeta))               
+               metaYaml[newMeta] = newMetaDict[newMeta]
                         
         with open(metaPath, 'w') as file:
             yaml.dump(metaYaml, file)
@@ -1320,3 +1370,59 @@ def checkResourceUsage():
     resourceUsage['disk_perc'] = disk_usage.percent
     
     return resourceUsage
+
+# %% Some functions for loading subject data
+
+def getSubjectNumber(subjectName):
+    subjects = requests.get(API_URL + "subjects/",
+                           headers = {"Authorization": "Token {}".format(API_TOKEN)}).json()
+    sNum = [s['id'] for s in subjects if s['name'] == subjectName]
+    if len(sNum)>1:
+        print(len(sNum) + ' subjects with the name ' + subjectName + '. Will use the first one.')   
+    elif len(sNum) == 0:
+        raise Exception('no subject found with this name.')
+        
+    return sNum[0]
+
+def getUserSessions():
+    sessionJson = requests.get(API_URL + "sessions/valid/",
+                           headers = {"Authorization": "Token {}".format(API_TOKEN)}).json()
+    return sessionJson
+
+def getSubjectSessions(subjectName):
+    sessions = getUserSessions()
+    subNum = getSubjectNumber(subjectName)
+    sessions2 = [s for s in sessions if (s['subject'] == subNum)]
+    
+    return sessions2
+
+def getTrialNames(session):
+    trialNames = [t['name'] for t in session['trials']]
+    return trialNames
+
+def findSessionWithTrials(subjectTrialNames,trialNames):
+    hasTrials = []
+    for trials in trialNames:
+        hasTrials.append(None)
+        for i,sTrials in enumerate(subjectTrialNames):
+            if all(elem in sTrials for elem in trials):
+                hasTrials[-1] = i
+                break
+            
+    return hasTrials
+
+def get_entry_with_largest_number(trialList):
+    max_entry = None
+    max_number = float('-inf')
+
+    for entry in trialList:
+        # Extract the number from the string
+        try:
+            number = int(entry.split('_')[-1])
+            if number > max_number:
+                max_number = number
+                max_entry = entry
+        except ValueError:
+            continue
+
+    return max_entry
