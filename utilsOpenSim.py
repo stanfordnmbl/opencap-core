@@ -51,7 +51,7 @@ def runScaleTool(pathGenericSetupFile, pathGenericModel, subjectMass,
     pathMarkerSet = os.path.join(dirGenericModel, markerSetFileName)
     
     # Add the marker set to the generic model and save that updated model.
-    # opensim.Logger.setLevelString('error')
+    opensim.Logger.setLevelString('error')
     genericModel = opensim.Model(pathGenericModel)
     markerSet = opensim.MarkerSet(pathMarkerSet)
     genericModel.set_MarkerSet(markerSet)
@@ -164,7 +164,7 @@ def runIKTool(pathGenericSetupFile, pathScaledModel, pathTRCFile,
         pathOutputFolder, 'Setup_IK_' + IKFileName + '.xml')
     
     # Setup IK tool.
-    # opensim.Logger.setLevelString('error')
+    opensim.Logger.setLevelString('error')
     IKTool = opensim.InverseKinematicsTool(pathGenericSetupFile)            
     IKTool.setName(IKFileName)
     IKTool.set_model_file(pathScaledModel)          
