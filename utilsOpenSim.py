@@ -295,7 +295,7 @@ def runIDTool(pathGenericSetupFileID, pathGenericSetupFileEL, pathGRFFile,
     
     # Defaults
     if timeRange is None:
-        timeRange = [0,'inf']
+        timeRange = [0,1000]
     if pathGRFFile is None:
         pathGRFFile = 'Unassigned'
     

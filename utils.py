@@ -97,6 +97,12 @@ def importMetadata(filePath):
     
     return parsedYamlFile
 
+def saveMetadata(metadataDict,filePath):
+    with open(filePath, 'w') as file:
+        yaml.dump(metadataDict, file)
+        
+    return
+
 def download_file(url, file_name):
     with urllib.request.urlopen(url) as response, open(file_name, 'wb') as out_file:
         shutil.copyfileobj(response, out_file)
@@ -737,7 +743,7 @@ def getMotionData(trial_id,session_path,simplePath=False):
     resultTags = [res['tag'] for res in trial['results']]
 
     # get marker data
-    if 'ik_results' in resultTags:
+    if 'marker_data' in resultTags:
         markerFolder = os.path.join(session_path,'MarkerData','PostAugmentation',trial_name)
         if simplePath:
             markerFolder = os.path.join(session_path,'MarkerData')

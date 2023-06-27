@@ -8,7 +8,7 @@
 		<!--Name of the .osim file used to construct a model.-->
 		<model_file>Unassigned</model_file>
 		<!--Time range over which the inverse dynamics problem is solved.-->
-		<time_range> 0 inf</time_range>
+		<time_range> 0 10000</time_range>
 		<!--List of forces by individual or grouping name (e.g. All, actuators, muscles, ...) to be excluded when computing model dynamics.-->
 		<forces_to_exclude> Muscles</forces_to_exclude>
 		<!--XML file (.xml) containing the external loads applied to the model as a set of ExternalForce(s).-->
