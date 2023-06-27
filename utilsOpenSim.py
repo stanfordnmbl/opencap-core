@@ -293,12 +293,22 @@ def runIDTool(pathGenericSetupFileID, pathGenericSetupFileEL, pathGRFFile,
     pathOutputSetupID =  os.path.join(
         pathOutputFolder, 'Setup_ID_' + IKFileName + '.xml')
     
+    # Defaults
+    if timeRange is None:
+        timeRange = [0,'inf']
+    if pathGRFFile is None:
+        pathGRFFile = 'Unassigned'
+    
     # External loads
     opensim.Logger.setLevelString('error')
-    ELTool = opensim.ExternalLoads(pathGenericSetupFileEL, True)
-    ELTool.setDataFileName(pathGRFFile)
-    ELTool.setName(IKFileName)
-    ELTool.printToXML(pathOutputSetupEL)
+    if pathGenericSetupFileEL is not None:
+        ELTool = opensim.ExternalLoads(pathGenericSetupFileEL, True)
+        ELTool.setDataFileName(pathGRFFile)
+        ELTool.setName(IKFileName)
+        ELTool.printToXML(pathOutputSetupEL)
+    else:
+        pathOutputSetupEL = 'Unassigned'
+
     
     # ID    
     IDTool = opensim.InverseDynamicsTool(pathGenericSetupFileID)

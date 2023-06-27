@@ -40,15 +40,15 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
 
     # %% High-level settings.
     # Camera calibration.
-    runCameraCalibration = True
+    runCameraCalibration = False
     # Pose detection.
-    runPoseDetection = True
+    runPoseDetection = False
     # Video Synchronization.
-    runSynchronization = True
+    runSynchronization = False
     # Triangulation.
-    runTriangulation = True
+    runTriangulation = False
     # Marker augmentation.
-    runMarkerAugmentation = True
+    runMarkerAugmentation = False
     # OpenSim pipeline.
     runOpenSimPipeline = True
     # Lowpass filter frequency of 2D keypoints for gait and everything else.
