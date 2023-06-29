@@ -416,6 +416,12 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
         
         openSimDir = os.path.join(sessionDir, openSimFolderName)        
         outputScaledModelDir = os.path.join(openSimDir, 'Model')
+
+        # Check if shoulder model.
+        if 'shoulder' in sessionMetadata['openSimModel']:
+            suffix_model = '_shoulder'
+        else:
+            suffix_model = ''
         
         # Scaling.    
         if scaleModel:
@@ -437,13 +443,14 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
                                                       thresholdPosition=0.007,
                                                       thresholdTime=0.1,
                                                       removeRoot=True)          
-            # Run scale tool.
+                # Run scale tool.
                 print('Running Scaling')
                 pathScaledModel = runScaleTool(
                     pathGenericSetupFile4Scaling, pathGenericModel4Scaling,
                     sessionMetadata['mass_kg'], pathTRCFile4Scaling, 
                     timeRange4Scaling, outputScaledModelDir,
-                    subjectHeight=sessionMetadata['height_m'])
+                    subjectHeight=sessionMetadata['height_m'], 
+                    suffix_model=suffix_model)
             except Exception as e:
                 if len(e.args) == 2: # specific exception
                     raise Exception(e.args[0], e.args[1])
@@ -469,7 +476,7 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
                                             "_scaled.osim")
             if os.path.exists(pathScaledModel):
                 # Path setup file.
-                genericSetupFile4IKName = 'Setup_IK.xml'
+                genericSetupFile4IKName = 'Setup_IK{}.xml'.format(suffix_model)
                 pathGenericSetupFile4IK = os.path.join(
                     openSimPipelineDir, 'IK', genericSetupFile4IKName)
                 # Path TRC file.
