@@ -56,19 +56,18 @@ API_TOKEN = getToken()
 # or more session identifiers. The identifier is found as the 36-character string at the
 # end of the session url: app.opencap.ai/session/<session_id>
 
-session_idss = [['34cd32a0-2398-4e56-a4dc-879fb331e12d'],
-                ['89e1063c-7ac6-458a-8416-d347c794a356'],
-                ['a269984f-0a9e-4d6f-b88c-8eef9e462027'],
-                ['a52cce9e-52db-4a42-8c5a-ef2ee2ca5dc0'],
-                ['59b912fb-f5e2-42d8-a18e-331a2166e3f8'],
-                ['3b7fbb9a-1083-497f-8de3-6b2d5e1d30c3'],
-                ['6a8ebc43-9976-4f6a-9e1b-ba88a138915c'],
-                ['bc82fdc7-b342-4b07-89ab-c9fdd6d8966f'],
-                ['1a39d188-6b7c-42c4-b7d7-d821656ae257'],
-                ['059b2b0d-8d83-4cde-b856-fde0d031be21']]
-
 # session_idss = [['34cd32a0-2398-4e56-a4dc-879fb331e12d'],
+#                 ['89e1063c-7ac6-458a-8416-d347c794a356'],
+#                 ['a269984f-0a9e-4d6f-b88c-8eef9e462027'],
+#                 ['a52cce9e-52db-4a42-8c5a-ef2ee2ca5dc0'],
+#                 ['59b912fb-f5e2-42d8-a18e-331a2166e3f8'],
+#                 ['3b7fbb9a-1083-497f-8de3-6b2d5e1d30c3'],
+#                 ['6a8ebc43-9976-4f6a-9e1b-ba88a138915c'],
+#                 ['bc82fdc7-b342-4b07-89ab-c9fdd6d8966f'],
+#                 ['1a39d188-6b7c-42c4-b7d7-d821656ae257'],
 #                 ['059b2b0d-8d83-4cde-b856-fde0d031be21']]
+
+session_idss = [['3b7fbb9a-1083-497f-8de3-6b2d5e1d30c3']]
 
 for session_ids in session_idss:
 
@@ -82,8 +81,8 @@ for session_ids in session_idss:
     # static_id. A list of strings is allowed for dynamic_ids.
 
     calib_id = [] # None (auto-selected trial), [] (skip), or string of specific trial_id
-    static_id = None # None (auto-selected trial), [] (skip), or string of specific trial_id
-    dynamic_trialNames = None # None (all dynamic trials), [] (skip), or list of trial names
+    static_id = [] # None (auto-selected trial), [] (skip), or string of specific trial_id
+    dynamic_trialNames = ['constant500'] # None (all dynamic trials), [] (skip), or list of trial names
     
     # extract trial ids from trial names
     if dynamic_trialNames is not None and len(dynamic_trialNames)>0:

@@ -40,15 +40,21 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
     
     # Study specific settings
     genericFolderNames = False
-    markerDataFolderNameSuffixs = ['3-cameras', '2-cameras']
-    # camerasToUse=['2-cameras']
+    # markerDataFolderNameSuffixs = ['3-cameras', '2-cameras']    
+    # camerasToUses = [['all'], ['2-cameras']]
+    # filters = [30]
     
-    camerasToUses = [['all'], ['2-cameras']]
-    filters = [25, 20, 15, 10, 5]
+    markerDataFolderNameSuffixs = ['2-cameras']    
+    camerasToUses = [['2-cameras']]
+    filters = [30, 25, 20, 15, 10, 5]
     
     for c_idx, camerasToUse in enumerate(camerasToUses):
         for filtFreq in filters:
-            markerDataFolderNameSuffix = markerDataFolderNameSuffixs[c_idx] + '-' + str(filtFreq)
+            
+            if filtFreq == 30:
+                markerDataFolderNameSuffix = markerDataFolderNameSuffixs[c_idx]
+            else:
+                markerDataFolderNameSuffix = markerDataFolderNameSuffixs[c_idx] + '-' + str(filtFreq)
     
             # %% High-level settings.
             # Camera calibration.
