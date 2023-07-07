@@ -15,6 +15,9 @@ __pycache__
 Data/
 Examples/Data/*
 
+# Files for re-processing
+Examples/reprocessSessionServer.py
+
 *.ini
 *.stats
 
