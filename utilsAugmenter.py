@@ -45,6 +45,7 @@ def augmentTRC(pathInputTRCFile, subject_mass, subject_height,
         augmenterModelType_all = [augmenterModelType_lower, augmenterModelType_upper]
         feature_markers_all = [feature_markers_lower, feature_markers_upper]
         response_markers_all = [response_markers_lower, response_markers_upper]
+    print('Using augmenter model: {}'.format(augmenter_model))
     
     # %% Process data.
     # Import TRC file
