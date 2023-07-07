@@ -36,7 +36,7 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
          poseDetector='OpenPose', resolutionPoseDetection='default', 
          scaleModel=False, bbox_thr=0.8, augmenter_model='v0.2',
          genericFolderNames=False, offset=True, benchmark=False,
-         dataDir=None):
+         dataDir=None, overwriteAugmenterModel=False):
 
     # %% High-level settings.
     # Camera calibration.
@@ -85,6 +85,14 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
             poseDetector = 'mmpose'
         else:
             poseDetector = 'OpenPose'
+
+    # If augmenter model defined through web app.
+    # If overwriteAugmenterModel is True, the augmenter model is the one
+    # passed as an argument to main(). This is useful for local testing.
+    if 'augmentermodel' in sessionMetadata and not overwriteAugmenterModel:
+        augmenterModel = sessionMetadata['augmentermodel']
+    else:
+        augmenterModel = augmenter_model
 
     # %% Paths to pose detector folder for local testing.
     if poseDetector == 'OpenPose':
@@ -330,10 +338,10 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
     else:
         postAugmentationDir = os.path.join(
             sessionDir, markerDataFolderName, 
-            'PostAugmentation_{}'.format(augmenter_model))
+            'PostAugmentation_{}'.format(augmenterModel))
     
     # Get augmenter model.
-    augmenterModel = (
+    augmenterModelName = (
         sessionMetadata['markerAugmentationSettings']['markerAugmenterModel'])
     
     # Set output file name.
@@ -344,10 +352,10 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
     else:
         if benchmark:
             pathAugmentedOutputFiles[trialName] = os.path.join(
-                    postAugmentationDir, trialName + "_" + augmenterModel +".trc")
+                    postAugmentationDir, trialName + "_" + augmenterModelName +".trc")
         else:
             pathAugmentedOutputFiles[trialName] = os.path.join(
-                    postAugmentationDir, trial_id + "_" + augmenterModel +".trc")
+                    postAugmentationDir, trial_id + "_" + augmenterModelName +".trc")
     
     if runMarkerAugmentation:
         os.makedirs(postAugmentationDir, exist_ok=True)    
@@ -357,8 +365,8 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
             vertical_offset = augmentTRC(
                 pathOutputFiles[trialName],sessionMetadata['mass_kg'], 
                 sessionMetadata['height_m'], pathAugmentedOutputFiles[trialName],
-                augmenterDir, augmenterModelName=augmenterModel,
-                augmenter_model=augmenter_model, offset=offset)
+                augmenterDir, augmenterModelName=augmenterModelName,
+                augmenter_model=augmenterModel, offset=offset)
         except Exception as e:
             if len(e.args) == 2: # specific exception
                 raise Exception(e.args[0], e.args[1])
@@ -479,11 +487,14 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
     if not extrinsicsTrial:
         pathSettings = os.path.join(postAugmentationDir, 
                                     'Settings_' + trial_id + '.yaml')
-        settings = {'poseDetector': poseDetector, 'resolutionPoseDetection':
-                    resolutionPoseDetection, 'augmenter_model': 
-                    augmenter_model, 'offset': offset, 'imageUpsampleFactor': 
-                    imageUpsampleFactor}
+        settings = {
+            'poseDetector': poseDetector, 
+            'resolutionPoseDetection': resolutionPoseDetection,
+            'augmenter_model': augmenterModel, 
+            'offset': offset, 
+            'imageUpsampleFactor': imageUpsampleFactor,
+            'openSimModel': sessionMetadata['openSimModel']}
         if poseDetector == 'mmpose':
             settings['bbox_thr']: str(bbox_thr)
         with open(pathSettings, 'w') as file:
-                yaml.dump(settings, file)
+            yaml.dump(settings, file)

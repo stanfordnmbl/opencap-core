@@ -23,10 +23,12 @@ the pose estimator used when reprocessing data in the cloud. This is mostly for
 developer use.
 
 The available options for metadata are:
-    - openSimModel: LaiUhlrich2022
-                    LaiUhlrich2022_shoulder
-    - posemodel:    openpose
-                    hrnet 
+    - openSimModel:     LaiUhlrich2022
+                        LaiUhlrich2022_shoulder
+    - posemodel:        openpose
+                        hrnet
+    - augmentermodel:   v0.2
+                        v0.3
 """
 import os
 import sys
@@ -38,5 +40,6 @@ session_ids = ['0d46adef-62cb-455f-9ff3-8116717cc2fe']
 
 # Dictionary of metadata fields to change (see sessionMetadata.yaml).
 newMetadata = {'openSimModel':'LaiUhlrich2022_shoulder',
-               'posemodel':'hrnet'}
+               'posemodel':'hrnet',
+               'augmentermodel':'v0.3'}
 changeSessionMetadata(session_ids,newMetadata)
