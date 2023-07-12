@@ -19,3 +19,5 @@ Examples/Data/*
 *.stats
 
 tests/
+
+newsletter.py
