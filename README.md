@@ -36,6 +36,6 @@ These instructions are for Windows 10. The pipeline also runs on Ubuntu. Minimum
 2) Copy your session identifier from [app.opencap.ai](https://app.opencap.ai) into `Examples/reprocessSession.py`, choose your pose estimation settings, and run it. The session id is the 36-character string at the end of the session url. For example, the session identifier for https://app.opencap.ai/session/7272a71a-e70a-4794-a253-39e11cb7542c is `'7272a71a-e70a-4794-a253-39e11cb7542c'`. If you reprocess a session that you recorded, results will be written back to the database, and if you choose, they will be saved locally in `./Data/<session_id>`.
 3) To compute kinetics we recommend starting with `example_kinetics.py` in the [opencap-processing](https://github.com/stanfordnmbl/opencap-processing) repository. Data from many sessions can also be downloaded in batch using `batchDownload.py` in the opencap-processing repository or the `Examples/batchDownloadData.py` script in this repository.
 
-### Reproducing results from the paper
+### Reproducing results from the paper 
 1) Data used in the OpenCap publication are available on [SimTK](https://simtk.org/projects/opencap). This dataset includes raw data (e.g., videos, motion capture, ground reaction forces, electromyography), and processed data (e.g., scaled OpenSim models, inverse kinematics, inverse dynamics, and dynamic simulation results).
 2) The scripts to process and plot the results are found in the `ReproducePaperResults` directory (see README.md in this folder for more details).
