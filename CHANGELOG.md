@@ -4,6 +4,7 @@ This is not a comprehensive list of changes but rather a hand-curated collection
 
 Changes
 =======
+- 07/11/2023: Add support for marker augmenter model v0.3 ([pull request](https://github.com/stanfordnmbl/opencap-core/pull/90))
 - 06/09/2023: Add support for full body model with ISB shoulder ([pull request](https://github.com/stanfordnmbl/opencap-core/pull/80))
 - 12/07/2022: Add support for iPhone 14, iPhone 14 Plus, iPad (10th gen), iPadPro 12.9 in (6th gen), and iPadPro 11 in (4th gen) ([pull request](https://github.com/stanfordnmbl/opencap-core/pull/17)).
 - 11/11/2022: Add support for horizontally oriented videos ([pull request](https://github.com/stanfordnmbl/opencap-core/pull/9)).

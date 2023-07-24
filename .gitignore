@@ -22,3 +22,5 @@ Examples/reprocessSessionServer.py
 *.stats
 
 tests/
+
+newsletter.py
