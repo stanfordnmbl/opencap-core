@@ -618,7 +618,7 @@ def changeSessionMetadata(session_ids,newMetaDict):
         for newMeta in newMetaDict:
             if not newMeta in addedKey:
                 print("Could not find {} in existing metadata, trying to add it.".format(newMeta))
-                settings_fields = ['framerate', 'posemodel', 'openSimModel','augmentermodel']
+                settings_fields = ['framerate', 'posemodel', 'openSimModel', 'augmentermodel']
                 if newMeta in settings_fields:
                     existingMeta['settings'][newMeta] = newMetaDict[newMeta]
                     addedKey[newMeta] = newMetaDict[newMeta]
