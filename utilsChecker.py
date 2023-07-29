@@ -2483,7 +2483,8 @@ def triangulateMultiviewVideo(CameraParamDict,keypointDict,imageScaleFactor=1,
             nFramesToWrite = endInd-startInd
     
             inputPaths = glob.glob(os.path.join(CameraDirectories[camName],'OutputMedia*',trialName,trialID + '*'))
-            if len(inputPaths) > 0:
+            # if len(inputPaths) > 0:
+            if False:
                 inputPath = inputPaths[0]
             else:
                 inputPaths = glob.glob(os.path.join(CameraDirectories[camName],'InputMedia*',trialName,trialID + '*'))
@@ -2501,12 +2502,12 @@ def triangulateMultiviewVideo(CameraParamDict,keypointDict,imageScaleFactor=1,
                 inputRoot,inputExt = os.path.splitext(inputName)
                 
                 # Let's use mp4 since we write for the internet
-                outputFileName = inputRoot + '_syncd_' + camName + ".mp4 "# inputExt
+                outputFileName = inputRoot + '_syncd_' + camName + ".avi "# inputExt
                 
                 thisStartFrame = startInd + startEndFrames[camName][0]
                 
                 rewriteVideos(inputPath, thisStartFrame, nFramesToWrite, frameRate,
-                              outputDir=outputVideoDir, imageScaleFactor = .5,
+                              outputDir=outputVideoDir, imageScaleFactor = None,
                               outputFileName = outputFileName)
         
     if spline3dZeros:

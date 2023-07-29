@@ -48,9 +48,9 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
     # Triangulation.
     runTriangulation = True
     # Marker augmentation.
-    runMarkerAugmentation = True
+    runMarkerAugmentation = False
     # OpenSim pipeline.
-    runOpenSimPipeline = True
+    runOpenSimPipeline = False
     # Lowpass filter frequency of 2D keypoints for gait and everything else.
     filtFreqs = {'gait':12, 'default':500} # defaults to framerate/2
     # High-resolution for OpenPose.
@@ -484,17 +484,17 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
                                vertical_offset=vertical_offset)  
         
     # %% Dump settings in yaml.
-    if not extrinsicsTrial:
-        pathSettings = os.path.join(postAugmentationDir, 
-                                    'Settings_' + trial_id + '.yaml')
-        settings = {
-            'poseDetector': poseDetector, 
-            'resolutionPoseDetection': resolutionPoseDetection,
-            'augmenter_model': augmenterModel, 
-            'offset': offset, 
-            'imageUpsampleFactor': imageUpsampleFactor,
-            'openSimModel': sessionMetadata['openSimModel']}
-        if poseDetector == 'mmpose':
-            settings['bbox_thr']: str(bbox_thr)
-        with open(pathSettings, 'w') as file:
-            yaml.dump(settings, file)
+    # if not extrinsicsTrial:
+    #     pathSettings = os.path.join(postAugmentationDir, 
+    #                                 'Settings_' + trial_id + '.yaml')
+    #     settings = {
+    #         'poseDetector': poseDetector, 
+    #         'resolutionPoseDetection': resolutionPoseDetection,
+    #         'augmenter_model': augmenterModel, 
+    #         'offset': offset, 
+    #         'imageUpsampleFactor': imageUpsampleFactor,
+    #         'openSimModel': sessionMetadata['openSimModel']}
+    #     if poseDetector == 'mmpose':
+    #         settings['bbox_thr']: str(bbox_thr)
+    #     with open(pathSettings, 'w') as file:
+    #         yaml.dump(settings, file)

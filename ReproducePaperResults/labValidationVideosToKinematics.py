@@ -66,7 +66,7 @@ from utils import importMetadata
 #   C:/Users/opencap/Documents/LabValidation_withVideos/subject2
 #   C:/Users/opencap/Documents/LabValidation_withVideos/subject3
 #   ...
-dataDir = 'C:/Users/opencap/Documents/LabValidation_withVideos/'
+dataDir = 'C:/Users/hpl/Downloads/LabValidation_withVideos/LabValidation_withVideos/'
 
 # The dataset includes 2 sessions per subject.The first session includes
 # static, sit-to-stand, squat, and drop jump trials. The second session 
@@ -88,7 +88,7 @@ poseDetectors = ['OpenPose']
 
 # Select the camera configuration you would like to use.
 # cameraSetups = ['2-cameras', '3-cameras', '5-cameras']
-cameraSetups = ['2-cameras']
+cameraSetups = ['5-cameras']
 
 # Select the resolution at which you would like to use OpenPose. More details
 # about the options in Examples/reprocessSessions. In the paper, we compared 
@@ -175,7 +175,7 @@ def process_trial(trial_name=None, session_name=None, isDocker=False,
           scaleModel=scaleModel, bbox_thr=bbox_thr,
           augmenter_model=augmenter_model, benchmark=benchmark, offset=offset,
           dataDir=dataDir)
-
+    
     return
 
 # %% Process trials.
@@ -215,22 +215,22 @@ for count, sessionName in enumerate(sessionNames):
             # model. The static trials were collected as part of the first
             # session for each subject (<>_0). We here copy the Model folder
             # from the first session to the second session.
-            if sessionName[-1] == '1':
-                sessionDir = os.path.join(dataDir, 'Data', sessionName)
-                sessionDir_0 = sessionDir[:-1] + '0'
-                camDir_0 = os.path.join(
-                    sessionDir_0, 'OpenSimData', 
-                    poseDetector + '_' + resolutionPoseDetection, cameraSetup)
-                modelDir_0 = os.path.join(camDir_0, 'Model')
-                camDir_1 = os.path.join(
-                    sessionDir, 'OpenSimData', 
-                    poseDetector + '_' + resolutionPoseDetection, cameraSetup)
-                modelDir_1 = os.path.join(camDir_1, 'Model')
-                os.makedirs(modelDir_1, exist_ok=True)
-                for file in os.listdir(modelDir_0):
-                    pathFile = os.path.join(modelDir_0, file)
-                    pathFileEnd = os.path.join(modelDir_1, file)
-                    shutil.copy2(pathFile, pathFileEnd)
+            # if sessionName[-1] == '1':
+            #     sessionDir = os.path.join(dataDir, 'Data', sessionName)
+            #     sessionDir_0 = sessionDir[:-1] + '0'
+            #     camDir_0 = os.path.join(
+            #         sessionDir_0, 'OpenSimData', 
+            #         poseDetector + '_' + resolutionPoseDetection, cameraSetup)
+            #     modelDir_0 = os.path.join(camDir_0, 'Model')
+            #     camDir_1 = os.path.join(
+            #         sessionDir, 'OpenSimData', 
+            #         poseDetector + '_' + resolutionPoseDetection, cameraSetup)
+            #     modelDir_1 = os.path.join(camDir_1, 'Model')
+            #     os.makedirs(modelDir_1, exist_ok=True)
+            #     for file in os.listdir(modelDir_0):
+            #         pathFile = os.path.join(modelDir_0, file)
+            #         pathFileEnd = os.path.join(modelDir_1, file)
+            #         shutil.copy2(pathFile, pathFileEnd)
                     
             # Process trial.
             for trial in trials:                
@@ -265,3 +265,5 @@ for count, sessionName in enumerate(sessionNames):
                               scaleModel=scaleModel, 
                               augmenter_model=augmenter_model,
                               dataDir=dataDir)
+                
+                
