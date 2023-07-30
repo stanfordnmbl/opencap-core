@@ -596,6 +596,9 @@ def changeSessionMetadata(session_ids,newMetaDict):
         session = getSessionJson(session_id)
         existingMeta = session['meta']
         
+        if 'settings' not in existingMeta.keys():
+            existingMeta['settings'] = {}
+        
         # change metadata
         # Hack: wrong mapping between metadata and yaml
         # mass in metadata is mass_kg in yaml
