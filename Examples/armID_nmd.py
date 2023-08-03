@@ -26,10 +26,13 @@ sessions = ['057d10da-34c7-4fb7-a127-6040010dde06']
 trial_names = ['brooke']
 
 # data directory
-dataDir = 'C:/Users/suhlr/Documents/MyRepositories/sandbox/' # A 'Data' folder will be appended
+# dataDir = 'C:/Users/suhlr/Documents/MyRepositories/sandbox/' # A 'Data' folder will be appended
+dataDir = '..' # A 'Data' folder will be appended
+dataDir = '/Users/psr/Documents/Stanford/Research/Delp/OpenCap/opencap-core'
 
 # new model name. If using old model, set to None
 newModelName = 'LaiUhlrich2022_shoulder'
+# newModelName = 'LaiUhlrich2022_shoulder_generic'
 
 # Lowpass filter frequency for IK results before ID
 ikFiltFreq = 4

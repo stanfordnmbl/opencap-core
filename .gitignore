@@ -19,3 +19,6 @@ Examples/Data/*
 *.stats
 
 tests/
+
+*.swp
+.DS_Store

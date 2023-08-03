@@ -125,6 +125,9 @@ def runScaleTool(pathGenericSetupFile, pathGenericModel, subjectMass,
     # Run scale tool.                      
     scaleTool.printToXML(pathOutputSetup)            
     command = 'opensim-cmd -o error' + ' run-tool ' + pathOutputSetup
+    print()
+    print(command)
+    print()
     os.system(command)
     
     # Sanity check
@@ -178,6 +181,9 @@ def runIKTool(pathGenericSetupFile, pathScaledModel, pathTRCFile,
     IKTool.set_output_motion_file(pathOutputMotion)
     IKTool.printToXML(pathOutputSetup)
     command = 'opensim-cmd -o error' + ' run-tool ' + pathOutputSetup
+    print()
+    print(command)
+    print()
     os.system(command)
     
     return pathOutputMotion
