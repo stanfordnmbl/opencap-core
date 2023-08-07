@@ -271,13 +271,22 @@ def batchReprocess(session_ids,calib_id,static_id,dynamic_ids,poseDetector='Open
             calib_id_toProcess = calib_id
         
         if len(calib_id_toProcess) > 0:
-            processTrial(session_id,
-                          calib_id_toProcess,
-                          trial_type="calibration",
-                          poseDetector = poseDetector,
-                          deleteLocalFolder = deleteLocalFolder,
-                          isDocker=isServer,
-                          hasWritePermissions = hasWritePermissions)
+            try:
+                processTrial(session_id,
+                              calib_id_toProcess,
+                              trial_type="calibration",
+                              poseDetector = poseDetector,
+                              deleteLocalFolder = deleteLocalFolder,
+                              isDocker=isServer,
+                              hasWritePermissions = hasWritePermissions)
+                statusData = {'status':'done'}
+                _ = requests.patch(API_URL + "trials/{}/".format(calib_id_toProcess), data=statusData,
+                         headers = {"Authorization": "Token {}".format(API_TOKEN)})
+            except Exception as e:
+                print(e)
+                statusData = {'status':'error'}
+                _ = requests.patch(API_URL + "trials/{}/".format(calib_id_toProcess), data=statusData,
+                         headers = {"Authorization": "Token {}".format(API_TOKEN)})
         
         if static_id == None:
             static_id_toProcess = getNeutralTrialID(session_id)
@@ -330,7 +339,7 @@ def batchReprocess(session_ids,calib_id,static_id,dynamic_ids,poseDetector='Open
             except Exception as e:
                 print(e)
                 statusData = {'status':'error'}
-                _ = requests.patch(API_URL + "trials/{}/".format(static_id_toProcess), data=statusData,
+                _ = requests.patch(API_URL + "trials/{}/".format(dID), data=statusData,
                          headers = {"Authorization": "Token {}".format(API_TOKEN)})
 
 def runTestSession(pose='all',isDocker=True):
