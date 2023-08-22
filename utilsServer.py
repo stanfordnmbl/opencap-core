@@ -103,7 +103,7 @@ def processTrial(session_id, trial_id, trial_type = 'dynamic',
                 usedResolution = '1x736_2scales'
             elif usedPoseDetector.lower() == 'hrnet':
                 usedResolution = '0.8'
-            if usedPoseDetector == poseDetector and usedResolution == resolutionPoseDetection:
+            if usedPoseDetector.lower() == poseDetector.lower() and usedResolution == resolutionPoseDetection:
                 getPosePickles(trial_id,session_path, poseDetector=poseDetector, resolutionPoseDetection=resolutionPoseDetection)                
             else:
                 print('The pose pickles in the database are for {} {}, but you are now using {} {}. We will re-run pose estimation'.format(usedPoseDetector, usedResolution, poseDetector, resolutionPoseDetection))
@@ -173,14 +173,10 @@ def processTrial(session_id, trial_id, trial_type = 'dynamic',
                 usedResolution = '1x736_2scales'
             elif usedPoseDetector.lower() == 'hrnet':
                 usedResolution = '0.8'
-            # Compare poseDetector to that in the database.
-            if usedPoseDetector != poseDetector:
-                print('The pose pickles in the database are for {} at resolution {}, but you are now using {} at {}. We will re-run pose estimation'.format(usedPoseDetector, usedResolution, poseDetector, resolutionPoseDetection))
+            if usedPoseDetector.lower() == poseDetector.lower() and usedResolution == resolutionPoseDetection:
+                getPosePickles(trial_id,session_path, poseDetector=poseDetector, resolutionPoseDetection=resolutionPoseDetection)                
             else:
-                if usedResolution != resolutionPoseDetection:
-                    print('The pose pickles in the database are for {} at resolution {}, but you are now using {} at {}. We will re-run pose estimation'.format(usedPoseDetector, usedResolution, poseDetector, resolutionPoseDetection))
-                else:
-                    getPosePickles(trial_id,session_path, poseDetector=poseDetector, resolutionPoseDetection=resolutionPoseDetection)
+                print('The pose pickles in the database are for {} {}, but you are now using {} {}. We will re-run pose estimation'.format(usedPoseDetector, usedResolution, poseDetector, resolutionPoseDetection))
         
         # run dynamic
         try:
