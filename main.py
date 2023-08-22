@@ -58,6 +58,9 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
     # Set to False to only generate the json files (default is True).
     # This speeds things up and saves storage space.
     generateVideo = True
+    # This is a hack to handle a mismatch between the use of mmpose and hrnet.
+    if poseDetector == 'hrnet':
+        poseDetector = 'mmpose'
     
     # %% Special case: extrinsics trial.
     # For that trial, we only calibrate the cameras.

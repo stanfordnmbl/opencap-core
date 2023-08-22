@@ -705,7 +705,7 @@ def postMotionData(trial_id,session_path,trial_name=None,isNeutral=False):
     camDirs = glob.glob(os.path.join(session_path,'Videos','Cam*'))
     for camDir in camDirs:
         outputPklFolder = glob.glob(os.path.join(camDir,'OutputPkl*'))[0]
-        pklPath = glob.glob(os.path.join(outputPklFolder,trial_name,'*.pkl'))[0]
+        pklPath = glob.glob(os.path.join(outputPklFolder,trial_name,'*_pp.pkl'))[0]
         _,camName = os.path.split(camDir)
         postFileToTrial(pklPath,trial_id,tag='pose_pickle',device_id=camName)
         
@@ -836,6 +836,30 @@ def getSyncdVideos(trial_id,session_path):
                 
                 syncVideoPath = os.path.join(session_path,'Videos',cam,'InputMedia',trial_name,trial_name + '_sync' + suff)
                 download_file(url,syncVideoPath)
+
+def getPosePickles(trial_id,session_path, poseDetector='OpenPose', 
+                   resolutionPoseDetection='default', bbox_thr=0.8):
+    trial = getTrialJson(trial_id)
+    trial_name = trial['name']
+
+    if poseDetector.lower() == 'openpose':
+        pklDir = os.path.join("OutputPkl_" + resolutionPoseDetection, trial_name)
+    elif poseDetector.lower() == 'hrnet':
+        pklDir = os.path.join("OutputPkl_mmpose_" + str(bbox_thr), trial_name)
+    else:
+        raise Exception('Unknown pose detector: {}'.format(poseDetector))
+    
+    trialPrefix = trial_id + "_rotated_pp.pkl"
+    
+    if trial['results']:
+        for result in trial['results']:
+            if result['tag'] == 'pose_pickle':
+                url = result['media']                
+                cam = result['device_id']
+                posePickleDir = os.path.join(session_path,'Videos',cam,pklDir)
+                os.makedirs(posePickleDir,exist_ok=True)
+                posePicklePath = os.path.join(posePickleDir,trialPrefix)
+                download_file(url,posePicklePath)
         
 def downloadAndZipSession(session_id,deleteFolderWhenZipped=True,isDocker=True,
                           writeToDjango=False,justDownload=False,data_dir=None,

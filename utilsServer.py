@@ -23,6 +23,8 @@ from utils import postMotionData
 from utils import getNeutralTrialID
 from utils import getCalibrationTrialID
 from utils import sendStatusEmail    
+from utils import getPosePickles
+from utils import importMetadata
 from utilsAuth import getToken
 from utilsAPI import getAPIURL
 
@@ -35,7 +37,8 @@ def processTrial(session_id, trial_id, trial_type = 'dynamic',
                  isDocker = True, resolutionPoseDetection='default',
                  extrinsicTrialName = 'calibration',
                  deleteLocalFolder = True,
-                 hasWritePermissions=True):
+                 hasWritePermissions=True,
+                 use_existing_pose_pickle = False):
 
     # Get session directory
     session_name = session_id 
@@ -87,6 +90,23 @@ def processTrial(session_id, trial_id, trial_type = 'dynamic',
         # download the videos
         trial_name = downloadVideosFromServer(session_id,trial_id,isDocker=isDocker,
                                  isCalibration=False,isStaticPose=True)
+        
+        # Download the pose pickles
+        if use_existing_pose_pickle:
+            # Check if the pose pickles for that set of settings exist.
+            # Load poseDetector from metadata
+            sessionMetadata = importMetadata(
+                os.path.join(session_path, 'sessionMetadata.yaml'))
+            usedPoseDetector = sessionMetadata['posemodel']
+            # TODO
+            if usedPoseDetector.lower() == 'openpose':
+                usedResolution = '1x736_2scales'
+            elif usedPoseDetector.lower() == 'hrnet':
+                usedResolution = '0.8'
+            if usedPoseDetector == poseDetector and usedResolution == resolutionPoseDetection:
+                getPosePickles(trial_id,session_path, poseDetector=poseDetector, resolutionPoseDetection=resolutionPoseDetection)                
+            else:
+                print('The pose pickles in the database are for {} {}, but you are now using {} {}. We will re-run pose estimation'.format(usedPoseDetector, usedResolution, poseDetector, resolutionPoseDetection))
         
         # run static
         try:
@@ -140,6 +160,27 @@ def processTrial(session_id, trial_id, trial_type = 'dynamic',
         trial_name = downloadVideosFromServer(
             session_id, trial_id, isDocker=isDocker, isCalibration=False,
             isStaticPose=False)
+        
+        # Download the pose pickles
+        if use_existing_pose_pickle:
+            # Check if the pose pickles for that set of settings exist.
+            # Load poseDetector from metadata
+            sessionMetadata = importMetadata(
+                os.path.join(session_path, 'sessionMetadata.yaml'))
+            usedPoseDetector = sessionMetadata['posemodel']
+            # TODO
+            if usedPoseDetector.lower() == 'openpose':
+                usedResolution = '1x736_2scales'
+            elif usedPoseDetector.lower() == 'hrnet':
+                usedResolution = '0.8'
+            # Compare poseDetector to that in the database.
+            if usedPoseDetector != poseDetector:
+                print('The pose pickles in the database are for {} at resolution {}, but you are now using {} at {}. We will re-run pose estimation'.format(usedPoseDetector, usedResolution, poseDetector, resolutionPoseDetection))
+            else:
+                if usedResolution != resolutionPoseDetection:
+                    print('The pose pickles in the database are for {} at resolution {}, but you are now using {} at {}. We will re-run pose estimation'.format(usedPoseDetector, usedResolution, poseDetector, resolutionPoseDetection))
+                else:
+                    getPosePickles(trial_id,session_path, poseDetector=poseDetector, resolutionPoseDetection=resolutionPoseDetection)
         
         # run dynamic
         try:
@@ -250,11 +291,15 @@ def newSessionSameSetup(session_id_old,session_id_new,extrinsicTrialName='calibr
     
 def batchReprocess(session_ids,calib_id,static_id,dynamic_ids,poseDetector='OpenPose', 
                    resolutionPoseDetection='default',deleteLocalFolder=True,
-                   isServer=False):
+                   isServer=False, use_existing_pose_pickle=False):
 
     if (type(calib_id) == str or type(static_id) == str or type(dynamic_ids) == str or 
         (type(dynamic_ids)==list and len(dynamic_ids)>0)) and len(session_ids) >1:
         raise Exception('can only have one session number if hardcoding other trial ids')
+    
+    # No resolution options for hrnet.
+    if poseDetector.lower() == 'hrnet':
+        resolutionPoseDetection = '0.8'
         
     for session_id in session_ids:
         print('Processing ' + session_id)
@@ -302,7 +347,8 @@ def batchReprocess(session_ids,calib_id,static_id,dynamic_ids,poseDetector='Open
                               poseDetector = poseDetector,
                               deleteLocalFolder = deleteLocalFolder,
                               isDocker=isServer,
-                              hasWritePermissions = hasWritePermissions)
+                              hasWritePermissions = hasWritePermissions,
+                              use_existing_pose_pickle = use_existing_pose_pickle)
                 statusData = {'status':'done'}
                 _ = requests.patch(API_URL + "trials/{}/".format(static_id_toProcess), data=statusData,
                          headers = {"Authorization": "Token {}".format(API_TOKEN)})
@@ -331,7 +377,8 @@ def batchReprocess(session_ids,calib_id,static_id,dynamic_ids,poseDetector='Open
                           poseDetector = poseDetector,
                           deleteLocalFolder = deleteLocalFolder,
                           isDocker=isServer,
-                          hasWritePermissions = hasWritePermissions)
+                          hasWritePermissions = hasWritePermissions,
+                          use_existing_pose_pickle = use_existing_pose_pickle)
                 
                 statusData = {'status':'done'}
                 _ = requests.patch(API_URL + "trials/{}/".format(dID), data=statusData,

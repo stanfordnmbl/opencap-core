@@ -55,7 +55,17 @@ API_TOKEN = getToken()
 # Enter the identifier(s) of the session(s) you want to reprocess. This is a list of one
 # or more session identifiers. The identifier is found as the 36-character string at the
 # end of the session url: app.opencap.ai/session/<session_id>
-session_ids = ['23d52d41-69fe-47cf-8b60-838e4268dd50']
+# session_ids = ['8da6aaa9-6189-4175-b14c-38fb7377b63d']
+
+# session_ids = ['66d0cff9-c299-42ed-9c72-a6d59fcb8ba7']
+# poseDetector = 'OpenPose'
+
+session_ids = ['27aa9b31-a477-4326-a269-be24b8242494']
+poseDetector = 'hrnet'
+
+
+# OpenPose testing: 66d0cff9-c299-42ed-9c72-a6d59fcb8ba7
+# HRNet tsting: 27aa9b31-a477-4326-a269-be24b8242494
 
 
 
@@ -70,7 +80,7 @@ session_ids = ['23d52d41-69fe-47cf-8b60-838e4268dd50']
 
 calib_id = [] # None (auto-selected trial), [] (skip), or string of specific trial_id
 static_id = [] # None (auto-selected trial), [] (skip), or string of specific trial_id
-dynamic_trialNames = None # None (all dynamic trials), [] (skip), or list of trial names
+dynamic_trialNames = ['squats'] # None (all dynamic trials), [] (skip), or list of trial names
 
 # extract trial ids from trial names
 if dynamic_trialNames is not None and len(dynamic_trialNames)>0:
@@ -82,7 +92,11 @@ else:
 # # Optional: Uncomment this section to create a list of dynamic_ids to reprocess.
 # dynamic_ids = None # None (all dynamic trials), [] (skip), or list of trial_id strings
 
+# Pose estimation model to use. The default is 'openpose'. The other option is 'hrnet'.
+# poseDetector = 'hrnet'
+
 # The resolution at which the videos are processed by OpenPose can be adjusted.
+# There are no resolution options for hrnet.
 # The finer the resolution the more accurate the results (typically) but also
 # the more GPU memory is required and the more time it takes to process the video.
 # OpenCap supports the following four resolutionPoseDetection options (ordered
@@ -107,5 +121,8 @@ deleteLocalFolder = False
 
 # %% Process data.
 batchReprocess(session_ids,calib_id,static_id,dynamic_ids,
+               poseDetector=poseDetector,
                resolutionPoseDetection=resolutionPoseDetection,
-               deleteLocalFolder=deleteLocalFolder)
+               deleteLocalFolder=deleteLocalFolder,
+               use_existing_pose_pickle=True)
+test=1
