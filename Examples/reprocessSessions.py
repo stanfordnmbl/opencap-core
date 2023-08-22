@@ -57,11 +57,11 @@ API_TOKEN = getToken()
 # end of the session url: app.opencap.ai/session/<session_id>
 # session_ids = ['8da6aaa9-6189-4175-b14c-38fb7377b63d']
 
-session_ids = ['66d0cff9-c299-42ed-9c72-a6d59fcb8ba7']
-poseDetector = 'OpenPose'
+# session_ids = ['66d0cff9-c299-42ed-9c72-a6d59fcb8ba7']
+# poseDetector = 'OpenPose'
 
-# session_ids = ['27aa9b31-a477-4326-a269-be24b8242494']
-# poseDetector = 'hrnet'
+session_ids = ['f1180b1d-7ad6-4280-bd8b-4949746cc83a']
+poseDetector = 'hrnet'
 
 
 # OpenPose testing: 66d0cff9-c299-42ed-9c72-a6d59fcb8ba7
