@@ -52,7 +52,8 @@ def processTrial(session_id, trial_id, trial_type = 'dynamic',
     # here manually set resolutionPoseDetection and bbox_thr according to 
     # how they are set in loop.py (OpenPose) and loop_mmpose.py (HRnet).
     # This is needed to have the correct settings in main_settings.yaml. We also
-    # set poseDetector, although this is redundant to waht is done in main.py.
+    # set poseDetector here instead of in main.py, such that we can call
+    # processTrial from app.py and batchReprocess.py.
     if not batchProcess:
         sessionMetadata = importMetadata(
                 os.path.join(session_path, 'sessionMetadata.yaml'))
