@@ -25,14 +25,15 @@ in your <repositoryDirectory>/Data/<session_id> folder.
 
 
 This script is useful for processing a session with more accurate and higher 
-resolution pose estimation settings It is also useful for debugging failed trials.
+resolution pose estimation settings. It is also useful for debugging failed
+trials.
 
 
 The example session is publicly available, but you will need login credentials
 from app.opencap.ai to run this script. You can quickly create credentials
 from the home page: https://app.opencap.ai. We recommend first running the 
-Examples/createAuthenticationEnvFile.py script prior to running this script. Otherwise,
-you will need to to login every time you run the script.
+Examples/createAuthenticationEnvFile.py script prior to running this script.
+Otherwise, you will need to to login every time you run the script.
 
 
 You can view the example session at:
@@ -44,7 +45,6 @@ import sys
 sys.path.append(os.path.abspath('./..'))
 
 from utilsServer import batchReprocess
-from utils import getTrialNameIdMapping
 from utilsAPI import getAPIURL
 from utilsAuth import getToken
 
@@ -55,19 +55,7 @@ API_TOKEN = getToken()
 # Enter the identifier(s) of the session(s) you want to reprocess. This is a list of one
 # or more session identifiers. The identifier is found as the 36-character string at the
 # end of the session url: app.opencap.ai/session/<session_id>
-# session_ids = ['8da6aaa9-6189-4175-b14c-38fb7377b63d']
-
-session_ids = ['66d0cff9-c299-42ed-9c72-a6d59fcb8ba7']
-poseDetector = 'OpenPose'
-
-# session_ids = ['f1180b1d-7ad6-4280-bd8b-4949746cc83a']
-# poseDetector = 'hrnet'
-
-
-# OpenPose testing: 66d0cff9-c299-42ed-9c72-a6d59fcb8ba7
-# HRNet tsting: 27aa9b31-a477-4326-a269-be24b8242494
-
-
+session_ids = ['23d52d41-69fe-47cf-8b60-838e4268dd50']
 
 # Select which trials to reprocess. You can reprocess all trials in the session 
 # by entering None in all fields below. The correct calibration and static
@@ -75,30 +63,29 @@ poseDetector = 'OpenPose'
 # processed if None. If you do not want to process one of the trial types, 
 # enter []. If you specify multiple sessions above, all of the fields
 # below must be None or []. If you selected only one session_id above, you may
-# select specific reprocessed. Only one trial (str) is allowed for calib_id and
-# static_id. A list of strings is allowed for dynamic_ids.
+# select specific trials. Only one trial (str) is allowed for calib_id and
+# static_id. A list of strings is allowed for dynamic_trialNames.
 
 calib_id = [] # None (auto-selected trial), [] (skip), or string of specific trial_id
 static_id = None # None (auto-selected trial), [] (skip), or string of specific trial_id
-dynamic_trialNames = [] # None (all dynamic trials), [] (skip), or list of trial names
+dynamic_trialNames = None # None (all dynamic trials), [] (skip), or list of trial names
 
-# extract trial ids from trial names
-if dynamic_trialNames is not None and len(dynamic_trialNames)>0:
-    trialNames = getTrialNameIdMapping(session_ids[0])
-    dynamic_ids = [trialNames[name]['id'] for name in dynamic_trialNames]
-else:
-    dynamic_ids = dynamic_trialNames
+# Select which pose estimation model to use; options are 'OpenPose' and 'hrnet'.
+# If the same pose estimation model was used when collecting data with the web
+# app and if (OpenPose only) you are not reprocessing the data with a different
+# resolution, then the already computed pose estimation results will be used and
+# pose estimation will not be re-run. Please note that we do not provide support
+# for running 'hrnet' locally. If you want to use 'hrnet', you will need to have
+# selected 'hrnet' when collecting data with the web app. You can however re-
+# process data originally collected with 'hrnet' with 'OpenPose' if you have 
+# installed OpenPose locally (see README.md for instructions).
+poseDetector = 'OpenPose'
 
-# # Optional: Uncomment this section to create a list of dynamic_ids to reprocess.
-# dynamic_ids = None # None (all dynamic trials), [] (skip), or list of trial_id strings
-
-# Pose estimation model to use. The default is 'openpose'. The other option is 'hrnet'.
-# poseDetector = 'hrnet'
-
-# The resolution at which the videos are processed by OpenPose can be adjusted.
-# There are no resolution options for hrnet.
+# OpenPose only:
+# Select the resolution at which the videos are processed. There are no
+# resolution options for hrnet and resolutionPoseDetection will be ignored.
 # The finer the resolution the more accurate the results (typically) but also
-# the more GPU memory is required and the more time it takes to process the video.
+# the more GPU memory is required and the more time it takes for processing.
 # OpenCap supports the following four resolutionPoseDetection options (ordered
 # from lower to higher resolution/required memory):
 #   - 'default': 1x368 resolution, default in OpenPose (we were able to run with a GPU with 4GB memory).
@@ -110,9 +97,7 @@ else:
 #   - '1x1008_4scales': 1x1008 resolution with 4 scales (gap = 0.25). (we were only able to run with a GPU with 24GB memory)
 #       - This is the highest resolution/settings we could use with a 24GB
 #         GPU without running into memory issues.
-
-# resolutionPoseDetection = 'default'
-resolutionPoseDetection = '1x736_2scales'
+resolutionPoseDetection = '1x736'
 
 
 # Set deleteLocalFolder to False to keep a local copy of the data. If you are 
@@ -122,8 +107,7 @@ deleteLocalFolder = False
       
 
 # %% Process data.
-batchReprocess(session_ids,calib_id,static_id,dynamic_ids,
+batchReprocess(session_ids,calib_id,static_id,dynamic_trialNames,
                poseDetector=poseDetector,
                resolutionPoseDetection=resolutionPoseDetection,
                deleteLocalFolder=deleteLocalFolder)
-test=1

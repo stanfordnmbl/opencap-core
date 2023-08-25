@@ -22,10 +22,10 @@ from utils import writeCalibrationOptionsToAPI
 from utils import postMotionData
 from utils import getNeutralTrialID
 from utils import getCalibrationTrialID
-from utils import sendStatusEmail    
-from utils import getPosePickles
+from utils import sendStatusEmail
 from utils import importMetadata
-from utils import getMainSettings
+from utils import checkAndGetPosePickles
+from utils import getTrialNameIdMapping
 from utilsAuth import getToken
 from utilsAPI import getAPIURL
 
@@ -109,36 +109,7 @@ def processTrial(session_id, trial_id, trial_type = 'dynamic',
         
         # Download the pose pickles to avoid re-running pose estimation.
         if batchProcess and use_existing_pose_pickle:
-            # Check if the pose pickles for that set of settings exist.
-            # Load main_settings yaml.
-            main_settings = getMainSettings(trial_id)
-            if 'poseDetector' in main_settings:
-                usedPoseDetector = main_settings['poseDetector']
-                if usedPoseDetector.lower() == 'openpose':
-                    if 'resolutionPoseDetection' in main_settings:
-                        usedResolution = main_settings['resolutionPoseDetection']
-                        if usedPoseDetector.lower() == poseDetector.lower() and usedResolution == resolutionPoseDetection:
-                            getPosePickles(trial_id,session_path, poseDetector=poseDetector, resolutionPoseDetection=resolutionPoseDetection)
-                        else:
-                            print('The pose pickles in the database are for {} {}, but you are now using {} {}. We will re-run pose estimation'.format(usedPoseDetector, usedResolution, poseDetector, resolutionPoseDetection))
-                    else:
-                        print('It is unclear which settings were used for pose estimation. We will re-run pose estimation')
-                elif usedPoseDetector.lower() == 'mmpose' or usedPoseDetector.lower() == 'hrnet':
-                    if 'bbox_thr' in main_settings:
-                        usedBbox_thr = main_settings['bbox_thr']
-                    else:
-                        # There was a bug in main, where bbox_thr was not saved in main_settings.yaml.
-                        # Since there is in practice no option to change bbox_thr in the GUI, we can
-                        # assume that the default value was used.
-                        usedBbox_thr = 0.8
-                    if usedPoseDetector.lower() == poseDetector.lower() and usedBbox_thr == bbox_thr:
-                        getPosePickles(trial_id,session_path, poseDetector=poseDetector, bbox_thr=bbox_thr)
-                    else:
-                        print('The pose pickles in the database are for {} {}, but you are now using {} {}. We will re-run pose estimation'.format(usedPoseDetector, usedBbox_thr, poseDetector, bbox_thr))
-                else:
-                    print('It is unclear which settings were used for pose estimation. We will re-run pose estimation')
-            else:
-                print('It is unclear which settings were used for pose estimation. We will re-run pose estimation')
+            checkAndGetPosePickles(trial_id, session_path, poseDetector, resolutionPoseDetection, bbox_thr)
 
         # run static
         try:
@@ -197,22 +168,9 @@ def processTrial(session_id, trial_id, trial_type = 'dynamic',
             session_id, trial_id, isDocker=isDocker, isCalibration=False,
             isStaticPose=False)
         
-        # Download the pose pickles
-        if use_existing_pose_pickle:
-            # Check if the pose pickles for that set of settings exist.
-            # Load poseDetector from metadata
-            sessionMetadata = importMetadata(
-                os.path.join(session_path, 'sessionMetadata.yaml'))
-            usedPoseDetector = sessionMetadata['posemodel']
-            # TODO
-            if usedPoseDetector.lower() == 'openpose':
-                usedResolution = '1x736_2scales'
-            elif usedPoseDetector.lower() == 'hrnet':
-                usedResolution = '0.8'
-            if usedPoseDetector.lower() == poseDetector.lower() and usedResolution == resolutionPoseDetection:
-                getPosePickles(trial_id,session_path, poseDetector=poseDetector, resolutionPoseDetection=resolutionPoseDetection)                
-            else:
-                print('The pose pickles in the database are for {} {}, but you are now using {} {}. We will re-run pose estimation'.format(usedPoseDetector, usedResolution, poseDetector, resolutionPoseDetection))
+        # Download the pose pickles to avoid re-running pose estimation.
+        if batchProcess and use_existing_pose_pickle:
+            checkAndGetPosePickles(trial_id, session_path, poseDetector, resolutionPoseDetection, bbox_thr)
         
         # run dynamic
         try:
@@ -220,7 +178,8 @@ def processTrial(session_id, trial_id, trial_type = 'dynamic',
                  poseDetector=poseDetector,
                  imageUpsampleFactor=imageUpsampleFactor,
                  resolutionPoseDetection = resolutionPoseDetection,
-                 genericFolderNames = True)
+                 genericFolderNames = True,
+                 bbox_thr = bbox_thr)
         except Exception as e:
             error_msg = {}
             error_msg['error_msg'] = e.args[0]
@@ -246,7 +205,10 @@ def processTrial(session_id, trial_id, trial_type = 'dynamic',
                         tag="visualizerTransforms-json",deleteOldMedia=True)
         
         # Write results to django
-        postMotionData(trial_id,session_path,trial_name=trial_name,isNeutral=False)
+        postMotionData(trial_id,session_path,trial_name=trial_name,isNeutral=False,
+                       poseDetector=poseDetector, 
+                       resolutionPoseDetection=resolutionPoseDetection,
+                       bbox_thr=bbox_thr)
         
     else:
         raise Exception('Wrong trial type. Options: calibration, static, dynamic.')
@@ -321,7 +283,7 @@ def newSessionSameSetup(session_id_old,session_id_new,extrinsicTrialName='calibr
                      os.path.join(session_path_new,'sessionMetadata.yaml'))
             
     
-def batchReprocess(session_ids,calib_id,static_id,dynamic_ids,poseDetector='OpenPose', 
+def batchReprocess(session_ids,calib_id,static_id,dynamic_trialNames,poseDetector='OpenPose', 
                    resolutionPoseDetection='default',deleteLocalFolder=True,
                    isServer=False, use_existing_pose_pickle=True):
 
@@ -329,9 +291,12 @@ def batchReprocess(session_ids,calib_id,static_id,dynamic_ids,poseDetector='Open
         (type(dynamic_ids)==list and len(dynamic_ids)>0)) and len(session_ids) >1:
         raise Exception('can only have one session number if hardcoding other trial ids')
     
-    # No resolution options for hrnet.
-    if poseDetector.lower() == 'hrnet':
-        resolutionPoseDetection = '0.8'
+    # extract trial ids from trial names
+    if dynamic_trialNames is not None and len(dynamic_trialNames)>0:
+        trialNames = getTrialNameIdMapping(session_ids[0])
+        dynamic_ids = [trialNames[name]['id'] for name in dynamic_trialNames]
+    else:
+        dynamic_ids = dynamic_trialNames
         
     for session_id in session_ids:
         print('Processing ' + session_id)
