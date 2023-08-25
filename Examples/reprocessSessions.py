@@ -57,11 +57,11 @@ API_TOKEN = getToken()
 # end of the session url: app.opencap.ai/session/<session_id>
 # session_ids = ['8da6aaa9-6189-4175-b14c-38fb7377b63d']
 
-# session_ids = ['66d0cff9-c299-42ed-9c72-a6d59fcb8ba7']
-# poseDetector = 'OpenPose'
+session_ids = ['66d0cff9-c299-42ed-9c72-a6d59fcb8ba7']
+poseDetector = 'OpenPose'
 
-session_ids = ['f1180b1d-7ad6-4280-bd8b-4949746cc83a']
-poseDetector = 'hrnet'
+# session_ids = ['f1180b1d-7ad6-4280-bd8b-4949746cc83a']
+# poseDetector = 'hrnet'
 
 
 # OpenPose testing: 66d0cff9-c299-42ed-9c72-a6d59fcb8ba7
@@ -80,7 +80,7 @@ poseDetector = 'hrnet'
 
 calib_id = [] # None (auto-selected trial), [] (skip), or string of specific trial_id
 static_id = None # None (auto-selected trial), [] (skip), or string of specific trial_id
-dynamic_trialNames = None # None (all dynamic trials), [] (skip), or list of trial names
+dynamic_trialNames = [] # None (all dynamic trials), [] (skip), or list of trial names
 
 # extract trial ids from trial names
 if dynamic_trialNames is not None and len(dynamic_trialNames)>0:
@@ -110,6 +110,8 @@ else:
 #   - '1x1008_4scales': 1x1008 resolution with 4 scales (gap = 0.25). (we were only able to run with a GPU with 24GB memory)
 #       - This is the highest resolution/settings we could use with a 24GB
 #         GPU without running into memory issues.
+
+# resolutionPoseDetection = 'default'
 resolutionPoseDetection = '1x736_2scales'
 
 
@@ -123,6 +125,5 @@ deleteLocalFolder = False
 batchReprocess(session_ids,calib_id,static_id,dynamic_ids,
                poseDetector=poseDetector,
                resolutionPoseDetection=resolutionPoseDetection,
-               deleteLocalFolder=deleteLocalFolder,
-               use_existing_pose_pickle=True)
+               deleteLocalFolder=deleteLocalFolder)
 test=1

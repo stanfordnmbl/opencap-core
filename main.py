@@ -497,7 +497,7 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
             'offset': offset, 
             'imageUpsampleFactor': imageUpsampleFactor,
             'openSimModel': sessionMetadata['openSimModel']}
-        if poseDetector == 'mmpose':
-            settings['bbox_thr']: str(bbox_thr)
+        if poseDetector == 'mmpose': # TODO: change to hrnet
+            settings['bbox_thr'] = str(bbox_thr)
         with open(pathSettings, 'w') as file:
             yaml.dump(settings, file)
