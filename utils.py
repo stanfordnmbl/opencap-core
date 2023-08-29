@@ -695,17 +695,27 @@ def makeSessionPublic(session_id,publicStatus=True):
     return
 
         
-def postMotionData(trial_id,session_path,trial_name=None,isNeutral=False):
+def postMotionData(trial_id,session_path,trial_name=None,isNeutral=False,
+                   poseDetector='OpenPose', resolutionPoseDetection='default',
+                   bbox_thr=0.8):
+    
     if trial_name == None:
         trial_name = getTrialJson(trial_id)['id']
+
+    if poseDetector.lower() == 'openpose':
+        pklDir = os.path.join("OutputPkl_" + resolutionPoseDetection, trial_name)
+    elif poseDetector.lower() == 'hrnet':
+        pklDir = os.path.join("OutputPkl_mmpose_" + str(bbox_thr), trial_name)
+    else:
+        raise Exception('Unknown pose detector: {}'.format(poseDetector))
         
     # post pose pickles
     # If we parallelize this, this will be redundant, and we will want to delete this posting of pickles
     deleteResult(trial_id, tag='pose_pickle')
     camDirs = glob.glob(os.path.join(session_path,'Videos','Cam*'))
     for camDir in camDirs:
-        outputPklFolder = glob.glob(os.path.join(camDir,'OutputPkl*'))[0]
-        pklPath = glob.glob(os.path.join(outputPklFolder,trial_name,'*_pp.pkl'))[0]
+        outputPklFolder = os.path.join(camDir,pklDir)
+        pklPath = glob.glob(os.path.join(outputPklFolder,'*_pp.pkl'))[0]
         _,camName = os.path.split(camDir)
         postFileToTrial(pklPath,trial_id,tag='pose_pickle',device_id=camName)
         
@@ -836,6 +846,83 @@ def getSyncdVideos(trial_id,session_path):
                 
                 syncVideoPath = os.path.join(session_path,'Videos',cam,'InputMedia',trial_name,trial_name + '_sync' + suff)
                 download_file(url,syncVideoPath)
+
+def getPosePickles(trial_id,session_path, poseDetector='OpenPose', 
+                   resolutionPoseDetection='default', bbox_thr=0.8):
+    trial = getTrialJson(trial_id)
+    trial_name = trial['name']
+
+    if poseDetector.lower() == 'openpose':
+        pklDir = os.path.join("OutputPkl_" + resolutionPoseDetection, trial_name)
+    elif poseDetector.lower() == 'hrnet':
+        pklDir = os.path.join("OutputPkl_mmpose_" + str(bbox_thr), trial_name)
+    else:
+        raise Exception('Unknown pose detector: {}'.format(poseDetector))
+    
+    trialPrefix = trial_id + "_rotated_pp.pkl"
+    
+    if trial['results']:
+        for result in trial['results']:
+            if result['tag'] == 'pose_pickle':
+                url = result['media']                
+                cam = result['device_id']
+                posePickleDir = os.path.join(session_path,'Videos',cam,pklDir)
+                os.makedirs(posePickleDir,exist_ok=True)
+                posePicklePath = os.path.join(posePickleDir,trialPrefix)
+                download_file(url,posePicklePath)
+
+def checkAndGetPosePickles(trial_id, session_path, poseDetector, resolutionPoseDetection, bbox_thr):
+    # Check if the pose pickles for that set of settings exist.
+    # Load main_settings yaml.
+    main_settings = getMainSettings(trial_id)
+    if 'poseDetector' in main_settings:
+        usedPoseDetector = main_settings['poseDetector']
+        if poseDetector.lower() == 'openpose':
+            if 'resolutionPoseDetection' in main_settings:
+                usedResolution = main_settings['resolutionPoseDetection']
+                if usedPoseDetector.lower() == poseDetector.lower() and usedResolution == resolutionPoseDetection:
+                    print('The pose pickles for {} {} already exist in the database. We will download them to avoid re-running pose estimation'.format(poseDetector, resolutionPoseDetection))
+                    getPosePickles(trial_id,session_path, poseDetector=poseDetector, resolutionPoseDetection=resolutionPoseDetection)
+                else:
+                    print('The pose pickles in the database are for {} {}, but you are now using {} {}. We will re-run pose estimation'.format(usedPoseDetector, usedResolution, poseDetector, resolutionPoseDetection))
+            else:
+                print('It is unclear which settings were used for pose estimation. We will re-run pose estimation')
+        elif poseDetector.lower() == 'hrnet':
+            # Hack: hrnet is sometimes called mmpose
+            if usedPoseDetector.lower() == 'mmpose':
+                usedPoseDetector = 'hrnet'
+            if 'bbox_thr' in main_settings:
+                usedBbox_thr = main_settings['bbox_thr']
+            else:
+                # There was a bug in main, where bbox_thr was not saved in main_settings.yaml.
+                # Since there is in practice no option to change bbox_thr in the GUI, we can
+                # assume that the default value was used.
+                usedBbox_thr = 0.8
+            if usedPoseDetector.lower() == poseDetector.lower() and usedBbox_thr == bbox_thr:
+                print('The pose pickles for {} {} already exist in the database. We will download them to avoid re-running pose estimation'.format(poseDetector, bbox_thr))
+                getPosePickles(trial_id,session_path, poseDetector=poseDetector, bbox_thr=bbox_thr)
+            else:
+                print('The pose pickles in the database are for {} {}, but you are now using {} {}. We will re-run pose estimation'.format(usedPoseDetector, usedBbox_thr, poseDetector, bbox_thr))
+        else:
+            print('It is unclear which settings were used for pose estimation. We will re-run pose estimation')
+    else:
+        print('It is unclear which settings were used for pose estimation. We will re-run pose estimation')
+
+def getMainSettings(trial_id):
+    trial = getTrialJson(trial_id)
+    if trial['results']:
+        for result in trial['results']:
+            if result['tag'] == 'main_settings':
+                url = result['media']
+                # Load yaml file
+                try:
+                    with urllib.request.urlopen(url) as response:
+                        yaml_content = response.read()
+                        data = yaml.safe_load(yaml_content)
+                        return data
+                except Exception as e:
+                    print("An error occurred:", e)
+                    return {}  # Return an empty dictionary in case of an error
         
 def downloadAndZipSession(session_id,deleteFolderWhenZipped=True,isDocker=True,
                           writeToDjango=False,justDownload=False,data_dir=None,

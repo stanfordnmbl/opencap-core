@@ -3,6 +3,7 @@ import time
 import logging
 import shutil
 import ffmpeg
+import json
 
 #%% 
 def getVideoOrientation(videoPath):
@@ -65,7 +66,9 @@ video_path = "/openpose/data/video_openpose.mov"
 output_dir = "/openpose/data/output_openpose"
 
 # Set resolution for OpenPose ('default', '1x736', or '1x1008_4scales').
-resolutionPoseDetection = '1x736'
+with open('/openpose/defaultOpenCapSettings.json') as f:
+    defaultOpenCapSettings = json.load(f)
+resolutionPoseDetection = defaultOpenCapSettings['openpose']
     
 if os.path.isfile(video_path):
     os.remove(video_path)
