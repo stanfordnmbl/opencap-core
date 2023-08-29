@@ -23,7 +23,7 @@ from utils import postMotionData
 from utils import getNeutralTrialID
 from utils import getCalibrationTrialID
 from utils import sendStatusEmail
-from utils import getMetadataFromServer
+from utils import importMetadata
 from utils import checkAndGetPosePickles
 from utils import getTrialNameIdMapping
 from utilsAuth import getToken
@@ -47,23 +47,7 @@ def processTrial(session_id, trial_id, trial_type = 'dynamic',
     data_dir = getDataDirectory(isDocker=isDocker)
     session_path = os.path.join(data_dir,'Data',session_name)    
     trial_url = "{}{}{}/".format(API_URL, "trials/", trial_id)
-
-    # If processTrial is run from app.py, then batchProcess is False and we
-    # here manually set resolutionPoseDetection and bbox_thr to default.
-    # This is needed to have the correct settings in main_settings.yaml. We also
-    # set poseDetector here instead of in main.py, such that we can call
-    # processTrial from both app.py and batchReprocess.py.
-    if not batchProcess:
-        # TODO: This might be redundant with downloadVideosFromServer.
-        sessionMetadata = getMetadataFromServer(session_id)
-        poseDetector = sessionMetadata['posemodel']
-        file_dir = os.path.dirname(os.path.abspath(__file__))
-        with open(os.path.join(file_dir,'defaultOpenCapSettings.json')) as f:
-            defaultOpenCapSettings = json.load(f)
-        if poseDetector.lower() == 'openpose':
-            resolutionPoseDetection = defaultOpenCapSettings['openpose']
-        elif poseDetector.lower() == 'hrnet':
-            bbox_thr = defaultOpenCapSettings['hrnet']
+    metadata_path = os.path.join(session_path, 'sessionMetadata.yaml')        
        
     # Process the 3 different types of trials
     if trial_type == 'calibration':
@@ -77,8 +61,7 @@ def processTrial(session_id, trial_id, trial_type = 'dynamic',
         # run calibration
         try:
             main(session_name, trial_name, trial_id, isDocker=isDocker, extrinsicsTrial=True,
-                 imageUpsampleFactor=imageUpsampleFactor,genericFolderNames = True,
-                 poseDetector=poseDetector)
+                 imageUpsampleFactor=imageUpsampleFactor,genericFolderNames = True)
         except Exception as e:
             error_msg = {}
             error_msg['error_msg'] = e.args[0]
@@ -113,6 +96,22 @@ def processTrial(session_id, trial_id, trial_type = 'dynamic',
         # Download the pose pickles to avoid re-running pose estimation.
         if batchProcess and use_existing_pose_pickle:
             checkAndGetPosePickles(trial_id, session_path, poseDetector, resolutionPoseDetection, bbox_thr)
+
+        # If processTrial is run from app.py, poseDetector is set based on what
+        # users select in the webapp, which is saved in metadata. Based on this,
+        # we set resolutionPoseDetection or bbox_thr to the webapp defaults. If
+        # processTrial is run from batchReprocess.py, then the settings used are
+        # those passed as arguments to processTrial.
+        if not batchProcess:
+            sessionMetadata = importMetadata(metadata_path)
+            poseDetector = sessionMetadata['posemodel']
+            file_dir = os.path.dirname(os.path.abspath(__file__))
+            with open(os.path.join(file_dir,'defaultOpenCapSettings.json')) as f:
+                defaultOpenCapSettings = json.load(f)
+            if poseDetector.lower() == 'openpose':
+                resolutionPoseDetection = defaultOpenCapSettings['openpose']
+            elif poseDetector.lower() == 'hrnet':
+                bbox_thr = defaultOpenCapSettings['hrnet']            
 
         # run static
         try:
@@ -174,6 +173,22 @@ def processTrial(session_id, trial_id, trial_type = 'dynamic',
         # Download the pose pickles to avoid re-running pose estimation.
         if batchProcess and use_existing_pose_pickle:
             checkAndGetPosePickles(trial_id, session_path, poseDetector, resolutionPoseDetection, bbox_thr)
+
+        # If processTrial is run from app.py, poseDetector is set based on what
+        # users select in the webapp, which is saved in metadata. Based on this,
+        # we set resolutionPoseDetection or bbox_thr to the webapp defaults. If
+        # processTrial is run from batchReprocess.py, then the settings used are
+        # those passed as arguments to processTrial.
+        if not batchProcess:
+            sessionMetadata = importMetadata(metadata_path)
+            poseDetector = sessionMetadata['posemodel']
+            file_dir = os.path.dirname(os.path.abspath(__file__))
+            with open(os.path.join(file_dir,'defaultOpenCapSettings.json')) as f:
+                defaultOpenCapSettings = json.load(f)
+            if poseDetector.lower() == 'openpose':
+                resolutionPoseDetection = defaultOpenCapSettings['openpose']
+            elif poseDetector.lower() == 'hrnet':
+                bbox_thr = defaultOpenCapSettings['hrnet'] 
         
         # run dynamic
         try:
@@ -287,7 +302,7 @@ def newSessionSameSetup(session_id_old,session_id_new,extrinsicTrialName='calibr
             
     
 def batchReprocess(session_ids,calib_id,static_id,dynamic_trialNames,poseDetector='OpenPose', 
-                   resolutionPoseDetection='default',deleteLocalFolder=True,
+                   resolutionPoseDetection='1x736',deleteLocalFolder=True,
                    isServer=False, use_existing_pose_pickle=True):
 
     # extract trial ids from trial names
