@@ -290,7 +290,7 @@ def batchReprocess(session_ids,calib_id,static_id,dynamic_trialNames,poseDetecto
                    resolutionPoseDetection='default',deleteLocalFolder=True,
                    isServer=False, use_existing_pose_pickle=True):
 
-    # extract trial ids from trial namesspyde
+    # extract trial ids from trial names
     if dynamic_trialNames is not None and len(dynamic_trialNames)>0:
         trialNames = getTrialNameIdMapping(session_ids[0])
         dynamic_ids = [trialNames[name]['id'] for name in dynamic_trialNames]

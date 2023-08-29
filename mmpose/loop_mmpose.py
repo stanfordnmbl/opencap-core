@@ -17,7 +17,6 @@ generateVideo=False
 
 with open('/mmpose/defaultOpenCapSettings.json') as f:
     defaultOpenCapSettings = json.load(f)
-resolutionPoseDetection = defaultOpenCapSettings['openpose']
 bbox_thr = defaultOpenCapSettings['hrnet']
 model_config_person='/mmpose/faster_rcnn_r50_fpn_coco.py'
 model_ckpt_person='/mmpose/faster_rcnn_r50_fpn_1x_coco_20200130-047c8118.pth'
