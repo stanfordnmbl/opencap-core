@@ -67,7 +67,7 @@ session_ids = ['23d52d41-69fe-47cf-8b60-838e4268dd50']
 # static_id. A list of strings is allowed for dynamic_trialNames.
 
 calib_id = [] # None (auto-selected trial), [] (skip), or string of specific trial_id
-static_id = None # None (auto-selected trial), [] (skip), or string of specific trial_id
+static_id = [] # None (auto-selected trial), [] (skip), or string of specific trial_id
 dynamic_trialNames = None # None (all dynamic trials), [] (skip), or list of trial names
 
 # Select which pose estimation model to use; options are 'OpenPose' and 'hrnet'.
@@ -111,3 +111,4 @@ batchReprocess(session_ids,calib_id,static_id,dynamic_trialNames,
                poseDetector=poseDetector,
                resolutionPoseDetection=resolutionPoseDetection,
                deleteLocalFolder=deleteLocalFolder)
+test=1

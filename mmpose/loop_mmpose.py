@@ -2,6 +2,7 @@ import os
 import time
 import logging
 import shutil
+import json
 
 from utilsMMpose import detection_inference, pose_inference
 
@@ -13,7 +14,11 @@ video_path = "/mmpose/data/video_mmpose.mov"
 output_dir = "/mmpose/data/output_mmpose"
 
 generateVideo=False
-bbox_thr=0.8
+
+with open('/mmpose/defaultOpenCapSettings.json') as f:
+    defaultOpenCapSettings = json.load(f)
+resolutionPoseDetection = defaultOpenCapSettings['openpose']
+bbox_thr = defaultOpenCapSettings['hrnet']
 model_config_person='/mmpose/faster_rcnn_r50_fpn_coco.py'
 model_ckpt_person='/mmpose/faster_rcnn_r50_fpn_1x_coco_20200130-047c8118.pth'
 model_config_pose='/mmpose/hrnet_w48_coco_wholebody_384x288_dark_plus.py'
