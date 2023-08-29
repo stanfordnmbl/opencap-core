@@ -23,7 +23,7 @@ from utils import postMotionData
 from utils import getNeutralTrialID
 from utils import getCalibrationTrialID
 from utils import sendStatusEmail
-from utils import importMetadata
+from utils import getMetadataFromServer
 from utils import checkAndGetPosePickles
 from utils import getTrialNameIdMapping
 from utilsAuth import getToken
@@ -54,8 +54,8 @@ def processTrial(session_id, trial_id, trial_type = 'dynamic',
     # set poseDetector here instead of in main.py, such that we can call
     # processTrial from both app.py and batchReprocess.py.
     if not batchProcess:
-        sessionMetadata = importMetadata(
-                os.path.join(session_path, 'sessionMetadata.yaml'))
+        # TODO: This might be redundant with downloadVideosFromServer.
+        sessionMetadata = getMetadataFromServer(session_id)
         poseDetector = sessionMetadata['posemodel']
         file_dir = os.path.dirname(os.path.abspath(__file__))
         with open(os.path.join(file_dir,'defaultOpenCapSettings.json')) as f:
