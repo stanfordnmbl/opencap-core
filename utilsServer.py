@@ -22,7 +22,10 @@ from utils import writeCalibrationOptionsToAPI
 from utils import postMotionData
 from utils import getNeutralTrialID
 from utils import getCalibrationTrialID
-from utils import sendStatusEmail    
+from utils import sendStatusEmail
+from utils import importMetadata
+from utils import checkAndGetPosePickles
+from utils import getTrialNameIdMapping
 from utilsAuth import getToken
 from utilsAPI import getAPIURL
 
@@ -32,16 +35,35 @@ API_TOKEN = getToken()
 
 def processTrial(session_id, trial_id, trial_type = 'dynamic',
                  imageUpsampleFactor = 4, poseDetector = 'OpenPose',
-                 isDocker = True, resolutionPoseDetection='default',
-                 extrinsicTrialName = 'calibration',
+                 isDocker = True, resolutionPoseDetection = 'default',
+                 bbox_thr = 0.8, extrinsicTrialName = 'calibration',
                  deleteLocalFolder = True,
-                 hasWritePermissions=True):
+                 hasWritePermissions = True,
+                 use_existing_pose_pickle = False,
+                 batchProcess = False):
 
     # Get session directory
     session_name = session_id 
     data_dir = getDataDirectory(isDocker=isDocker)
     session_path = os.path.join(data_dir,'Data',session_name)    
     trial_url = "{}{}{}/".format(API_URL, "trials/", trial_id)
+
+    # If processTrial is run from app.py, then batchProcess is False and we
+    # here manually set resolutionPoseDetection and bbox_thr to default.
+    # This is needed to have the correct settings in main_settings.yaml. We also
+    # set poseDetector here instead of in main.py, such that we can call
+    # processTrial from both app.py and batchReprocess.py.
+    if not batchProcess:
+        sessionMetadata = importMetadata(
+                os.path.join(session_path, 'sessionMetadata.yaml'))
+        poseDetector = sessionMetadata['posemodel']
+        file_dir = os.path.dirname(os.path.abspath(__file__))
+        with open(os.path.join(file_dir,'defaultOpenCapSettings.json')) as f:
+            defaultOpenCapSettings = json.load(f)
+        if poseDetector.lower() == 'openpose':
+            resolutionPoseDetection = defaultOpenCapSettings['openpose']
+        elif poseDetector.lower() == 'hrnet':
+            bbox_thr = defaultOpenCapSettings['hrnet']
        
     # Process the 3 different types of trials
     if trial_type == 'calibration':
@@ -82,12 +104,16 @@ def processTrial(session_id, trial_id, trial_type = 'dynamic',
         deleteStaticFiles(session_path, staticTrialName = 'neutral')
         
         # Check for calibration to use on django, if not, check for switch calibrations and post result.
-        calibrationOptions = getCalibration(session_id,session_path,trial_type=trial_type,getCalibrationOptions=True)   
+        calibrationOptions = getCalibration(session_id,session_path,trial_type=trial_type,getCalibrationOptions=True)
         
         # download the videos
         trial_name = downloadVideosFromServer(session_id,trial_id,isDocker=isDocker,
                                  isCalibration=False,isStaticPose=True)
         
+        # Download the pose pickles to avoid re-running pose estimation.
+        if batchProcess and use_existing_pose_pickle:
+            checkAndGetPosePickles(trial_id, session_path, poseDetector, resolutionPoseDetection, bbox_thr)
+
         # run static
         try:
             main(session_name, trial_name, trial_id, isDocker=isDocker, extrinsicsTrial=False,
@@ -96,6 +122,7 @@ def processTrial(session_id, trial_id, trial_type = 'dynamic',
                  scaleModel = True,
                  resolutionPoseDetection = resolutionPoseDetection,
                  genericFolderNames = True,
+                 bbox_thr = bbox_thr,
                  calibrationOptions = calibrationOptions)
         except Exception as e:            
             error_msg = {}
@@ -126,7 +153,10 @@ def processTrial(session_id, trial_id, trial_type = 'dynamic',
                         tag="visualizerTransforms-json",deleteOldMedia=True)
         
         # Write results to django
-        postMotionData(trial_id,session_path,trial_name=trial_name,isNeutral=True)
+        postMotionData(trial_id,session_path,trial_name=trial_name,isNeutral=True,
+                       poseDetector=poseDetector, 
+                       resolutionPoseDetection=resolutionPoseDetection,
+                       bbox_thr=bbox_thr)
         
         # Write calibration options to django
         postCalibrationOptions(session_path,session_id,overwrite=True)
@@ -141,13 +171,18 @@ def processTrial(session_id, trial_id, trial_type = 'dynamic',
             session_id, trial_id, isDocker=isDocker, isCalibration=False,
             isStaticPose=False)
         
+        # Download the pose pickles to avoid re-running pose estimation.
+        if batchProcess and use_existing_pose_pickle:
+            checkAndGetPosePickles(trial_id, session_path, poseDetector, resolutionPoseDetection, bbox_thr)
+        
         # run dynamic
         try:
             main(session_name, trial_name, trial_id, isDocker=isDocker, extrinsicsTrial=False,
                  poseDetector=poseDetector,
                  imageUpsampleFactor=imageUpsampleFactor,
                  resolutionPoseDetection = resolutionPoseDetection,
-                 genericFolderNames = True)
+                 genericFolderNames = True,
+                 bbox_thr = bbox_thr)
         except Exception as e:
             error_msg = {}
             error_msg['error_msg'] = e.args[0]
@@ -173,7 +208,10 @@ def processTrial(session_id, trial_id, trial_type = 'dynamic',
                         tag="visualizerTransforms-json",deleteOldMedia=True)
         
         # Write results to django
-        postMotionData(trial_id,session_path,trial_name=trial_name,isNeutral=False)
+        postMotionData(trial_id,session_path,trial_name=trial_name,isNeutral=False,
+                       poseDetector=poseDetector, 
+                       resolutionPoseDetection=resolutionPoseDetection,
+                       bbox_thr=bbox_thr)
         
     else:
         raise Exception('Wrong trial type. Options: calibration, static, dynamic.')
@@ -248,10 +286,17 @@ def newSessionSameSetup(session_id_old,session_id_new,extrinsicTrialName='calibr
                      os.path.join(session_path_new,'sessionMetadata.yaml'))
             
     
-def batchReprocess(session_ids,calib_id,static_id,dynamic_ids,poseDetector='OpenPose', 
+def batchReprocess(session_ids,calib_id,static_id,dynamic_trialNames,poseDetector='OpenPose', 
                    resolutionPoseDetection='default',deleteLocalFolder=True,
-                   isServer=False):
+                   isServer=False, use_existing_pose_pickle=True):
 
+    # extract trial ids from trial names
+    if dynamic_trialNames is not None and len(dynamic_trialNames)>0:
+        trialNames = getTrialNameIdMapping(session_ids[0])
+        dynamic_ids = [trialNames[name]['id'] for name in dynamic_trialNames]
+    else:
+        dynamic_ids = dynamic_trialNames
+    
     if (type(calib_id) == str or type(static_id) == str or type(dynamic_ids) == str or 
         (type(dynamic_ids)==list and len(dynamic_ids)>0)) and len(session_ids) >1:
         raise Exception('can only have one session number if hardcoding other trial ids')
@@ -302,7 +347,9 @@ def batchReprocess(session_ids,calib_id,static_id,dynamic_ids,poseDetector='Open
                               poseDetector = poseDetector,
                               deleteLocalFolder = deleteLocalFolder,
                               isDocker=isServer,
-                              hasWritePermissions = hasWritePermissions)
+                              hasWritePermissions = hasWritePermissions,
+                              use_existing_pose_pickle = use_existing_pose_pickle,
+                              batchProcess = True)
                 statusData = {'status':'done'}
                 _ = requests.patch(API_URL + "trials/{}/".format(static_id_toProcess), data=statusData,
                          headers = {"Authorization": "Token {}".format(API_TOKEN)})
@@ -331,7 +378,9 @@ def batchReprocess(session_ids,calib_id,static_id,dynamic_ids,poseDetector='Open
                           poseDetector = poseDetector,
                           deleteLocalFolder = deleteLocalFolder,
                           isDocker=isServer,
-                          hasWritePermissions = hasWritePermissions)
+                          hasWritePermissions = hasWritePermissions,
+                          use_existing_pose_pickle = use_existing_pose_pickle,
+                          batchProcess = True)
                 
                 statusData = {'status':'done'}
                 _ = requests.patch(API_URL + "trials/{}/".format(dID), data=statusData,

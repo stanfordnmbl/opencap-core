@@ -34,7 +34,7 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
          calibrationOptions=None,
          markerDataFolderNameSuffix=None, imageUpsampleFactor=4,
          poseDetector='OpenPose', resolutionPoseDetection='default', 
-         scaleModel=False, bbox_thr=0.8, augmenter_model='v0.2',
+         scaleModel=False, bbox_thr=0.8, augmenter_model='v0.3',
          genericFolderNames=False, offset=True, benchmark=False,
          dataDir=None, overwriteAugmenterModel=False):
 
@@ -58,6 +58,12 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
     # Set to False to only generate the json files (default is True).
     # This speeds things up and saves storage space.
     generateVideo = True
+    # This is a hack to handle a mismatch between the use of mmpose and hrnet,
+    # and between the use of OpenPose and openpose.
+    if poseDetector == 'hrnet':
+        poseDetector = 'mmpose'
+    elif poseDetector == 'openpose':
+        poseDetector = 'OpenPose'
     
     # %% Special case: extrinsics trial.
     # For that trial, we only calibrate the cameras.
@@ -79,13 +85,7 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
         sessionDir = os.path.join(dataDir, 'Data', sessionName)
     sessionMetadata = importMetadata(os.path.join(sessionDir,
                                                   'sessionMetadata.yaml'))
-    # If pose model defined through web app.
-    if 'posemodel' in sessionMetadata:
-        if sessionMetadata['posemodel'] == 'hrnet':
-            poseDetector = 'mmpose'
-        else:
-            poseDetector = 'OpenPose'
-
+    
     # If augmenter model defined through web app.
     # If overwriteAugmenterModel is True, the augmenter model is the one
     # passed as an argument to main(). This is useful for local testing.
@@ -495,6 +495,6 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
             'imageUpsampleFactor': imageUpsampleFactor,
             'openSimModel': sessionMetadata['openSimModel']}
         if poseDetector == 'mmpose':
-            settings['bbox_thr']: str(bbox_thr)
+            settings['bbox_thr'] = str(bbox_thr)
         with open(pathSettings, 'w') as file:
             yaml.dump(settings, file)
