@@ -489,12 +489,13 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
                                     'Settings_' + trial_id + '.yaml')
         settings = {
             'poseDetector': poseDetector, 
-            'resolutionPoseDetection': resolutionPoseDetection,
             'augmenter_model': augmenterModel, 
             'offset': offset, 
             'imageUpsampleFactor': imageUpsampleFactor,
             'openSimModel': sessionMetadata['openSimModel']}
-        if poseDetector == 'mmpose':
+        if poseDetector == 'OpenPose':
+            settings['resolutionPoseDetection'] = resolutionPoseDetection
+        elif poseDetector == 'mmpose':
             settings['bbox_thr'] = str(bbox_thr)
         with open(pathSettings, 'w') as file:
             yaml.dump(settings, file)
