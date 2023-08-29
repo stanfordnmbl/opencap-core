@@ -496,6 +496,6 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
         if poseDetector == 'OpenPose':
             settings['resolutionPoseDetection'] = resolutionPoseDetection
         elif poseDetector == 'mmpose':
-            settings['bbox_thr'] = str(bbox_thr)
+            settings['bbox_thr'] = bbox_thr
         with open(pathSettings, 'w') as file:
             yaml.dump(settings, file)
