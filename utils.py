@@ -628,6 +628,8 @@ def changeSessionMetadata(session_ids,newMetaDict):
                 print("Could not find {} in existing metadata, trying to add it.".format(newMeta))
                 settings_fields = ['framerate', 'posemodel', 'openSimModel', 'augmentermodel']
                 if newMeta in settings_fields:
+                    if not 'settings' in existingMeta:
+                        existingMeta['settings'] = {}
                     existingMeta['settings'][newMeta] = newMetaDict[newMeta]
                     addedKey[newMeta] = newMetaDict[newMeta]
                     print("Added {} to settings in metadata".format(newMetaDict[newMeta]))
