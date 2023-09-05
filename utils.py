@@ -1450,7 +1450,7 @@ def sendStatusEmail(message=None,subject=None):
             server.send_message(msg)
         server.quit()
 
-def checkResourceUsage():
+def checkResourceUsage(stop_machine_and_email=True):
     import psutil
     
     resourceUsage = {}
@@ -1465,6 +1465,15 @@ def checkResourceUsage():
     # Get the percentage of disk usage
     resourceUsage['disk_gb'] = disk_usage.used / (1024 ** 3)
     resourceUsage['disk_perc'] = disk_usage.percent
+    
+    if stop_machine_and_email and resourceUsage['disk_perc'] > 95:
+            
+        message = "Disc is full on an OpenCap machine backend machine: " \
+                            + socket.gethostname() + ". It has been stopped. Data: " \
+                            + json.dumps(resourceUsage)
+        sendStatusEmail(message=message)
+        
+        raise Exception('Not enough available disc space. Stopped.')
     
     return resourceUsage
 
