@@ -30,7 +30,6 @@ initialStatusCheck = False
 # logging.info(tf.config.list_physical_devices('GPU'))
 
 while True:
-    
     # Run test trial at a given frequency to check status of machine. Stop machine if fails.
     if checkTime(t,minutesElapsed=30) or not initialStatusCheck:
         runTestSession(isDocker=isDocker)           
@@ -60,7 +59,7 @@ while True:
         continue
     
     # Check resource usage
-    resourceUsage = checkResourceUsage()
+    resourceUsage = checkResourceUsage(stop_machine_and_email=True)
     logging.info(json.dumps(resourceUsage))
 
     logging.info(r.text)
