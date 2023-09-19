@@ -123,16 +123,10 @@ def processTrial(session_id, trial_id, trial_type = 'dynamic',
                  genericFolderNames = True,
                  bbox_thr = bbox_thr,
                  calibrationOptions = calibrationOptions)
-        except Exception as e:            
-            error_msg = {}
-            error_msg['error_msg'] = e.args[0]
-            error_msg['error_msg_dev'] = e.args[1]
-            _ = requests.patch(trial_url, data={"meta": json.dumps(error_msg)},
-                   headers = {"Authorization": "Token {}".format(API_TOKEN)})
-            
-            # Try to post pose jsons so can be used offline. This function will 
-            # error at kinematics most likely, but hopefully pose pickles
-            # will be uploaded
+        except Exception as e:       
+            # Try to post pose pickles so can be used offline. This function will 
+            # error at kinematics most likely, but if pose estimation completed,
+            # pickles will get posted
             try :
                 # Write results to django
                 postMotionData(trial_id,session_path,trial_name=trial_name,isNeutral=True,
@@ -141,6 +135,12 @@ def processTrial(session_id, trial_id, trial_type = 'dynamic',
                                bbox_thr=bbox_thr)
             except:
                 pass
+            
+            error_msg = {}
+            error_msg['error_msg'] = e.args[0]
+            error_msg['error_msg_dev'] = e.args[1]
+            _ = requests.patch(trial_url, data={"meta": json.dumps(error_msg)},
+                   headers = {"Authorization": "Token {}".format(API_TOKEN)})
             
             raise Exception('Static trial failed')
         
@@ -212,24 +212,24 @@ def processTrial(session_id, trial_id, trial_type = 'dynamic',
                  genericFolderNames = True,
                  bbox_thr = bbox_thr)
         except Exception as e:
-            error_msg = {}
-            error_msg['error_msg'] = e.args[0]
-            error_msg['error_msg_dev'] = e.args[1]
-            _ = requests.patch(trial_url, data={"meta": json.dumps(error_msg)},
-                   headers = {"Authorization": "Token {}".format(API_TOKEN)})   
-                        
-            # Try to post pose jsons so can be used offline. This function will 
-            # error at kinematics most likely, but hopefully pose pickles
-            # will be uploaded
-            try :
+            # Try to post pose pickles so can be used offline. This function will 
+            # error at kinematics most likely, but if pose estimation completed,
+            # pickles will get posted
+            try:
                 # Write results to django
-                postMotionData(trial_id,session_path,trial_name=trial_name,isNeutral=True,
+                postMotionData(trial_id,session_path,trial_name=trial_name,isNeutral=False,
                                poseDetector=poseDetector, 
                                resolutionPoseDetection=resolutionPoseDetection,
                                bbox_thr=bbox_thr)
             except:
                 pass
             
+            error_msg = {}
+            error_msg['error_msg'] = e.args[0]
+            error_msg['error_msg_dev'] = e.args[1]
+            _ = requests.patch(trial_url, data={"meta": json.dumps(error_msg)},
+                   headers = {"Authorization": "Token {}".format(API_TOKEN)})   
+                                    
             raise Exception('Dynamic trial failed.\n' + error_msg['error_msg_dev'])
         
         if not hasWritePermissions:
