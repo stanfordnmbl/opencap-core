@@ -2,6 +2,7 @@ import sys
 sys.path.append("./mmpose") # utilities in child directory
 import cv2 
 import numpy as np 
+import pandas as pd
 import os 
 import glob 
 import pickle
@@ -780,7 +781,8 @@ def synchronizeVideos(CameraDirectories, trialRelativePath, pathPoseDetector,
                       filtFreqs={'gait':12,'default':30},
                       imageBasedTracker=False, cams2Use=['all'],
                       poseDetector='OpenPose', trialName=None, bbox_thr=0.8,
-                      resolutionPoseDetection='default'):
+                      resolutionPoseDetection='default', 
+                      visualizeKeypointAnimation=False):
     
     markerNames = getOpenPoseMarkerNames()
     
@@ -818,7 +820,7 @@ def synchronizeVideos(CameraDirectories, trialRelativePath, pathPoseDetector,
         ppPklPath = os.path.join(pathOutputPkl, trialPrefix+'_rotated_pp.pkl')
         key2D, confidence = loadPklVideo(
             ppPklPath, videoFullPath, imageBasedTracker=imageBasedTracker,
-            poseDetector=poseDetector)
+            poseDetector=poseDetector,confidenceThresholdForBB=0.3)
         thisVideo = cv2.VideoCapture(videoFullPath[:-4] + '_rotated.avi')
         frameRate = np.round(thisVideo.get(cv2.CAP_PROP_FPS))        
         if key2D.shape[1] == 0 and confidence.shape[1] == 0:
@@ -838,6 +840,36 @@ def synchronizeVideos(CameraDirectories, trialRelativePath, pathPoseDetector,
         CamParamDict.pop(camToExclude)
         CameraDirectories.pop(camToExclude)        
     delete_multiple_element(CamParamList_selectedCams, idx_camToExclude)    
+
+    # Creates a web animation for each camera's keypoints. For debugging.
+    if visualizeKeypointAnimation:
+        import plotly.express as px
+        import plotly.io as pio
+        pio.renderers.default = 'browser'
+    
+        for i,data in enumerate(pointList):
+        
+            nPoints,nFrames,_ = data.shape
+            # Reshape the 3D numpy array to 2D, preserving point and frame indices
+            data_reshaped = np.copy(data).reshape(-1, 2)
+    
+            # Create DataFrame
+            df = pd.DataFrame(data_reshaped, columns=['x', 'y'])
+    
+            # Add columns for point number and frame number
+            df['Point'] = np.repeat(np.arange(nPoints), nFrames)
+            df['Frame'] = np.tile(np.arange(nFrames), nPoints)
+    
+            # Reorder columns if needed
+            df = df[['Point', 'Frame', 'x', 'y']]
+    
+            # Create a figure and add an animated scatter plot
+            fig = px.scatter(df,x='x', y='y', title="Cam " + str(i),
+                              animation_frame='Frame',
+                              range_x=[0, 1200], range_y=[1200,0])
+    
+            # Show the animation
+            fig.show()
 
     # Synchronize keypoints.
     pointList, confList, nansInOutList,startEndFrameList = synchronizeVideoKeypoints(
@@ -1372,7 +1404,7 @@ def getLargestBoundingBox(data, bbox, confThresh=0.6):
     return maxArea, idxMax
 
 #%%
-def keypointsToBoundingBox(data):
+def keypointsToBoundingBox(data,confidenceThreshold=0.3):
     # input: nFrames x 75.
     # output: nFrames x 4 (xTopLeft, yTopLeft, width, height).
     
@@ -1383,8 +1415,12 @@ def keypointsToBoundingBox(data):
     idxToRemove = np.hstack([np.arange(i*3,i*3+3) for i in idxFaceMarkers])
     c_data = np.delete(c_data, idxToRemove, axis=1)    
     
-    c_data[c_data==0] = np.nan
+    # nan the data if below a threshold
+    confData = c_data[:,2::3]<confidenceThreshold
+    confMask = np.repeat(confData, 3, axis=1)
+    c_data[confMask] = np.nan  
     nonNanRows = np.argwhere(np.any(~np.isnan(c_data), axis=1))
+    
     bbox = np.zeros((c_data.shape[0], 4))
     bbox[nonNanRows,0] = np.nanmin(c_data[nonNanRows,0::3], axis=2)
     bbox[nonNanRows,1] = np.nanmin(c_data[nonNanRows,1::3], axis=2)
@@ -1471,20 +1507,8 @@ def trackKeypointBox(videoPath,bbStart,allPeople,allBoxes,dataOut,frameStart = 0
         # Find person closest to tracked bounding box, and fill their keypoint data
         keyBoxes = [box[frameNum] for box in allBoxes]        
         
-        # For OpenPose: a person is not always referred to by the same index,
-        # so we identify the box that 'contains' the subject of interest. For
-        # mmpose, a person is always referred to by the same index, since
-        # persons are detected first and joints second. Here, we therefore
-        # distinguish between both detection algorithms, and detect the person
-        # for mmpose only for the first frame and then use the same person 
-        # index for the rest of the frames. For OpenPose, we detect the person 
-        # at each frame.
-        if count == 0 or poseDetector == "OpenPose":
-            iPerson, bboxKey_new, samePerson = findClosestBox(bboxKey, keyBoxes,
-                                                          imageSize)
-        else:
-            _, bboxKey_new, samePerson = findClosestBox(bboxKey, keyBoxes, 
-                                                    imageSize, iPerson)
+        iPerson, bboxKey_new, samePerson = findClosestBox(bboxKey, keyBoxes, 
+                                                imageSize)
         
         # We allow badFramesBeforeStop of samePerson = False to account for an
         # errant frame(s) in the pose detector. Once we reach badFramesBeforeStop,
@@ -2385,7 +2409,8 @@ def triangulateMultiviewVideo(CameraParamDict,keypointDict,imageScaleFactor=1,
                               cams2Use = ['all'],confidenceDict={},trimTrial=True,
                               spline3dZeros = False, splineMaxFrames=5, nansInOut=[],
                               CameraDirectories = None, trialName = None,
-                              startEndFrames=None, trialID=''):
+                              startEndFrames=None, trialID='',
+                              outputMediaFolder=None):
     # cams2Use is a list of cameras that you want to use in triangulation. 
     # if first entry of list is ['all'], will use all
     # otherwise, ['Cam0','Cam2']
@@ -2477,12 +2502,19 @@ def triangulateMultiviewVideo(CameraParamDict,keypointDict,imageScaleFactor=1,
         print('Writing synchronized videos')
         outputVideoDir = os.path.abspath(os.path.join(
                         list(CameraDirectories.values())[0],'../../','VisualizerVideos',trialName))
+        # Check if the directory already exists
+        if os.path.exists(outputVideoDir):
+            # If it exists, delete it and its contents
+            shutil.rmtree(outputVideoDir)
         os.makedirs(outputVideoDir,exist_ok=True)
         for iCam,camName in enumerate(keypointDict):
                         
             nFramesToWrite = endInd-startInd
-    
-            inputPaths = glob.glob(os.path.join(CameraDirectories[camName],'OutputMedia*',trialName,trialID + '*'))
+            
+            if outputMediaFolder is None:
+                outputMediaFolder = 'OutputMedia*'
+                
+            inputPaths = glob.glob(os.path.join(CameraDirectories[camName],outputMediaFolder,trialName,trialID + '*'))
             if len(inputPaths) > 0:
                 inputPath = inputPaths[0]
             else:
@@ -2811,7 +2843,8 @@ def findOverlap(confidenceList, markers4VertVel):
     return overlapInds_clean, minConfLength
 
 #%%
-def loadPklVideo(pklPath, videoFullPath, imageBasedTracker=False, poseDetector='OpenPose'):
+def loadPklVideo(pklPath, videoFullPath, imageBasedTracker=False, poseDetector='OpenPose',
+                 confidenceThresholdForBB=0.3, visualizeKeypointAnimation=False):
     
     open_file = open(pklPath, "rb")
     frames = pickle.load(open_file)
@@ -2842,12 +2875,47 @@ def loadPklVideo(pklPath, videoFullPath, imageBasedTracker=False, poseDetector='
                 anotherPerson = True 
         
         allPeople.append(res.copy())
-        iPerson +=1        
+        iPerson +=1     
+        
+    # Creates a browser animation of the data in each person detected. This
+    # may not be continuous yet. That happens later with person tracking.
+    if visualizeKeypointAnimation:
+        import plotly.express as px
+        import plotly.io as pio
+        pio.renderers.default = 'browser'
+    
+        for i,data in enumerate(allPeople):
+            
+            # Remove the selected columns from 'data'
+            data = np.delete(data, np.s_[2::3], axis=1)        
+            data = data.reshape(nFrames, 25, 2).transpose(1, 0, 2)
+        
+            nPoints,nFrames,_ = data.shape
+            # Reshape the 3D numpy array to 2D, preserving point and frame indices
+            data_reshaped = np.copy(data).reshape(-1, 2)
+    
+            # Create DataFrame
+            df = pd.DataFrame(data_reshaped, columns=['x', 'y'])
+    
+            # Add columns for point number and frame number
+            df['Point'] = np.repeat(np.arange(nPoints), nFrames)
+            df['Frame'] = np.tile(np.arange(nFrames), nPoints)
+    
+            # Reorder columns if needed
+            df = df[['Point', 'Frame', 'x', 'y']]
+    
+            # Create a figure and add an animated scatter plot
+            fig = px.scatter(df,x='x', y='y', title=videoFullPath + ' Box ' + str(i),
+                              animation_frame='Frame',
+                              range_x=[0, 1200], range_y=[1200,0])
+    
+            # Show the animation
+            fig.show()   
  
     # Track People, or if only one person, skip tracking
     if len(allPeople) >1: 
         # Select the largest keypoint-based bounding box as the subject of interest
-        bbFromKeypoints = [keypointsToBoundingBox(data) for data in allPeople]
+        bbFromKeypoints = [keypointsToBoundingBox(data,confidenceThreshold=confidenceThresholdForBB) for data in allPeople]
         maxArea, maxIdx = zip(*[getLargestBoundingBox(data,bbox) for data,bbox in zip(allPeople,bbFromKeypoints)]) # may want to find largest bounding box size in future instead of height
         
         # Check if a person has been detected, ie maxArea >= 0.0. If not, set

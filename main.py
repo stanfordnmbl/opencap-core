@@ -62,8 +62,10 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
     # and between the use of OpenPose and openpose.
     if poseDetector == 'hrnet':
         poseDetector = 'mmpose'
+        outputMediaFolder = 'OutputMedia_mmpose' + str(bbox_thr)
     elif poseDetector == 'openpose':
         poseDetector = 'OpenPose'
+        outputMediaFolder = 'OutputMedia_' + resolutionPoseDetection
     
     # %% Special case: extrinsics trial.
     # For that trial, we only calibrate the cameras.
@@ -312,7 +314,8 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
                 cams2Use=cameras2Use, confidenceDict=confidence,
                 spline3dZeros = True, splineMaxFrames=int(frameRate/5), 
                 nansInOut=nansInOut,CameraDirectories=cameraDirectories,
-                trialName=trialName,startEndFrames=startEndFrames,trialID=trial_id)
+                trialName=trialName,startEndFrames=startEndFrames,trialID=trial_id,
+                outputMediaFolder=outputMediaFolder)
         except Exception as e:
             if len(e.args) == 2: # specific exception
                 raise Exception(e.args[0], e.args[1])
