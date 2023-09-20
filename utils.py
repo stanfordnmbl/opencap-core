@@ -1479,6 +1479,22 @@ def checkResourceUsage(stop_machine_and_email=True):
     
     return resourceUsage
 
+def checkCuda():
+    import tensorflow as tf
+
+    if tf.config.experimental.list_physical_devices('GPU'):
+        # Get the list of available GPUs
+        gpus = tf.config.experimental.list_physical_devices('GPU')
+        print(f"Found {len(gpus)} GPU(s).")
+        # You can also print GPU device names and memory limits if needed
+        for gpu in gpus:
+            print(f"GPU: {gpu.name}, Memory: {gpu.memory_limit}")
+    else:
+        message = "Cuda check failed on an OpenCap machine backend machine: " \
+                            + socket.gethostname() + ". It has been stopped."
+        sendStatusEmail(message=message)
+        raise Exception("No GPU detected. Exiting.")
+
 # %% Some functions for loading subject data
 
 def getSubjectNumber(subjectName):
