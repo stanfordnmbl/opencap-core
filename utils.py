@@ -912,7 +912,7 @@ def checkAndGetPosePickles(trial_id, session_path, poseDetector, resolutionPoseD
 
 def getMainSettings(trial_id):
     trial = getTrialJson(trial_id)
-    if trial['results']:
+    if len(trial['results'])>1:
         for result in trial['results']:
             if result['tag'] == 'main_settings':
                 url = result['media']
@@ -925,6 +925,8 @@ def getMainSettings(trial_id):
                 except Exception as e:
                     print("An error occurred:", e)
                     return {}  # Return an empty dictionary in case of an error
+    else:
+        return {}
         
 def downloadAndZipSession(session_id,deleteFolderWhenZipped=True,isDocker=True,
                           writeToDjango=False,justDownload=False,data_dir=None,
@@ -1450,7 +1452,7 @@ def sendStatusEmail(message=None,subject=None):
             server.send_message(msg)
         server.quit()
 
-def checkResourceUsage():
+def checkResourceUsage(stop_machine_and_email=True):
     import psutil
     
     resourceUsage = {}
@@ -1465,6 +1467,15 @@ def checkResourceUsage():
     # Get the percentage of disk usage
     resourceUsage['disk_gb'] = disk_usage.used / (1024 ** 3)
     resourceUsage['disk_perc'] = disk_usage.percent
+    
+    if stop_machine_and_email and resourceUsage['disk_perc'] > 95:
+            
+        message = "Disc is full on an OpenCap machine backend machine: " \
+                            + socket.gethostname() + ". It has been stopped. Data: " \
+                            + json.dumps(resourceUsage)
+        sendStatusEmail(message=message)
+        
+        raise Exception('Not enough available disc space. Stopped.')
     
     return resourceUsage
 
