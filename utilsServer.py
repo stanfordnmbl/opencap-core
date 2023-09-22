@@ -127,12 +127,14 @@ def processTrial(session_id, trial_id, trial_type = 'dynamic',
             # Try to post pose pickles so can be used offline. This function will 
             # error at kinematics most likely, but if pose estimation completed,
             # pickles will get posted
-            try :
+            try:
                 # Write results to django
-                postMotionData(trial_id,session_path,trial_name=trial_name,isNeutral=True,
-                               poseDetector=poseDetector, 
-                               resolutionPoseDetection=resolutionPoseDetection,
-                               bbox_thr=bbox_thr)
+                if not batchProcess:
+                    print('trial failed. posting pose pickles')
+                    postMotionData(trial_id,session_path,trial_name=trial_name,isNeutral=True,
+                                    poseDetector=poseDetector, 
+                                    resolutionPoseDetection=resolutionPoseDetection,
+                                    bbox_thr=bbox_thr)
             except:
                 pass
             
@@ -216,10 +218,12 @@ def processTrial(session_id, trial_id, trial_type = 'dynamic',
             # pickles will get posted
             try:
                 # Write results to django
-                postMotionData(trial_id,session_path,trial_name=trial_name,isNeutral=False,
-                               poseDetector=poseDetector, 
-                               resolutionPoseDetection=resolutionPoseDetection,
-                               bbox_thr=bbox_thr)
+                if not batchProcess:
+                    print('trial failed. posting pose pickles')
+                    postMotionData(trial_id,session_path,trial_name=trial_name,isNeutral=False,
+                                    poseDetector=poseDetector, 
+                                    resolutionPoseDetection=resolutionPoseDetection,
+                                    bbox_thr=bbox_thr)
             except:
                 pass
             

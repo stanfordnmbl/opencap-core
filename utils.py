@@ -711,6 +711,13 @@ def postMotionData(trial_id,session_path,trial_name=None,isNeutral=False,
     else:
         raise Exception('Unknown pose detector: {}'.format(poseDetector))
         
+    markerDir = os.path.join(session_path,'MarkerData','PostAugmentation')
+        
+    # post settings
+    deleteResult(trial_id, tag='main_settings')
+    mainSettingsPath = os.path.join(markerDir,'Settings_{}.yaml'.format(trial_id))
+    postFileToTrial(mainSettingsPath,trial_id,tag='main_settings',device_id='all')
+        
     # post pose pickles
     # If we parallelize this, this will be redundant, and we will want to delete this posting of pickles
     deleteResult(trial_id, tag='pose_pickle')
@@ -723,7 +730,6 @@ def postMotionData(trial_id,session_path,trial_name=None,isNeutral=False,
         
     # post marker data
     deleteResult(trial_id, tag='marker_data')
-    markerDir = os.path.join(session_path,'MarkerData','PostAugmentation')
     markerPath = os.path.join(markerDir,trial_id + '.trc')
     postFileToTrial(markerPath,trial_id,tag='marker_data',device_id='all')
     
@@ -743,11 +749,6 @@ def postMotionData(trial_id,session_path,trial_name=None,isNeutral=False,
         deleteResult(trial_id, tag='ik_results')
         ikPath = os.path.join(session_path,'OpenSimData','Kinematics',trial_id + '.mot')
         postFileToTrial(ikPath,trial_id,tag='ik_results',device_id='all')
-    
-    # post settings
-    deleteResult(trial_id, tag='main_settings')
-    mainSettingsPath = os.path.join(markerDir,'Settings_{}.yaml'.format(trial_id))
-    postFileToTrial(mainSettingsPath,trial_id,tag='main_settings',device_id='all')
         
     return
 
