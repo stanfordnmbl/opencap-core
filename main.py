@@ -399,7 +399,7 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
         if offset:
             # If offset, no need to offset again for the webapp visualization.
             # (0.01 so that there is no overall offset, see utilsOpenSim).
-            vertical_offset_settings = float(np.copy(vertical_offset))
+            vertical_offset_settings = float(np.copy(vertical_offset)-0.01)
             vertical_offset = 0.01   
         
     # %% OpenSim pipeline.
@@ -507,8 +507,8 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
                                outputJsonVisPath, 
                                vertical_offset=vertical_offset)  
         
-    # %% Rewrite settings, adding offset
-    if not extrinsicsTrial:
+    # %% Rewrite settings, adding offset  
+    if not extrinsicsTrial and offset:
         settings['verticalOffset'] = vertical_offset_settings 
         with open(pathSettings, 'w') as file:
             yaml.dump(settings, file)
