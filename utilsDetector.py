@@ -352,10 +352,11 @@ def runMMposeVideo(
     # https://github.com/stanfordnmbl/opencap-core/pull/100/files.
     # We here identify these cases and re-run post processing. 
     else:
-        with open(ppPklPath, "rb") as open_file:
-            unpickler = pickle.Unpickler(open_file)
-            first_element = unpickler.load()[0]
-        if 'pose_keypoints_2d' not in first_element[0].keys():
+        open_file = open(ppPklPath, "rb")
+        frames = pickle.load(open_file)
+        open_file.close()
+        isData = any([('pose_keypoints_2d' in element[0].keys()) for element in frames if len(element)>0])
+        if not isData:
             os.rename(ppPklPath, pklPath)
             arrangeMMposePkl(pklPath, ppPklPath)
 

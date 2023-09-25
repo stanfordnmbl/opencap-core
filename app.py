@@ -57,8 +57,9 @@ while True:
     # Check resource usage
     resourceUsage = checkResourceUsage(stop_machine_and_email=True)
     logging.info(json.dumps(resourceUsage))
+    # TODO: not yet functional.
     # Check GPU device is available
-    checkCuda()
+    # checkCuda()
     logging.info(r.text)
     
     trial = r.json()
