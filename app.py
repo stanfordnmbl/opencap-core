@@ -10,7 +10,7 @@ import glob
 import numpy as np
 from utilsAPI import getAPIURL, getWorkerType
 from utilsAuth import getToken
-from utils import getDataDirectory, checkTime, checkResourceUsage
+from utils import getDataDirectory, checkTime, checkResourceUsage, checkCuda
 
 logging.basicConfig(level=logging.INFO)
 
@@ -26,7 +26,6 @@ t = time.localtime()
 initialStatusCheck = False
 
 while True:
-    
     # Run test trial at a given frequency to check status of machine. Stop machine if fails.
     if checkTime(t,minutesElapsed=30) or not initialStatusCheck:
         runTestSession(isDocker=isDocker)           
@@ -56,9 +55,11 @@ while True:
         continue
     
     # Check resource usage
-    resourceUsage = checkResourceUsage()
+    resourceUsage = checkResourceUsage(stop_machine_and_email=True)
     logging.info(json.dumps(resourceUsage))
-
+    # TODO: not yet functional.
+    # Check GPU device is available
+    # checkCuda()
     logging.info(r.text)
     
     trial = r.json()
