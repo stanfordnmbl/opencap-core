@@ -1489,7 +1489,7 @@ def checkCudaTF():
         print(f"Found {len(gpus)} GPU(s).")
         # You can also print GPU device names and memory limits if needed
         for gpu in gpus:
-            print(f"GPU: {gpu.name}, Memory: {gpu.memory_limit}")
+            print(f"GPU: {gpu.name}")
     else:
         message = "Cuda check failed on an OpenCap machine backend machine: " \
                             + socket.gethostname() + ". It has been stopped."
