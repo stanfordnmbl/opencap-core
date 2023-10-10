@@ -8,7 +8,7 @@ import traceback
 import logging
 import glob
 import numpy as np
-from utilsAPI import getAPIURL, getWorkerType
+from utilsAPI import getAPIURL, getWorkerType, getASInstance
 from utilsAuth import getToken
 from utils import getDataDirectory, checkTime, checkResourceUsage, checkCuda
 
@@ -17,13 +17,19 @@ logging.basicConfig(level=logging.INFO)
 API_TOKEN = getToken()
 API_URL = getAPIURL()
 workerType = getWorkerType()
+autoScalingInstance = getASInstance()
 
 # if true, will delete entire data directory when finished with a trial
 isDocker = True
 
 # get start time
-t = time.localtime()
 initialStatusCheck = False
+t = time.localtime()
+
+# for shutting down AWS machine
+t_lastTrial = time.localtime()
+justProcessed = True
+minutesBeforeShutdown = 5
 
 while True:
     # Run test trial at a given frequency to check status of machine. Stop machine if fails.
@@ -47,6 +53,16 @@ while True:
     if r.status_code == 404:
         logging.info("...pulling " + workerType + " trials.")
         time.sleep(1)
+        if (autoScalingInstance and not justProcessed and 
+            checkTime(t_lastTrial,minutesElapsed=minutesBeforeShutdown)):
+            # TODO query if any trials are recording before shutting down
+            
+            # AWS CLI to turn off machine
+            print('TODO placeholder: turning off AWS machine')
+        if autoScalingInstance and justProcessed:
+            justProcessed = False
+            t_lastTrial = time.localtime()
+            
         continue
     
     if np.floor(r.status_code/100) == 5: # 5xx codes are server faults
@@ -91,6 +107,8 @@ while True:
     logging.info("processTrial({},{},trial_type={})".format(trial["session"], trial["id"], trial_type))
 
     try:
+        # reset timer for last processed trial
+        justProcessed = True                    
         processTrial(trial["session"], trial["id"], trial_type=trial_type, isDocker=isDocker)   
         # note a result needs to be posted for the API to know we finished, but we are posting them 
         # automatically thru procesTrial now

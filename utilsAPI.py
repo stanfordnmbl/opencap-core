@@ -38,4 +38,13 @@ def getStatusEmails():
         emailInfo = None
     
     return emailInfo
-        
+
+def getASInstance():
+    try: # look in environment file
+        param = config("AUTOSCALE_INSTANCE").lower()
+        if param == 'true': asInstance=True
+        else: asInstance=False
+    except: # default
+        asInstance = False
+    
+    return asInstance
