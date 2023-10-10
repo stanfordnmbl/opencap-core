@@ -1480,7 +1480,7 @@ def checkResourceUsage(stop_machine_and_email=True):
     
     return resourceUsage
 
-def checkCuda():
+def checkCudaTF():
     import tensorflow as tf
 
     if tf.config.experimental.list_physical_devices('GPU'):

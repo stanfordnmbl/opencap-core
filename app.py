@@ -10,7 +10,7 @@ import glob
 import numpy as np
 from utilsAPI import getAPIURL, getWorkerType
 from utilsAuth import getToken
-from utils import getDataDirectory, checkTime, checkResourceUsage, checkCuda
+from utils import getDataDirectory, checkTime, checkResourceUsage, checkCudaTF
 
 logging.basicConfig(level=logging.INFO)
 
@@ -59,7 +59,7 @@ while True:
     logging.info(json.dumps(resourceUsage))
     # TODO: not yet functional.
     # Check GPU device is available
-    # checkCuda()
+    checkCudaTF()
     logging.info(r.text)
     
     trial = r.json()
