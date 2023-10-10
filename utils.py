@@ -1485,6 +1485,8 @@ def checkCudaTF():
 
     if tf.config.experimental.list_physical_devices('GPU'):
         # Get the list of available GPUs
+
+        print("HERE")
         gpus = tf.config.experimental.list_physical_devices('GPU')
         print(f"Found {len(gpus)} GPU(s).")
         # You can also print GPU device names and memory limits if needed
