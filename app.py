@@ -63,11 +63,13 @@ while True:
     logging.info('Checking GPU device is available...')
     # checkCudaTF()
 
-    print("HERE")
-    gpus = tf.config.list_physical_devices('GPU')
-    print(f"Found {len(gpus)} GPU(s).")
+    visible_devices = tf.config.list_physical_devices()
+    logging.info("Visible devices app.py:", visible_devices)
 
-    logging.info('GPU device is available.')
+    # gpus = tf.config.list_physical_devices('GPU')
+    # print(f"Found {len(gpus)} GPU(s).")
+
+    # logging.info('GPU device is available.')
     logging.info(r.text)
     
     trial = r.json()
