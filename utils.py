@@ -1487,11 +1487,11 @@ def checkCudaTF():
         # Get the list of available GPUs
 
         print("HERE")
-        gpus = tf.config.experimental.list_physical_devices('GPU')
+        gpus = tf.config.list_physical_devices('GPU')
         print(f"Found {len(gpus)} GPU(s).")
         # You can also print GPU device names and memory limits if needed
-        for gpu in gpus:
-            print(f"GPU: {gpu.name}")
+        # for gpu in gpus:
+        #     print(f"GPU: {gpu.name}")
     else:
         message = "Cuda check failed on an OpenCap machine backend machine: " \
                             + socket.gethostname() + ". It has been stopped."
