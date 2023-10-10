@@ -59,7 +59,9 @@ while True:
     logging.info(json.dumps(resourceUsage))
     # TODO: not yet functional.
     # Check GPU device is available
+    logging.info('Checking GPU device is available...')
     checkCudaTF()
+    logging.info('GPU device is available.')
     logging.info(r.text)
     
     trial = r.json()
