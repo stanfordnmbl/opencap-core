@@ -15,6 +15,7 @@ def check_cuda_device():
         _ = subprocess.check_output(["nvidia-smi"])
         # If the command ran successfully, assume a CUDA device is present
         logging.info("A CUDA-capable device is detected.")
+        raise Exception("No CUDA-capable device is detected.")
     except subprocess.CalledProcessError as e:
         # If the command fails, it means no CUDA device is detected
         logging.info("No CUDA-capable device is detected. Error:", e)

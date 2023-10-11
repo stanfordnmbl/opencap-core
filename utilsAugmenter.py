@@ -5,7 +5,6 @@ import copy
 import tensorflow as tf
 from utils import TRC2numpy
 import json
-import logging
 
 def augmentTRC(pathInputTRCFile, subject_mass, subject_height,
                pathOutputTRCFile, augmenterDir, augmenterModelName="LSTM",
@@ -111,10 +110,6 @@ def augmentTRC(pathInputTRCFile, subject_mass, subject_height,
         json_file = open(os.path.join(augmenterModelDir, "model.json"), 'r')
         pretrainedModel_json = json_file.read()
         json_file.close()
-
-        visible_devices = tf.config.list_physical_devices()
-        logging.info("Visible devices - augmentation:", visible_devices)
-
         model = tf.keras.models.model_from_json(pretrainedModel_json)
         model.load_weights(os.path.join(augmenterModelDir, "weights.h5"))  
         outputs = model.predict(inputs)
