@@ -10,8 +10,7 @@ import glob
 import numpy as np
 from utilsAPI import getAPIURL, getWorkerType
 from utilsAuth import getToken
-from utils import getDataDirectory, checkTime, checkResourceUsage, checkCudaTF
-import tensorflow as tf
+from utils import getDataDirectory, checkTime, checkResourceUsage, checkCuda
 
 logging.basicConfig(level=logging.INFO)
 
@@ -60,16 +59,7 @@ while True:
     logging.info(json.dumps(resourceUsage))
     # TODO: not yet functional.
     # Check GPU device is available
-    logging.info('Checking GPU device is available...')
-    # checkCudaTF()
-
-    visible_devices = tf.config.list_physical_devices()
-    logging.info("Visible devices app.py:", visible_devices)
-
-    # gpus = tf.config.list_physical_devices('GPU')
-    # print(f"Found {len(gpus)} GPU(s).")
-
-    # logging.info('GPU device is available.')
+    # checkCuda()
     logging.info(r.text)
     
     trial = r.json()

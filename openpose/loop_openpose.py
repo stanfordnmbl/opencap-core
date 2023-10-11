@@ -4,8 +4,21 @@ import logging
 import shutil
 import ffmpeg
 import json
+import subprocess
 
-#%% 
+#%%
+def check_cuda_device():
+    try:
+        # Run the nvidia-smi command and capture the output
+        _ = subprocess.check_output(["nvidia-smi"])
+        # If the command ran successfully, assume a CUDA device is present
+        print("A CUDA-capable device is detected.")
+    except subprocess.CalledProcessError as e:
+        # If the command fails, it means no CUDA device is detected
+        print("No CUDA-capable device is detected. Error:", e)
+        raise Exception("No CUDA-capable device is detected.")
+
+#%%
 def getVideoOrientation(videoPath):
     
     meta = ffmpeg.probe(videoPath)
@@ -87,6 +100,7 @@ while True:
     horizontal = getVideoOrientation(video_path)
     cmd_hr = getResolutionCommand(resolutionPoseDetection, horizontal)
 
+    check_cuda_device()
     command = "/openpose/build/examples/openpose/openpose.bin\
         --video {video_path}\
         --display 0\
