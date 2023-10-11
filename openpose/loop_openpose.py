@@ -6,16 +6,18 @@ import ffmpeg
 import json
 import subprocess
 
+logging.basicConfig(level=logging.INFO)
+
 #%%
 def check_cuda_device():
     try:
         # Run the nvidia-smi command and capture the output
         _ = subprocess.check_output(["nvidia-smi"])
         # If the command ran successfully, assume a CUDA device is present
-        print("A CUDA-capable device is detected.")
+        logging.info("A CUDA-capable device is detected.")
     except subprocess.CalledProcessError as e:
         # If the command fails, it means no CUDA device is detected
-        print("No CUDA-capable device is detected. Error:", e)
+        logging.info("No CUDA-capable device is detected. Error:", e)
         raise Exception("No CUDA-capable device is detected.")
 
 #%%
@@ -71,7 +73,6 @@ def getResolutionCommand(resolutionPoseDetection, horizontal):
     return cmd_hr
 
 #%% 
-logging.basicConfig(level=logging.INFO)
 
 logging.info("Waiting for data...")
 
