@@ -3,12 +3,21 @@ import time
 import logging
 import shutil
 import json
+import torch
 
 from utilsMMpose import detection_inference, pose_inference
 
 logging.basicConfig(level=logging.INFO)
 
 logging.info("Waiting for data...")
+
+def checkCudaPyTorch():
+    if torch.cuda.is_available():
+        num_gpus = torch.cuda.device_count()
+        logging.info(f"Found {num_gpus} GPU(s).")
+    else:
+        logging.info("No GPU detected. Exiting.")
+        raise Exception("No GPU detected. Exiting.")
 
 video_path = "/mmpose/data/video_mmpose.mov"
 output_dir = "/mmpose/data/output_mmpose"
@@ -38,6 +47,7 @@ while True:
     os.makedirs(output_dir)
     
     try:
+        checkCudaPyTorch()
         # Run human detection.
         pathModelCkptPerson = model_ckpt_person
         bboxPath = os.path.join(output_dir, 'box.pkl')
