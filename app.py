@@ -10,7 +10,8 @@ import glob
 import numpy as np
 from utilsAPI import getAPIURL, getWorkerType, getASInstance
 from utilsAuth import getToken
-from utils import getDataDirectory, checkTime, checkResourceUsage, checkCuda
+from utils import (getDataDirectory, checkTime, checkResourceUsage, checkCuda,
+                  checkForTrialsWithStatus)
 
 logging.basicConfig(level=logging.INFO)
 
@@ -53,12 +54,16 @@ while True:
     if r.status_code == 404:
         logging.info("...pulling " + workerType + " trials.")
         time.sleep(1)
+        # when using autoscaling, we will shut down the instance if it hasn't
+        # pulled a trial recently and there are no actively recording trials
         if (autoScalingInstance and not justProcessed and 
             checkTime(t_lastTrial,minutesElapsed=minutesBeforeShutdown)):
-            # TODO query if any trials are recording before shutting down
-            
-            # AWS CLI to turn off machine
-            print('TODO placeholder: turning off AWS machine')
+            if checkForTrialsWithStatus('recording',hours=2/60) == 0:
+                # AWS CLI to turn off machine
+                print('TODO placeholder: turning off AWS machine')
+                break
+            else:
+                t_lastTrial = time.localtime()
         if autoScalingInstance and justProcessed:
             justProcessed = False
             t_lastTrial = time.localtime()
@@ -107,7 +112,7 @@ while True:
     logging.info("processTrial({},{},trial_type={})".format(trial["session"], trial["id"], trial_type))
 
     try:
-        # reset timer for last processed trial
+        # trigger reset of timer for last processed trial
         justProcessed = True                    
         processTrial(trial["session"], trial["id"], trial_type=trial_type, isDocker=isDocker)   
         # note a result needs to be posted for the API to know we finished, but we are posting them 
