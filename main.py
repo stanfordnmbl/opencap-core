@@ -430,8 +430,15 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
         if scaleModel:
             os.makedirs(outputScaledModelDir, exist_ok=True)
             # Path setup file.
-            genericSetupFile4ScalingName = (
-                'Setup_scaling_RajagopalModified2016_withArms_KA.xml')
+            # Note: the names do not make much sense, the one with _KA is for
+            # the model without KA, and the one without _KA is for the model
+            # with KA. We will fix that someday.
+            if '_ka' in sessionMetadata['openSimModel'].lower():
+                genericSetupFile4ScalingName = (
+                    'Setup_scaling_RajagopalModified2016_withArms.xml')
+            else:
+                genericSetupFile4ScalingName = (
+                    'Setup_scaling_RajagopalModified2016_withArms_KA.xml')
             pathGenericSetupFile4Scaling = os.path.join(
                 openSimPipelineDir, 'Scaling', genericSetupFile4ScalingName)
             # Path model file.
