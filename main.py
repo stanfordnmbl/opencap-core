@@ -61,10 +61,12 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
     # This is a hack to handle a mismatch between the use of mmpose and hrnet,
     # and between the use of OpenPose and openpose.
     if poseDetector == 'hrnet':
-        poseDetector = 'mmpose'
-        outputMediaFolder = 'OutputMedia_mmpose' + str(bbox_thr)
+        poseDetector = 'mmpose'        
     elif poseDetector == 'openpose':
         poseDetector = 'OpenPose'
+    if poseDetector == 'mmpose':
+        outputMediaFolder = 'OutputMedia_mmpose' + str(bbox_thr)
+    elif poseDetector == 'OpenPose':
         outputMediaFolder = 'OutputMedia_' + resolutionPoseDetection
     
     # %% Special case: extrinsics trial.
