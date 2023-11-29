@@ -821,7 +821,7 @@ def synchronizeVideos(CameraDirectories, trialRelativePath, pathPoseDetector,
         key2D, confidence = loadPklVideo(
             ppPklPath, videoFullPath, imageBasedTracker=imageBasedTracker,
             poseDetector=poseDetector,confidenceThresholdForBB=0.3)
-        thisVideo = cv2.VideoCapture(videoFullPath[:-4] + '_rotated.avi')
+        thisVideo = cv2.VideoCapture(videoFullPath.replace('.mov', '_rotated.avi'))
         frameRate = np.round(thisVideo.get(cv2.CAP_PROP_FPS))        
         if key2D.shape[1] == 0 and confidence.shape[1] == 0:
             camsToExclude.append(camName)
@@ -862,11 +862,12 @@ def synchronizeVideos(CameraDirectories, trialRelativePath, pathPoseDetector,
     
             # Reorder columns if needed
             df = df[['Point', 'Frame', 'x', 'y']]
-    
+               
             # Create a figure and add an animated scatter plot
             fig = px.scatter(df,x='x', y='y', title="Cam " + str(i),
                               animation_frame='Frame',
-                              range_x=[0, 1200], range_y=[1200,0])
+                              range_x=[0, 1200], range_y=[1200,0],
+                              color='Point', color_continuous_scale=px.colors.sequential.Viridis)
     
             # Show the animation
             fig.show()
@@ -1040,11 +1041,12 @@ def synchronizeVideoKeypoints(keypointList, confidenceList,
     # trial to be considered a gait trial.
     
     # Detect activity, which determines sync function that gets used
+    isGait = detectGaitAllVideos(mkrSpeedList,allMarkerList,confSyncList,markers4Ankles,sampleFreq)
     
     isHandPunch,handForPunch = detectHandPunchAllVideos(handPunchVertPositionList,sampleFreq)
     if isHandPunch:
         syncActivity = 'handPunch'
-    elif detectGaitAllVideos(mkrSpeedList,allMarkerList,confSyncList,markers4Ankles,sampleFreq):
+    elif isGait:
         syncActivity = 'gait'
     else:
         syncActivity = 'general'
@@ -1053,7 +1055,7 @@ def synchronizeVideoKeypoints(keypointList, confidenceList,
     
     
     # Select filtering frequency based on if it is gait
-    if syncActivity == 'gait': 
+    if isGait: 
         filtFreq = filtFreqs['gait']
     else: 
         filtFreq = filtFreqs['default']
@@ -1481,7 +1483,7 @@ def trackKeypointBox(videoPath,bbStart,allPeople,allBoxes,dataOut,frameStart = 0
 
     # initiate video capture
     # Read video
-    video = cv2.VideoCapture(videoPath)
+    video = cv2.VideoCapture(videoPath.replace('.mov', '_rotated.avi'))
     nFrames = allBoxes[0].shape[0]
     
     # Read desiredFrames.
@@ -1489,7 +1491,7 @@ def trackKeypointBox(videoPath,bbStart,allPeople,allBoxes,dataOut,frameStart = 0
     ok, frame = video.read()
     if not ok:
         print('Cannot read video file')
-        sys.exit()
+        raise Exception('Cannot read video file')
         
     imageSize = (frame.shape[0],frame.shape[1])
     justStarted = True
@@ -1567,15 +1569,14 @@ def trackBoundingBox(videoPath,bbStart,allPeople,allBoxes,dataOut,frameStart = 0
     frameNum = frameStart
     
     # Read video
-    video = cv2.VideoCapture(videoPath)
+    video = cv2.VideoCapture(videoPath.replace('.mov', '_rotated.avi'))
     nFrames = allBoxes[0].shape[0]
 
     # Read desiredFrames.
     video.set(1, frameNum)
     ok, frame = video.read()
     if not ok:
-        print('Cannot read video file')
-        sys.exit()
+        raise Exception('Cannot read video file')
          
     # Initialize tracker with first frame and bounding box
     try:
@@ -2523,7 +2524,7 @@ def triangulateMultiviewVideo(CameraParamDict,keypointDict,imageScaleFactor=1,
             
             # get frame rate and assume all the same for sync'd videos
             if iCam==0: 
-                thisVideo = cv2.VideoCapture(inputPath)
+                thisVideo = cv2.VideoCapture(inputPath.replace('.mov', '_rotated.avi'))
                 frameRate = np.round(thisVideo.get(cv2.CAP_PROP_FPS))
                 thisVideo.release()
             
