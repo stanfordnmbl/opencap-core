@@ -1,0 +1,42 @@
+
+
+from pathlib import Path
+import pandas as pd
+
+datadir = Path('./datadir')
+df_trial = pd.read_excel(datadir / 'trial_info.xlsx')
+
+shoulder_trials = ['brooke', 'arm_rom']
+df_shoulder = df_trial[df_trial.trial_clean.isin(shoulder_trials)]
+
+def sto_path(row):
+    return datadir / f'opencap_data/{row.sid}/OpenSimData/Dynamics/{row.trial}_shoulder.sto'
+SHOULDER_OUTPUTS = df_shoulder.apply(sto_path, axis=1).to_list()
+print(len(SHOULDER_OUTPUTS))
+# SHOULDER_OUTPUTS = SHOULDER_OUTPUTS[:5]
+
+
+rule all:
+    input:
+        SHOULDER_OUTPUTS
+
+rule reprocess_shoulder_call:
+    input:
+        'datadir/opencap_data/{sid}/MarkerData/PostAugmentation/{trial}/{trial}.trc',
+        'datadir/opencap_data/{sid}/MarkerData/PostAugmentation/neutral/neutral.trc',
+        # 'datadir/opencap_data'
+    output:
+        'datadir/opencap_data/{sid}/OpenSimData/Dynamics/{trial}_shoulder.sto'
+    shell:
+        'python utilsShoulder.py -s {wildcards.sid} -t {wildcards.trial} -d {datadir}'
+    
+
+# rule shoulder_trials:
+#     input:
+#         'datadir/trial_info.xlsx'
+#     output:
+#         'shoulder_trials.csv'
+#     script:
+#         'find_shoulder_trials.py'
+
+
