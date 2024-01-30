@@ -36,10 +36,12 @@ sys.path.append(os.path.abspath('./..'))
 
 from utils import changeSessionMetadata
 
-session_ids = ['0d46adef-62cb-455f-9ff3-8116717cc2fe']
+session_ids = ['54d4868a-9351-4844-b56c-c0c24bcb24e3']
 
 # Dictionary of metadata fields to change (see sessionMetadata.yaml).
-newMetadata = {'openSimModel':'LaiUhlrich2022_shoulder',
-               'posemodel':'hrnet',
-               'augmentermodel':'v0.3'}
+newMetadata = {
+    'openSimModel':'LaiUhlrich2022_KA',
+    # 'posemodel':'hrnet',
+    # 'augmentermodel':'v0.3'
+    }
 changeSessionMetadata(session_ids,newMetadata)
