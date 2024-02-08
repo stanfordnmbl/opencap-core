@@ -442,10 +442,21 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
             pathTRCFile4Scaling = pathAugmentedOutputFiles[trialName]
             # Get time range.
             try:
-                timeRange4Scaling = getScaleTimeRange(pathTRCFile4Scaling,
-                                                      thresholdPosition=0.007,
-                                                      thresholdTime=0.1,
-                                                      removeRoot=True)          
+                thresholdPosition = 0.003
+                maxThreshold = 0.015
+                increment = 0.001
+                success = False
+                while thresholdPosition <= maxThreshold and not success:
+                    try:
+                        timeRange4Scaling = getScaleTimeRange(
+                            pathTRCFile4Scaling,
+                            thresholdPosition=thresholdPosition,
+                            thresholdTime=0.1, removeRoot=True)
+                        success = True
+                    except Exception as e:
+                        print(f"Attempt with thresholdPosition {thresholdPosition} failed: {e}")
+                        thresholdPosition += increment  # Increase the threshold for the next iteration
+
                 # Run scale tool.
                 print('Running Scaling')
                 pathScaledModel = runScaleTool(
