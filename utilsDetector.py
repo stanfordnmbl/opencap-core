@@ -308,7 +308,8 @@ def runMMposeVideo(
                     if not os.path.isfile(vid_path):
                         break
                     
-                    if start + 60*30 < time.time():
+                    if start + 1 < time.time():
+                    # if start + 60*30 < time.time():
                         raise Exception("mmpose processing timeout")
                     
                     time.sleep(0.1)
