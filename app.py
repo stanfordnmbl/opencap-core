@@ -10,7 +10,7 @@ import glob
 import numpy as np
 from utilsAPI import getAPIURL, getWorkerType
 from utilsAuth import getToken
-from utils import getDataDirectory, checkTime, checkResourceUsage
+from utils import getDataDirectory, checkTime, checkResourceUsage, sendStatusEmail
 
 logging.basicConfig(level=logging.INFO)
 
@@ -96,10 +96,15 @@ while True:
         
         logging.info('0.5s pause if need to restart.')
         time.sleep(0.5)
-    except:
+    except Exception as e:
         r = requests.patch(trial_url, data={"status": "error"},
                          headers = {"Authorization": "Token {}".format(API_TOKEN)})
         traceback.print_exc()
+        if 'pose detection timed out' in e.args[1].lower():
+            logging.info("Worker failed. Stopping machine.")
+            message = "A backend OpenCap machine timed out during pose detection. It has been stopped."
+            sendStatusEmail(message=message)
+            raise Exception('Worker failed. Stopped.')
     
     # Clean data directory
     if isDocker:
