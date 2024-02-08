@@ -68,7 +68,7 @@ def processTrial(session_id, trial_id, trial_type = 'dynamic',
             error_msg['error_msg_dev'] = e.args[1]
             _ = requests.patch(trial_url, data={"meta": json.dumps(error_msg)},
                    headers = {"Authorization": "Token {}".format(API_TOKEN)})   
-            raise Exception('Calibration failed')
+            raise Exception('Calibration failed', e.args[0], e.args[1])
         
         if not hasWritePermissions:
             print('You are not the owner of this session, so do not have permission to write results to database.')
@@ -257,7 +257,7 @@ def processTrial(session_id, trial_id, trial_type = 'dynamic',
                        bbox_thr=bbox_thr)
         
     else:
-        raise Exception('Wrong trial type. Options: calibration, static, dynamic.')
+        raise Exception('Wrong trial type. Options: calibration, static, dynamic.', 'TODO', 'TODO')
     
     # Remove data
     if deleteLocalFolder:
