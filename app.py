@@ -100,7 +100,7 @@ while True:
         r = requests.patch(trial_url, data={"status": "error"},
                          headers = {"Authorization": "Token {}".format(API_TOKEN)})
         traceback.print_exc()
-        if 'pose detection timed out' in e.args[1].lower():
+        if len(e.args) > 1 and 'pose detection timed out' in e.args[1].lower():
             logging.info("Worker failed. Stopping machine.")
             message = "A backend OpenCap machine timed out during pose detection. It has been stopped."
             sendStatusEmail(message=message)
