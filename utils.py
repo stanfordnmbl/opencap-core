@@ -601,9 +601,11 @@ def downloadAndSwitchCalibrationFromDjango(session_id,session_path,calibTrialID 
     
 def changeSessionMetadata(session_ids,newMetaDict):
 
-    # If filterfrequency in newMetaDict and if it is not 'default', convert to string
     if 'filterfrequency' in newMetaDict and newMetaDict['filterfrequency'] != 'default':
-        newMetaDict['filterfrequency'] = str(newMetaDict['filterfrequency'])
+        if type(newMetaDict['filterfrequency']) is not str:
+            newMetaDict['filterfrequency'] = str(newMetaDict['filterfrequency'])
+        else:
+            raise Exception('Filter frequency should be a number or default.')    
    
     for session_id in session_ids:
         session_url = "{}{}{}/".format(API_URL, "sessions/", session_id)
@@ -611,6 +613,18 @@ def changeSessionMetadata(session_ids,newMetaDict):
         # get metadata
         session = getSessionJson(session_id)
         existingMeta = session['meta']
+        
+        # Check if framerate is in metadata. If not, set to 60
+        if 'framerate' not in existingMeta:
+            framerate = 60
+        else:
+            framerate = existingMeta['framerate']
+        if 'filterfrequency' in newMetaDict:
+            if newMetaDict['filterfrequency'] != 'default':
+                if float(newMetaDict['filterfrequency']) > framerate/2:
+                    raise Exception('Filter frequency cannot exceed Nyquist frequency (here {}Hz).'.format(framerate/2))
+                elif float(newMetaDict['filterfrequency']) < 0:
+                    raise Exception('Filter frequency cannot be negative.')        
         
         # change metadata
         # Hack: wrong mapping between metadata and yaml
@@ -648,9 +662,9 @@ def changeSessionMetadata(session_ids,newMetaDict):
                         existingMeta['settings'] = {}
                     existingMeta['settings'][newMeta] = newMetaDict[newMeta]
                     addedKey[newMeta] = newMetaDict[newMeta]
-                    print("Added {} to settings in metadata".format(newMetaDict[newMeta]))
+                    print("Added {}={} to settings in metadata".format(newMeta, newMetaDict[newMeta]))
                 else:
-                    print("Could not add {} to the metadata; not recognized".format(newMetaDict[newMeta]))
+                    print("Could not add {}={} to the metadata; not recognized".format(newMeta, newMetaDict[newMeta]))
         
         data = {"meta":json.dumps(existingMeta)}
         
