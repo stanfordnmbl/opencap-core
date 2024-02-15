@@ -29,6 +29,8 @@ The available options for metadata are:
                         hrnet
     - augmentermodel:   v0.2
                         v0.3
+    - filterfrequency:  default
+                        TODO (str + logic)
 """
 import os
 import sys
@@ -36,10 +38,10 @@ sys.path.append(os.path.abspath('./..'))
 
 from utils import changeSessionMetadata
 
-session_ids = ['0d46adef-62cb-455f-9ff3-8116717cc2fe']
+session_ids = ['64e76156-1943-4831-89b2-93e308db8714']
 
 # Dictionary of metadata fields to change (see sessionMetadata.yaml).
-newMetadata = {'openSimModel':'LaiUhlrich2022_shoulder',
-               'posemodel':'hrnet',
-               'augmentermodel':'v0.3'}
+newMetadata = {
+               'filterfrequency': 13}
 changeSessionMetadata(session_ids,newMetadata)
+test=1
