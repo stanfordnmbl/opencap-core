@@ -669,8 +669,8 @@ def changeSessionMetadata(session_ids,newMetaDict):
                             
             for newMeta in newMetaDict:
                 if not newMeta in addedKey:
-                print("Could not find {} in existing yaml, adding it.".format(newMeta))               
-                metaYaml[newMeta] = newMetaDict[newMeta]
+                    print("Could not find {} in existing yaml, adding it.".format(newMeta))               
+                    metaYaml[newMeta] = newMetaDict[newMeta]
                             
             with open(metaPath, 'w') as file:
                 yaml.dump(metaYaml, file)
