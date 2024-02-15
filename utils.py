@@ -605,7 +605,14 @@ def changeSessionMetadata(session_ids,newMetaDict):
         if type(newMetaDict['filterfrequency']) is not str:
             newMetaDict['filterfrequency'] = str(newMetaDict['filterfrequency'])
         else:
-            raise Exception('Filter frequency should be a number or default.')    
+            raise Exception('Filter frequency should be a number or default.')
+        
+    if 'datasharing' in newMetaDict:
+        if newMetaDict['datasharing'] not in ['Share processed data and identified videos',
+                                                'Share processed data and de-identified videos',
+                                                'Share processed data',
+                                                'Share no data']:
+                raise Exception('datasharing is {} but should be one of the following options: "Share processed data and identified videos", "Share processed data and de-identified videos", "Share processed data", "Share no data".'.format(newMetaDict['datasharing']))
    
     for session_id in session_ids:
         session_url = "{}{}{}/".format(API_URL, "sessions/", session_id)
