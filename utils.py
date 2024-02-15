@@ -650,33 +650,34 @@ def changeSessionMetadata(session_ids,newMetaDict):
         resultTags = [res['tag'] for res in trial['results']]
         
         metaPath = os.path.join(os.getcwd(),'sessionMetadata.yaml')
-        yamlURL = trial['results'][resultTags.index('session_metadata')]['media']
-        download_file(yamlURL,metaPath)
-        
-        metaYaml = importMetadata(metaPath)
-        
-        addedKey= {}
-        for key in metaYaml.keys():
-            if key in newMetaDict.keys():
-                metaYaml[key] = newMetaDict[key]
-                addedKey[key] = newMetaDict[key]
-            if type(metaYaml[key]) is dict:
-                for key2 in metaYaml[key].keys():
-                    if key2 in newMetaDict.keys():
-                        metaYaml[key][key2] = newMetaDict[key2] 
-                        addedKey[key2] = newMetaDict[key2]
-                        
-        for newMeta in newMetaDict:
-            if not newMeta in addedKey:
-               print("Could not find {} in existing yaml, adding it.".format(newMeta))               
-               metaYaml[newMeta] = newMetaDict[newMeta]
-                        
-        with open(metaPath, 'w') as file:
-            yaml.dump(metaYaml, file)
+        if 'session_metadata' in resultTags:
+            yamlURL = trial['results'][resultTags.index('session_metadata')]['media']
+            download_file(yamlURL,metaPath)
             
-        deleteResult(trial_id, tag='session_metadata')
-        postFileToTrial(metaPath,trial_id,tag='session_metadata',device_id='all')
-        os.remove(metaPath)
+            metaYaml = importMetadata(metaPath)
+            
+            addedKey= {}
+            for key in metaYaml.keys():
+                if key in newMetaDict.keys():
+                    metaYaml[key] = newMetaDict[key]
+                    addedKey[key] = newMetaDict[key]
+                if type(metaYaml[key]) is dict:
+                    for key2 in metaYaml[key].keys():
+                        if key2 in newMetaDict.keys():
+                            metaYaml[key][key2] = newMetaDict[key2] 
+                            addedKey[key2] = newMetaDict[key2]
+                            
+            for newMeta in newMetaDict:
+                if not newMeta in addedKey:
+                print("Could not find {} in existing yaml, adding it.".format(newMeta))               
+                metaYaml[newMeta] = newMetaDict[newMeta]
+                            
+            with open(metaPath, 'w') as file:
+                yaml.dump(metaYaml, file)
+                
+            deleteResult(trial_id, tag='session_metadata')
+            postFileToTrial(metaPath,trial_id,tag='session_metadata',device_id='all')
+            os.remove(metaPath)
         
 def makeSessionPublic(session_id,publicStatus=True):
     
