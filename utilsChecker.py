@@ -1879,7 +1879,7 @@ def filterKeypointsButterworth(key2D,filtFreq,sampleFreq,order=4):
         wn=0.99
     elif wn==1:
         wn=0.99
-        
+    print("Filter frequency: " + str(filtFreq) + " Hz")
     sos = butter(order/2,wn,btype='low',output='sos')
     
     for i in range(2):
