@@ -377,7 +377,7 @@ def getMetadataFromServer(session_id,justCheckerParams=False):
                     session_desc["posemodel"] = session['meta']['subject']['posemodel']
                 except:
                     session_desc["posemodel"] = 'openpose'
-                # This might happen if openSimModel/augmentermodel was changed post data collection.
+                # This might happen if openSimModel/augmentermodel/filterfrequency was changed post data collection.
                 if 'settings' in session['meta']:
                     try:
                         session_desc["openSimModel"] = session['meta']['settings']['openSimModel']
@@ -387,6 +387,12 @@ def getMetadataFromServer(session_id,justCheckerParams=False):
                         session_desc["augmentermodel"] = session['meta']['settings']['augmentermodel']
                     except:
                         session_desc["augmentermodel"] = 'v0.2'
+                    try:
+                        session_desc["filterfrequency"] = session['meta']['settings']['filterfrequency']
+                        if session_desc["filterfrequency"] != 'default':
+                            session_desc["filterfrequency"] = float(session_desc["filterfrequency"])
+                    except:
+                        session_desc["filterfrequency"] = 'default'
             else:                
                 subject_info = getSubjectJson(session['subject'])                
                 session_desc["subjectID"] = subject_info['name']
@@ -404,6 +410,12 @@ def getMetadataFromServer(session_id,justCheckerParams=False):
                     session_desc["augmentermodel"] = session['meta']['settings']['augmentermodel']
                 except:
                     session_desc["augmentermodel"] = 'v0.2'
+                try:
+                    session_desc["filterfrequency"] = session['meta']['settings']['filterfrequency']
+                    if session_desc["filterfrequency"] != 'default':
+                        session_desc["filterfrequency"] = float(session_desc["filterfrequency"])
+                except:
+                    session_desc["filterfrequency"] = 'default'
 
         if 'sessionWithCalibration' in session['meta'] and 'checkerboard' not in session['meta']:
             newSessionId = session['meta']['sessionWithCalibration']['id']
@@ -587,7 +599,13 @@ def downloadAndSwitchCalibrationFromDjango(session_id,session_path,calibTrialID 
     else:
         return None
     
-def changeSessionMetadata(session_ids,newMetaDict):   
+def changeSessionMetadata(session_ids,newMetaDict):
+
+    if 'filterfrequency' in newMetaDict and newMetaDict['filterfrequency'] != 'default':
+        if type(newMetaDict['filterfrequency']) is not str:
+            newMetaDict['filterfrequency'] = str(newMetaDict['filterfrequency'])
+        else:
+            raise Exception('Filter frequency should be a number or default.')    
    
     for session_id in session_ids:
         session_url = "{}{}{}/".format(API_URL, "sessions/", session_id)
@@ -595,6 +613,18 @@ def changeSessionMetadata(session_ids,newMetaDict):
         # get metadata
         session = getSessionJson(session_id)
         existingMeta = session['meta']
+        
+        # Check if framerate is in metadata. If not, set to 60
+        if 'framerate' not in existingMeta:
+            framerate = 60
+        else:
+            framerate = existingMeta['framerate']
+        if 'filterfrequency' in newMetaDict:
+            if newMetaDict['filterfrequency'] != 'default':
+                if float(newMetaDict['filterfrequency']) > framerate/2:
+                    raise Exception('Filter frequency cannot exceed Nyquist frequency (here {}Hz).'.format(framerate/2))
+                elif float(newMetaDict['filterfrequency']) < 0:
+                    raise Exception('Filter frequency cannot be negative.')        
         
         # change metadata
         # Hack: wrong mapping between metadata and yaml
@@ -626,15 +656,15 @@ def changeSessionMetadata(session_ids,newMetaDict):
         for newMeta in newMetaDict:
             if not newMeta in addedKey:
                 print("Could not find {} in existing metadata, trying to add it.".format(newMeta))
-                settings_fields = ['framerate', 'posemodel', 'openSimModel', 'augmentermodel']
+                settings_fields = ['framerate', 'posemodel', 'openSimModel', 'augmentermodel', 'filterfrequency']
                 if newMeta in settings_fields:
                     if 'settings' not in existingMeta:
                         existingMeta['settings'] = {}
                     existingMeta['settings'][newMeta] = newMetaDict[newMeta]
                     addedKey[newMeta] = newMetaDict[newMeta]
-                    print("Added {} to settings in metadata".format(newMetaDict[newMeta]))
+                    print("Added {}={} to settings in metadata".format(newMeta, newMetaDict[newMeta]))
                 else:
-                    print("Could not add {} to the metadata; not recognized".format(newMetaDict[newMeta]))
+                    print("Could not add {}={} to the metadata; not recognized".format(newMeta, newMetaDict[newMeta]))
         
         data = {"meta":json.dumps(existingMeta)}
         

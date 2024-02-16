@@ -36,7 +36,8 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
          poseDetector='OpenPose', resolutionPoseDetection='default', 
          scaleModel=False, bbox_thr=0.8, augmenter_model='v0.3',
          genericFolderNames=False, offset=True, benchmark=False,
-         dataDir=None, overwriteAugmenterModel=False):
+         dataDir=None, overwriteAugmenterModel=False,
+         filter_frequency='default', overwriteFilterFrequency=False):
 
     # %% High-level settings.
     # Camera calibration.
@@ -50,9 +51,7 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
     # Marker augmentation.
     runMarkerAugmentation = True
     # OpenSim pipeline.
-    runOpenSimPipeline = True
-    # Lowpass filter frequency of 2D keypoints for gait and everything else.
-    filtFreqs = {'gait':12, 'default':500} # defaults to framerate/2
+    runOpenSimPipeline = True    
     # High-resolution for OpenPose.
     resolutionPoseDetection = resolutionPoseDetection
     # Set to False to only generate the json files (default is True).
@@ -97,6 +96,18 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
         augmenterModel = sessionMetadata['augmentermodel']
     else:
         augmenterModel = augmenter_model
+        
+    # Lowpass filter frequency of 2D keypoints for gait and everything else.
+    # If overwriteFilterFrequency is True, the filter frequency is the one
+    # passed as an argument to main(). This is useful for local testing.
+    if 'filterfrequency' in sessionMetadata and not overwriteFilterFrequency:
+        filterfrequency = sessionMetadata['filterfrequency']
+    else:
+        filterfrequency = filter_frequency
+    if filterfrequency == 'default':
+        filtFreqs = {'gait':12, 'default':500} # defaults to framerate/2
+    else:
+        filtFreqs = {'gait':filterfrequency, 'default':filterfrequency}
 
     # %% Paths to pose detector folder for local testing.
     if poseDetector == 'OpenPose':
