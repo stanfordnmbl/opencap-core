@@ -565,7 +565,7 @@ def downloadAndSwitchCalibrationFromDjango(session_id,session_path,calibTrialID 
        
     calibURLs = {t['device_id']:t['media'] for t in trial['results'] if t['tag'] == 'calibration_parameters_options'}
     
-    if 'meta' in trial.keys() and trial['meta'] is not None and 'calibration' in trial['meta'].keys():
+    if 'meta' in trial.keys() and trial['meta'] is not None and 'calibration' in trial['meta'].keys() and trial['meta']['calibration']:
         calibDict = trial['meta']['calibration']
     else:
         print('No metadata for camera switching. Using first solution.')
