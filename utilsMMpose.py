@@ -1,6 +1,8 @@
 import cv2
 import pickle
 import torch
+import torch.nn as nn
+import numpy as np
 
 from tqdm import tqdm
 from mmpose_utils import process_mmdet_results, frame_iter, concat, convert_instance_to_frame
@@ -13,9 +15,15 @@ except (ImportError, ModuleNotFoundError):
 from mmpose_data import CustomVideoDataset
 from mmpose_inference import init_pose_model, init_test_pipeline, run_pose_inference, run_pose_tracking
 from mmcv.parallel import collate
+from mmcv.ops import RoIPool
+from mmcv.transforms import Compose
+from mmdet.structures import DetDataSample, SampleList
+from mmdet.utils import get_test_pipeline_cfg
 from torch.utils.data import DataLoader
 from mmpose.apis import vis_pose_tracking_result
 from mmpose.datasets import DatasetInfo
+
+from typing import Optional, Sequence, Union
 
 # %%
 def get_dataset_info():
@@ -58,6 +66,126 @@ def detection_inference(model_config, model_ckpt, video_path, bbox_path,
     output_file = bbox_path
     pickle.dump(output, open(str(output_file), 'wb'))
     cap.release()
+
+def detection_inference_batch(model_config, model_ckpt, video_path, bbox_path,
+                              device='cuda:0', det_cat_id=1, batch_size=10000):
+    
+    """Visualize the demo images.
+
+    Using mmdet to detect the human.
+    """
+
+    det_model = init_detector(
+        model_config, model_ckpt, device=device.lower())
+
+    cap = cv2.VideoCapture(video_path)
+    assert cap.isOpened(), f'Faild to load video file {video_path}'
+
+    output = []
+    nFrames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    batched_frames = []
+    for img in tqdm(frame_iter(cap), total=nFrames):
+        # test a batch of images
+        batched_frames.append(img)
+        if len(batched_frames) == batch_size:
+            # the resulting box is (x1, y1, x2, y2)
+            mmdet_results_batched = inference_detector_batched(det_model, batched_frames)
+            batched_frames = []
+            for mmdet_results in mmdet_results_batched:
+                # keep the person class bounding boxes.
+                person_results = process_mmdet_results(mmdet_results, det_cat_id)
+                output.append(person_results)
+
+    if len(batched_frames) > 0:
+        mmdet_results_batched = inference_detector_batched(det_model, batched_frames)
+        batched_frames = []
+        for mmdet_results in mmdet_results_batched:
+                # keep the person class bounding boxes.
+                person_results = process_mmdet_results(mmdet_results, det_cat_id)
+                output.append(person_results)
+
+    output_file = bbox_path
+    pickle.dump(output, open(str(output_file), "wb"))
+    cap.release()
+
+def inference_detector_batched(
+    model: nn.Module,
+    imgs: Union[str, np.ndarray, Sequence[str], Sequence[np.ndarray]],
+    test_pipeline: Optional[Compose] = None,
+    text_prompt: Optional[str] = None,
+    custom_entities: bool = False,
+) -> Union[DetDataSample, SampleList]:
+    """Inference image(s) with the detector.
+
+    Args:
+        model (nn.Module): The loaded detector.
+        imgs (str, ndarray, Sequence[str/ndarray]):
+           Either image files or loaded images.
+        test_pipeline (:obj:`Compose`): Test pipeline.
+
+    Returns:
+        :obj:`DetDataSample` or list[:obj:`DetDataSample`]:
+        If imgs is a list or tuple, the same length list type results
+        will be returned, otherwise return the detection results directly.
+    """
+
+    if isinstance(imgs, (list, tuple)):
+        is_batch = True
+    else:
+        imgs = [imgs]
+        is_batch = False
+
+    cfg = model.cfg
+
+    if test_pipeline is None:
+        cfg = cfg.copy()
+        test_pipeline = get_test_pipeline_cfg(cfg)
+        if isinstance(imgs[0], np.ndarray):
+            # Calling this method across libraries will result
+            # in module unregistered error if not prefixed with mmdet.
+            test_pipeline[0].type = 'mmdet.LoadImageFromNDArray'
+
+        test_pipeline = Compose(test_pipeline)
+
+    if model.data_preprocessor.device.type == 'cpu':
+        for m in model.modules():
+            assert not isinstance(
+                m, RoIPool
+            ), 'CPU inference with RoIPool is not supported currently.'
+
+    result_list = []
+    data_batched = {}
+    data_batched['inputs'] = []
+    data_batched['data_samples'] = []
+    for i, img in enumerate(imgs):
+        # prepare data
+        if isinstance(img, np.ndarray):
+            # TODO: remove img_id.
+            data_ = dict(img=img, img_id=0)
+        else:
+            # TODO: remove img_id.
+            data_ = dict(img_path=img, img_id=0)
+
+        if text_prompt:
+            data_['text'] = text_prompt
+            data_['custom_entities'] = custom_entities
+
+        # build the data pipeline
+        data_ = test_pipeline(data_)
+
+        data_batched['inputs'].append(data_['inputs'])
+        data_batched['data_samples'].append(data_['data_samples'])
+
+        # forward the model
+    with torch.no_grad():
+        result_list = model.test_step(data_batched)
+
+    torch.cuda.empty_cache()
+
+    if not is_batch:
+        return result_list[0]
+    else:
+        return result_list
     
 # %%
 def pose_inference(model_config, model_ckpt, video_path, bbox_path, pkl_path,

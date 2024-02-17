@@ -5,7 +5,7 @@ import shutil
 import json
 import torch
 
-from utilsMMpose import detection_inference, pose_inference
+from utilsMMpose import detection_inference, pose_inference, detection_inference_batch
 
 logging.basicConfig(level=logging.INFO)
 
@@ -52,8 +52,8 @@ while True:
         pathModelCkptPerson = model_ckpt_person
         bboxPath = os.path.join(output_dir, 'box.pkl')
         full_model_config_person = model_config_person
-        detection_inference(full_model_config_person, pathModelCkptPerson,
-                            video_path, bboxPath)        
+        detection_inference_batch(full_model_config_person, pathModelCkptPerson,
+                                  video_path, bboxPath)        
         
         # Run pose detection.     
         pathModelCkptPose = model_ckpt_pose
