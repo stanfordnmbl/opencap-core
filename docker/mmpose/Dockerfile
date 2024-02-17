@@ -1,4 +1,4 @@
-FROM stanfordnmbl/mmpose:0.1
+FROM stanfordnmbl/mmpose:test
 COPY mmpose /mmpose
 COPY utilsMMpose.py /mmpose
 COPY defaultOpenCapSettings.json /mmpose
