@@ -377,12 +377,16 @@ def getMetadataFromServer(session_id,justCheckerParams=False):
                     session_desc["posemodel"] = session['meta']['subject']['posemodel']
                 except:
                     session_desc["posemodel"] = 'openpose'
-                # This might happen if openSimModel was changed post data collection.
+                # This might happen if openSimModel/augmentermodel was changed post data collection.
                 if 'settings' in session['meta']:
                     try:
                         session_desc["openSimModel"] = session['meta']['settings']['openSimModel']
                     except:
                         session_desc["openSimModel"] = 'LaiUhlrich2022'
+                    try:
+                        session_desc["augmentermodel"] = session['meta']['settings']['augmentermodel']
+                    except:
+                        session_desc["augmentermodel"] = 'v0.2'
             else:                
                 subject_info = getSubjectJson(session['subject'])                
                 session_desc["subjectID"] = subject_info['name']
@@ -396,6 +400,10 @@ def getMetadataFromServer(session_id,justCheckerParams=False):
                     session_desc["openSimModel"] = session['meta']['settings']['openSimModel']
                 except:
                     session_desc["openSimModel"] = 'LaiUhlrich2022'
+                try:
+                    session_desc["augmentermodel"] = session['meta']['settings']['augmentermodel']
+                except:
+                    session_desc["augmentermodel"] = 'v0.2'
 
         if 'sessionWithCalibration' in session['meta'] and 'checkerboard' not in session['meta']:
             newSessionId = session['meta']['sessionWithCalibration']['id']
@@ -620,6 +628,8 @@ def changeSessionMetadata(session_ids,newMetaDict):
                 print("Could not find {} in existing metadata, trying to add it.".format(newMeta))
                 settings_fields = ['framerate', 'posemodel', 'openSimModel', 'augmentermodel']
                 if newMeta in settings_fields:
+                    if 'settings' not in existingMeta:
+                        existingMeta['settings'] = {}
                     existingMeta['settings'][newMeta] = newMetaDict[newMeta]
                     addedKey[newMeta] = newMetaDict[newMeta]
                     print("Added {} to settings in metadata".format(newMetaDict[newMeta]))
@@ -687,23 +697,39 @@ def makeSessionPublic(session_id,publicStatus=True):
     return
 
         
-def postMotionData(trial_id,session_path,trial_name=None,isNeutral=False):
+def postMotionData(trial_id,session_path,trial_name=None,isNeutral=False,
+                   poseDetector='OpenPose', resolutionPoseDetection='default',
+                   bbox_thr=0.8):
+    
     if trial_name == None:
         trial_name = getTrialJson(trial_id)['id']
+
+    if poseDetector.lower() == 'openpose':
+        pklDir = os.path.join("OutputPkl_" + resolutionPoseDetection, trial_name)
+    elif poseDetector.lower() == 'hrnet':
+        pklDir = os.path.join("OutputPkl_mmpose_" + str(bbox_thr), trial_name)
+    else:
+        raise Exception('Unknown pose detector: {}'.format(poseDetector))
+        
+    markerDir = os.path.join(session_path,'MarkerData','PostAugmentation')
+        
+    # post settings
+    deleteResult(trial_id, tag='main_settings')
+    mainSettingsPath = os.path.join(markerDir,'Settings_{}.yaml'.format(trial_id))
+    postFileToTrial(mainSettingsPath,trial_id,tag='main_settings',device_id='all')
         
     # post pose pickles
     # If we parallelize this, this will be redundant, and we will want to delete this posting of pickles
     deleteResult(trial_id, tag='pose_pickle')
     camDirs = glob.glob(os.path.join(session_path,'Videos','Cam*'))
     for camDir in camDirs:
-        outputPklFolder = glob.glob(os.path.join(camDir,'OutputPkl*'))[0]
-        pklPath = glob.glob(os.path.join(outputPklFolder,trial_name,'*.pkl'))[0]
+        outputPklFolder = os.path.join(camDir,pklDir)
+        pklPath = glob.glob(os.path.join(outputPklFolder,'*_pp.pkl'))[0]
         _,camName = os.path.split(camDir)
         postFileToTrial(pklPath,trial_id,tag='pose_pickle',device_id=camName)
         
     # post marker data
     deleteResult(trial_id, tag='marker_data')
-    markerDir = os.path.join(session_path,'MarkerData','PostAugmentation')
     markerPath = os.path.join(markerDir,trial_id + '.trc')
     postFileToTrial(markerPath,trial_id,tag='marker_data',device_id='all')
     
@@ -723,11 +749,6 @@ def postMotionData(trial_id,session_path,trial_name=None,isNeutral=False):
         deleteResult(trial_id, tag='ik_results')
         ikPath = os.path.join(session_path,'OpenSimData','Kinematics',trial_id + '.mot')
         postFileToTrial(ikPath,trial_id,tag='ik_results',device_id='all')
-    
-    # post settings
-    deleteResult(trial_id, tag='main_settings')
-    mainSettingsPath = os.path.join(markerDir,'Settings_{}.yaml'.format(trial_id))
-    postFileToTrial(mainSettingsPath,trial_id,tag='main_settings',device_id='all')
         
     return
 
@@ -828,6 +849,85 @@ def getSyncdVideos(trial_id,session_path):
                 
                 syncVideoPath = os.path.join(session_path,'Videos',cam,'InputMedia',trial_name,trial_name + '_sync' + suff)
                 download_file(url,syncVideoPath)
+
+def getPosePickles(trial_id,session_path, poseDetector='OpenPose', 
+                   resolutionPoseDetection='default', bbox_thr=0.8):
+    trial = getTrialJson(trial_id)
+    trial_name = trial['name']
+
+    if poseDetector.lower() == 'openpose':
+        pklDir = os.path.join("OutputPkl_" + resolutionPoseDetection, trial_name)
+    elif poseDetector.lower() == 'hrnet':
+        pklDir = os.path.join("OutputPkl_mmpose_" + str(bbox_thr), trial_name)
+    else:
+        raise Exception('Unknown pose detector: {}'.format(poseDetector))
+    
+    trialPrefix = trial_id + "_rotated_pp.pkl"
+    
+    if trial['results']:
+        for result in trial['results']:
+            if result['tag'] == 'pose_pickle':
+                url = result['media']                
+                cam = result['device_id']
+                posePickleDir = os.path.join(session_path,'Videos',cam,pklDir)
+                os.makedirs(posePickleDir,exist_ok=True)
+                posePicklePath = os.path.join(posePickleDir,trialPrefix)
+                download_file(url,posePicklePath)
+
+def checkAndGetPosePickles(trial_id, session_path, poseDetector, resolutionPoseDetection, bbox_thr):
+    # Check if the pose pickles for that set of settings exist.
+    # Load main_settings yaml.
+    main_settings = getMainSettings(trial_id)
+    if 'poseDetector' in main_settings:
+        usedPoseDetector = main_settings['poseDetector']
+        if poseDetector.lower() == 'openpose':
+            if 'resolutionPoseDetection' in main_settings:
+                usedResolution = main_settings['resolutionPoseDetection']
+                if usedPoseDetector.lower() == poseDetector.lower() and usedResolution == resolutionPoseDetection:
+                    print('The pose pickles for {} {} already exist in the database. We will download them to avoid re-running pose estimation'.format(poseDetector, resolutionPoseDetection))
+                    getPosePickles(trial_id,session_path, poseDetector=poseDetector, resolutionPoseDetection=resolutionPoseDetection)
+                else:
+                    print('The pose pickles in the database are for {} {}, but you are now using {} {}. We will re-run pose estimation'.format(usedPoseDetector, usedResolution, poseDetector, resolutionPoseDetection))
+            else:
+                print('It is unclear which settings were used for pose estimation. We will re-run pose estimation')
+        elif poseDetector.lower() == 'hrnet':
+            # Hack: hrnet is sometimes called mmpose
+            if usedPoseDetector.lower() == 'mmpose':
+                usedPoseDetector = 'hrnet'
+            if 'bbox_thr' in main_settings:
+                usedBbox_thr = main_settings['bbox_thr']
+            else:
+                # There was a bug in main, where bbox_thr was not saved in main_settings.yaml.
+                # Since there is in practice no option to change bbox_thr in the GUI, we can
+                # assume that the default value was used.
+                usedBbox_thr = 0.8
+            if usedPoseDetector.lower() == poseDetector.lower() and usedBbox_thr == bbox_thr:
+                print('The pose pickles for {} {} already exist in the database. We will download them to avoid re-running pose estimation'.format(poseDetector, bbox_thr))
+                getPosePickles(trial_id,session_path, poseDetector=poseDetector, bbox_thr=bbox_thr)
+            else:
+                print('The pose pickles in the database are for {} {}, but you are now using {} {}. We will re-run pose estimation'.format(usedPoseDetector, usedBbox_thr, poseDetector, bbox_thr))
+        else:
+            print('It is unclear which settings were used for pose estimation. We will re-run pose estimation')
+    else:
+        print('It is unclear which settings were used for pose estimation. We will re-run pose estimation')
+
+def getMainSettings(trial_id):
+    trial = getTrialJson(trial_id)
+    if len(trial['results'])>1:
+        for result in trial['results']:
+            if result['tag'] == 'main_settings':
+                url = result['media']
+                # Load yaml file
+                try:
+                    with urllib.request.urlopen(url) as response:
+                        yaml_content = response.read()
+                        data = yaml.safe_load(yaml_content)
+                        return data
+                except Exception as e:
+                    print("An error occurred:", e)
+                    return {}  # Return an empty dictionary in case of an error
+    else:
+        return {}
         
 def downloadAndZipSession(session_id,deleteFolderWhenZipped=True,isDocker=True,
                           writeToDjango=False,justDownload=False,data_dir=None,
@@ -1219,6 +1319,29 @@ def getOpenPoseMarkers_lowerExtremity():
 
     return feature_markers, response_markers
 
+# Different order of markers compared to getOpenPoseMarkers_lowerExtremity 
+def getOpenPoseMarkers_lowerExtremity2():
+
+    feature_markers = [
+        "Neck", "RShoulder", "LShoulder", "RHip", "LHip", "RKnee", "LKnee",
+        "RAnkle", "LAnkle", "RHeel", "LHeel", "RSmallToe", "LSmallToe",
+        "RBigToe", "LBigToe"]
+
+    response_markers = [
+        'r.ASIS_study', 'L.ASIS_study', 'r.PSIS_study',
+        'L.PSIS_study', 'r_knee_study', 'r_mknee_study', 
+        'r_ankle_study', 'r_mankle_study', 'r_toe_study', 
+        'r_5meta_study', 'r_calc_study', 'L_knee_study', 
+        'L_mknee_study', 'L_ankle_study', 'L_mankle_study',
+        'L_toe_study', 'L_calc_study', 'L_5meta_study', 
+        'r_shoulder_study', 'L_shoulder_study', 'C7_study', 
+        'r_thigh1_study', 'r_thigh2_study', 'r_thigh3_study',
+        'L_thigh1_study', 'L_thigh2_study', 'L_thigh3_study',
+        'r_sh1_study', 'r_sh2_study', 'r_sh3_study', 'L_sh1_study',
+        'L_sh2_study', 'L_sh3_study', 'RHJC_study', 'LHJC_study']
+
+    return feature_markers, response_markers
+
 def getMMposeMarkers_lowerExtremity():
 
     # Here we replace RSmallToe_mmpose and LSmallToe_mmpose by RSmallToe and
@@ -1263,6 +1386,19 @@ def getMarkers_upperExtremity_noPelvis():
     response_markers = ["r_lelbow_study", "L_lelbow_study", "r_melbow_study",
                         "L_melbow_study", "r_lwrist_study", "L_lwrist_study",
                         "r_mwrist_study", "L_mwrist_study"]
+
+    return feature_markers, response_markers
+
+# Different order of markers compared to getMarkers_upperExtremity_noPelvis.
+def getMarkers_upperExtremity_noPelvis2():
+
+    feature_markers = [
+        "Neck", "RShoulder", "LShoulder", "RElbow", "LElbow", "RWrist",
+        "LWrist"]
+
+    response_markers = ["r_lelbow_study", "r_melbow_study", "r_lwrist_study",
+                        "r_mwrist_study", "L_lelbow_study", "L_melbow_study",
+                        "L_lwrist_study", "L_mwrist_study"]
 
     return feature_markers, response_markers
 
@@ -1317,7 +1453,7 @@ def sendStatusEmail(message=None,subject=None):
             server.send_message(msg)
         server.quit()
 
-def checkResourceUsage():
+def checkResourceUsage(stop_machine_and_email=True):
     import psutil
     
     resourceUsage = {}
@@ -1333,7 +1469,30 @@ def checkResourceUsage():
     resourceUsage['disk_gb'] = disk_usage.used / (1024 ** 3)
     resourceUsage['disk_perc'] = disk_usage.percent
     
+    if stop_machine_and_email and resourceUsage['disk_perc'] > 95:
+            
+        message = "Disc is full on an OpenCap machine backend machine: " \
+                            + socket.gethostname() + ". It has been stopped. Data: " \
+                            + json.dumps(resourceUsage)
+        sendStatusEmail(message=message)
+        
+        raise Exception('Not enough available disc space. Stopped.')
+    
     return resourceUsage
+
+def checkCudaTF():
+    import tensorflow as tf
+
+    if tf.config.list_physical_devices('GPU'):
+        gpus = tf.config.list_physical_devices('GPU')
+        print(f"Found {len(gpus)} GPU(s).")
+        for gpu in gpus:
+            print(f"GPU: {gpu.name}")
+    else:
+        message = "Cuda check failed on an OpenCap machine backend machine: " \
+                            + socket.gethostname() + ". It has been stopped."
+        sendStatusEmail(message=message)
+        raise Exception("No GPU detected. Exiting.")
 
 # %% Some functions for loading subject data
 

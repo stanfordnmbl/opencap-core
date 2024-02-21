@@ -202,15 +202,19 @@ def runOpenPoseCMD(pathOpenPose, resolutionPoseDetection, cameraDirectory,
                     break
                 
                 if start + 60*30 < time.time():
-                    raise Exception("OpenPose processing timeout")
+                    raise Exception("Pose detection timed out. This is unlikely to be your fault, please report this issue on the forum. You can proceed with your data collection (videos are uploaded to the server) and later reprocess errored trials.", 'timeout - openpose')
                 
                 time.sleep(0.1)
             
             # copy /data/output to openposeJsonDir
             os.system("cp /data/output_openpose/* {cameraDirectory}/{openposeJsonDir}/".format(cameraDirectory=cameraDirectory, openposeJsonDir=openposeJsonDir))
-        except:
-            exception = "Pose detection failed. Verify your setup and try again. Visit https://www.opencap.ai/best-pratices to learn more about data collection and https://www.opencap.ai/troubleshooting for potential causes for a failed neutral pose."
-            raise Exception(exception, exception)
+        
+        except Exception as e:
+            if len(e.args) == 2: # specific exception
+                raise Exception(e.args[0], e.args[1])
+            elif len(e.args) == 1: # generic exception
+                exception = "Pose detection failed. Verify your setup and try again. Visit https://www.opencap.ai/best-pratices to learn more about data collection and https://www.opencap.ai/troubleshooting for potential causes for a failed neutral pose."
+                raise Exception(exception, exception)   
             
     elif pathOpenPose == "docker":
         
@@ -309,20 +313,22 @@ def runMMposeVideo(
                         break
                     
                     if start + 60*30 < time.time():
-                        raise Exception("mmpose processing timeout")
-                    
+                        raise Exception("Pose detection timed out. This is unlikely to be your fault, please report this issue on the forum. You can proceed with your data collection (videos are uploaded to the server) and later reprocess errored trials.", 'timeout - hrnet')
+                
                     time.sleep(0.1)
-            
+                      
                 # copy /data/output to pathOutputPkl
                 os.system("cp /data/output_mmpose/* {pathOutputPkl}/".format(pathOutputPkl=pathOutputPkl))            
                 pkl_path_tmp = os.path.join(pathOutputPkl, 'human.pkl')            
                 os.rename(pkl_path_tmp, pklPath)
-            except:
-                exception = "Pose detection failed. Verify your setup and try again. Visit https://www.opencap.ai/best-pratices to learn more about data collection and https://www.opencap.ai/troubleshooting for potential causes for a failed neutral pose."
-                raise Exception(exception, exception)
             
-        else:
-            
+            except Exception as e:
+                if len(e.args) == 2: # specific exception
+                    raise Exception(e.args[0], e.args[1])
+                elif len(e.args) == 1: # generic exception
+                    exception = "Pose detection failed. Verify your setup and try again. Visit https://www.opencap.ai/best-pratices to learn more about data collection and https://www.opencap.ai/troubleshooting for potential causes for a failed neutral pose."
+                    raise Exception(exception, exception)            
+        else:           
             c_path = os.path.dirname(os.path.abspath(__file__))
             sys.path.append(os.path.join(c_path, 'mmpose'))
             from utilsMMpose import detection_inference, pose_inference
@@ -346,6 +352,19 @@ def runMMposeVideo(
             
         # Post-process data to have OpenPose-like file structure.        
         arrangeMMposePkl(pklPath, ppPklPath)
+
+    # This is a hack to be able to use pose pickle files already saved in the
+    # database. In some cases, we saved pklPath instead of ppPklPath:
+    # https://github.com/stanfordnmbl/opencap-core/pull/100/files.
+    # We here identify these cases and re-run post processing. 
+    else:
+        open_file = open(ppPklPath, "rb")
+        frames = pickle.load(open_file)
+        open_file.close()
+        isData = any([('pose_keypoints_2d' in element[0].keys()) for element in frames if len(element)>0])
+        if not isData:
+            os.rename(ppPklPath, pklPath)
+            arrangeMMposePkl(pklPath, ppPklPath)
 
 # %%
 def arrangeMMposePkl(poseInferencePklPath, outputPklPath):
