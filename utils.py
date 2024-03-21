@@ -847,11 +847,12 @@ def postFileToTrial(filePath,trial_id,tag,device_id):
         
     # get S3 link
     data = {'fileName':os.path.split(filePath)[1]}
-    r = requests.get(API_URL + "sessions/null/get_presigned_url/",data=data).json()
+    r = requests.get(API_URL + "sessions/null/get_presigned_url/",data=data)
+    r_json = r.json()
     
     # upload to S3
     files = {'file': open(filePath, 'rb')}
-    requests.post(r['url'], data=r['fields'],files=files)   
+    requests.post(r_json['url'], data=r_json['fields'],files=files)   
     files["file"].close()
 
     # post link to and data to results   
@@ -859,14 +860,17 @@ def postFileToTrial(filePath,trial_id,tag,device_id):
         "trial": trial_id,
         "tag": tag,
         "device_id" : device_id,
-        "media_url" : r['fields']['key']
+        "media_url" : r_json['fields']['key']
     }
     
     rResult = requests.post(API_URL + "results/", data=data,
                   headers = {"Authorization": "Token {}".format(API_TOKEN)})
     
     if rResult.status_code != 201:
-        print('server response was + ' + str(r.status_code))
+        print('server get response was', r.status_code)
+        print('server post response was', rResult.status_code)
+        print(rResult.json())
+        print('lets make it crash: server response was + ' + str(r_json.status_code))
     else:
         print('Result posted to S3.')
     
