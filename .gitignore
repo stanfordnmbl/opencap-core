@@ -7,14 +7,15 @@ __pycache__
 *.log
 *WithKeypoints.avi
 *_rotated.avi
-.env
+.env*
 *.pth
+*.xlsx
 
 # Data
 */Data/*
 Data/
 Examples/Data/*
-.snakemake
+*.snakemake
 
 *.ini
 *.stats

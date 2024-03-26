@@ -14,7 +14,6 @@ sids = df_trial[~df_trial.trial_clean.isna()].sid.unique()
 
 OUTPUTS = [f'{datadir}/opencap_data/{sid}' for sid in sids]
 
-
 rule all:
     input:
         OUTPUTS
