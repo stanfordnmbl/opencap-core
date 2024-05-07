@@ -27,7 +27,7 @@ isDocker = True
 initialStatusCheck = False
 t = time.localtime()
 
-# for shutting down AWS machine
+# for removing AWS machine scale-in protection
 t_lastTrial = time.localtime()
 justProcessed = True
 minutesBeforeShutdown = 5
@@ -54,13 +54,13 @@ while True:
     if r.status_code == 404:
         logging.info("...pulling " + workerType + " trials.")
         time.sleep(1)
-        # when using autoscaling, we will shut down the instance if it hasn't
+        # when using autoscaling, we will remove the instance scale-in protection if it hasn't
         # pulled a trial recently and there are no actively recording trials
         if (autoScalingInstance and not justProcessed and 
             checkTime(t_lastTrial,minutesElapsed=minutesBeforeShutdown)):
             if checkForTrialsWithStatus('recording',hours=2/60) == 0:
-                # AWS CLI to turn off machine
-                print('TODO placeholder: turning off AWS machine')
+                # AWS CLI to remove machine scale-in protection
+                print('TODO placeholder: removing AWS machine scale-in protection.')
                 break
             else:
                 t_lastTrial = time.localtime()
