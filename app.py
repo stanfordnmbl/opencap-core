@@ -10,8 +10,8 @@ import glob
 import numpy as np
 from utilsAPI import getAPIURL, getWorkerType, getASInstance
 from utilsAuth import getToken
-from utils import (getDataDirectory, checkTime, checkResourceUsage, checkCuda,
-                  checkForTrialsWithStatus)
+from utils import (getDataDirectory, checkTime, checkResourceUsage,
+                  sendStatusEmail, checkForTrialsWithStatus)
 
 logging.basicConfig(level=logging.INFO)
 
@@ -78,9 +78,6 @@ while True:
     # Check resource usage
     resourceUsage = checkResourceUsage(stop_machine_and_email=True)
     logging.info(json.dumps(resourceUsage))
-    # TODO: not yet functional.
-    # Check GPU device is available
-    # checkCuda()
     logging.info(r.text)
     
     trial = r.json()
@@ -122,10 +119,16 @@ while True:
         
         logging.info('0.5s pause if need to restart.')
         time.sleep(0.5)
-    except:
+    except Exception as e:
         r = requests.patch(trial_url, data={"status": "error"},
                          headers = {"Authorization": "Token {}".format(API_TOKEN)})
         traceback.print_exc()
+        args_as_strings = [str(arg) for arg in e.args]
+        if len(args_as_strings) > 1 and 'pose detection timed out' in args_as_strings[1].lower():
+            logging.info("Worker failed. Stopping machine.")
+            message = "A backend OpenCap machine timed out during pose detection. It has been stopped."
+            sendStatusEmail(message=message)
+            raise Exception('Worker failed. Stopped.')
     
     # Clean data directory
     if isDocker:

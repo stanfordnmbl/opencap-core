@@ -377,7 +377,7 @@ def getMetadataFromServer(session_id,justCheckerParams=False):
                     session_desc["posemodel"] = session['meta']['subject']['posemodel']
                 except:
                     session_desc["posemodel"] = 'openpose'
-                # This might happen if openSimModel/augmentermodel was changed post data collection.
+                # This might happen if openSimModel/augmentermodel/filterfrequency was changed post data collection.
                 if 'settings' in session['meta']:
                     try:
                         session_desc["openSimModel"] = session['meta']['settings']['openSimModel']
@@ -387,6 +387,12 @@ def getMetadataFromServer(session_id,justCheckerParams=False):
                         session_desc["augmentermodel"] = session['meta']['settings']['augmentermodel']
                     except:
                         session_desc["augmentermodel"] = 'v0.2'
+                    try:
+                        session_desc["filterfrequency"] = session['meta']['settings']['filterfrequency']
+                        if session_desc["filterfrequency"] != 'default':
+                            session_desc["filterfrequency"] = float(session_desc["filterfrequency"])
+                    except:
+                        session_desc["filterfrequency"] = 'default'
             else:                
                 subject_info = getSubjectJson(session['subject'])                
                 session_desc["subjectID"] = subject_info['name']
@@ -404,6 +410,12 @@ def getMetadataFromServer(session_id,justCheckerParams=False):
                     session_desc["augmentermodel"] = session['meta']['settings']['augmentermodel']
                 except:
                     session_desc["augmentermodel"] = 'v0.2'
+                try:
+                    session_desc["filterfrequency"] = session['meta']['settings']['filterfrequency']
+                    if session_desc["filterfrequency"] != 'default':
+                        session_desc["filterfrequency"] = float(session_desc["filterfrequency"])
+                except:
+                    session_desc["filterfrequency"] = 'default'
 
         if 'sessionWithCalibration' in session['meta'] and 'checkerboard' not in session['meta']:
             newSessionId = session['meta']['sessionWithCalibration']['id']
@@ -553,7 +565,7 @@ def downloadAndSwitchCalibrationFromDjango(session_id,session_path,calibTrialID 
        
     calibURLs = {t['device_id']:t['media'] for t in trial['results'] if t['tag'] == 'calibration_parameters_options'}
     
-    if 'meta' in trial.keys() and trial['meta'] is not None and 'calibration' in trial['meta'].keys():
+    if 'meta' in trial.keys() and trial['meta'] is not None and 'calibration' in trial['meta'].keys() and trial['meta']['calibration']:
         calibDict = trial['meta']['calibration']
     else:
         print('No metadata for camera switching. Using first solution.')
@@ -587,7 +599,20 @@ def downloadAndSwitchCalibrationFromDjango(session_id,session_path,calibTrialID 
     else:
         return None
     
-def changeSessionMetadata(session_ids,newMetaDict):   
+def changeSessionMetadata(session_ids,newMetaDict):
+
+    if 'filterfrequency' in newMetaDict and newMetaDict['filterfrequency'] != 'default':
+        if type(newMetaDict['filterfrequency']) is not str:
+            newMetaDict['filterfrequency'] = str(newMetaDict['filterfrequency'])
+        else:
+            raise Exception('Filter frequency should be a number or default.')
+        
+    if 'datasharing' in newMetaDict:
+        if newMetaDict['datasharing'] not in ['Share processed data and identified videos',
+                                                'Share processed data and de-identified videos',
+                                                'Share processed data',
+                                                'Share no data']:
+                raise Exception('datasharing is {} but should be one of the following options: "Share processed data and identified videos", "Share processed data and de-identified videos", "Share processed data", "Share no data".'.format(newMetaDict['datasharing']))
    
     for session_id in session_ids:
         session_url = "{}{}{}/".format(API_URL, "sessions/", session_id)
@@ -595,6 +620,18 @@ def changeSessionMetadata(session_ids,newMetaDict):
         # get metadata
         session = getSessionJson(session_id)
         existingMeta = session['meta']
+        
+        # Check if framerate is in metadata. If not, set to 60
+        if 'framerate' not in existingMeta:
+            framerate = 60
+        else:
+            framerate = existingMeta['framerate']
+        if 'filterfrequency' in newMetaDict:
+            if newMetaDict['filterfrequency'] != 'default':
+                if float(newMetaDict['filterfrequency']) > framerate/2:
+                    raise Exception('Filter frequency cannot exceed Nyquist frequency (here {}Hz).'.format(framerate/2))
+                elif float(newMetaDict['filterfrequency']) < 0:
+                    raise Exception('Filter frequency cannot be negative.')        
         
         # change metadata
         # Hack: wrong mapping between metadata and yaml
@@ -626,15 +663,15 @@ def changeSessionMetadata(session_ids,newMetaDict):
         for newMeta in newMetaDict:
             if not newMeta in addedKey:
                 print("Could not find {} in existing metadata, trying to add it.".format(newMeta))
-                settings_fields = ['framerate', 'posemodel', 'openSimModel', 'augmentermodel']
+                settings_fields = ['framerate', 'posemodel', 'openSimModel', 'augmentermodel', 'filterfrequency']
                 if newMeta in settings_fields:
                     if 'settings' not in existingMeta:
                         existingMeta['settings'] = {}
                     existingMeta['settings'][newMeta] = newMetaDict[newMeta]
                     addedKey[newMeta] = newMetaDict[newMeta]
-                    print("Added {} to settings in metadata".format(newMetaDict[newMeta]))
+                    print("Added {}={} to settings in metadata".format(newMeta, newMetaDict[newMeta]))
                 else:
-                    print("Could not add {} to the metadata; not recognized".format(newMetaDict[newMeta]))
+                    print("Could not add {}={} to the metadata; not recognized".format(newMeta, newMetaDict[newMeta]))
         
         data = {"meta":json.dumps(existingMeta)}
         
@@ -650,33 +687,34 @@ def changeSessionMetadata(session_ids,newMetaDict):
         resultTags = [res['tag'] for res in trial['results']]
         
         metaPath = os.path.join(os.getcwd(),'sessionMetadata.yaml')
-        yamlURL = trial['results'][resultTags.index('session_metadata')]['media']
-        download_file(yamlURL,metaPath)
-        
-        metaYaml = importMetadata(metaPath)
-        
-        addedKey= {}
-        for key in metaYaml.keys():
-            if key in newMetaDict.keys():
-                metaYaml[key] = newMetaDict[key]
-                addedKey[key] = newMetaDict[key]
-            if type(metaYaml[key]) is dict:
-                for key2 in metaYaml[key].keys():
-                    if key2 in newMetaDict.keys():
-                        metaYaml[key][key2] = newMetaDict[key2] 
-                        addedKey[key2] = newMetaDict[key2]
-                        
-        for newMeta in newMetaDict:
-            if not newMeta in addedKey:
-               print("Could not find {} in existing yaml, adding it.".format(newMeta))               
-               metaYaml[newMeta] = newMetaDict[newMeta]
-                        
-        with open(metaPath, 'w') as file:
-            yaml.dump(metaYaml, file)
+        if 'session_metadata' in resultTags:
+            yamlURL = trial['results'][resultTags.index('session_metadata')]['media']
+            download_file(yamlURL,metaPath)
             
-        deleteResult(trial_id, tag='session_metadata')
-        postFileToTrial(metaPath,trial_id,tag='session_metadata',device_id='all')
-        os.remove(metaPath)
+            metaYaml = importMetadata(metaPath)
+            
+            addedKey= {}
+            for key in metaYaml.keys():
+                if key in newMetaDict.keys():
+                    metaYaml[key] = newMetaDict[key]
+                    addedKey[key] = newMetaDict[key]
+                if type(metaYaml[key]) is dict:
+                    for key2 in metaYaml[key].keys():
+                        if key2 in newMetaDict.keys():
+                            metaYaml[key][key2] = newMetaDict[key2] 
+                            addedKey[key2] = newMetaDict[key2]
+                            
+            for newMeta in newMetaDict:
+                if not newMeta in addedKey:
+                    print("Could not find {} in existing yaml, adding it.".format(newMeta))               
+                    metaYaml[newMeta] = newMetaDict[newMeta]
+                            
+            with open(metaPath, 'w') as file:
+                yaml.dump(metaYaml, file)
+                
+            deleteResult(trial_id, tag='session_metadata')
+            postFileToTrial(metaPath,trial_id,tag='session_metadata',device_id='all')
+            os.remove(metaPath)
         
 def makeSessionPublic(session_id,publicStatus=True):
     
@@ -1494,16 +1532,14 @@ def checkResourceUsage(stop_machine_and_email=True):
     
     return resourceUsage
 
-def checkCuda():
+def checkCudaTF():
     import tensorflow as tf
 
-    if tf.config.experimental.list_physical_devices('GPU'):
-        # Get the list of available GPUs
-        gpus = tf.config.experimental.list_physical_devices('GPU')
+    if tf.config.list_physical_devices('GPU'):
+        gpus = tf.config.list_physical_devices('GPU')
         print(f"Found {len(gpus)} GPU(s).")
-        # You can also print GPU device names and memory limits if needed
         for gpu in gpus:
-            print(f"GPU: {gpu.name}, Memory: {gpu.memory_limit}")
+            print(f"GPU: {gpu.name}")
     else:
         message = "Cuda check failed on an OpenCap machine backend machine: " \
                             + socket.gethostname() + ". It has been stopped."

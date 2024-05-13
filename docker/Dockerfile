@@ -1,7 +1,11 @@
 FROM stanfordnmbl/opensim-python:4.3
 
-RUN add-apt-repository ppa:jonathonf/ffmpeg-4 ; apt update
-RUN apt-get install ffmpeg -y --fix-missing
+# We used to do this locally until 12/2/23...but there isn't a Release file for ubuntu 20.04.
+# RUN add-apt-repository ppa:jonathonf/ffmpeg-4 ; apt update
+# RUN apt-get install ffmpeg -y --fix-missing
+
+RUN apt update
+RUN apt install ffmpeg -y
 
 WORKDIR /workspace/
 COPY requirements.txt /workspace/

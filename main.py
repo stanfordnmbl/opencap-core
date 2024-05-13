@@ -36,7 +36,8 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
          poseDetector='OpenPose', resolutionPoseDetection='default', 
          scaleModel=False, bbox_thr=0.8, augmenter_model='v0.3',
          genericFolderNames=False, offset=True, benchmark=False,
-         dataDir=None, overwriteAugmenterModel=False):
+         dataDir=None, overwriteAugmenterModel=False,
+         filter_frequency='default', overwriteFilterFrequency=False):
 
     # %% High-level settings.
     # Camera calibration.
@@ -50,9 +51,7 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
     # Marker augmentation.
     runMarkerAugmentation = True
     # OpenSim pipeline.
-    runOpenSimPipeline = True
-    # Lowpass filter frequency of 2D keypoints for gait and everything else.
-    filtFreqs = {'gait':12, 'default':500} # defaults to framerate/2
+    runOpenSimPipeline = True    
     # High-resolution for OpenPose.
     resolutionPoseDetection = resolutionPoseDetection
     # Set to False to only generate the json files (default is True).
@@ -61,10 +60,12 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
     # This is a hack to handle a mismatch between the use of mmpose and hrnet,
     # and between the use of OpenPose and openpose.
     if poseDetector == 'hrnet':
-        poseDetector = 'mmpose'
-        outputMediaFolder = 'OutputMedia_mmpose' + str(bbox_thr)
+        poseDetector = 'mmpose'        
     elif poseDetector == 'openpose':
         poseDetector = 'OpenPose'
+    if poseDetector == 'mmpose':
+        outputMediaFolder = 'OutputMedia_mmpose' + str(bbox_thr)
+    elif poseDetector == 'OpenPose':
         outputMediaFolder = 'OutputMedia_' + resolutionPoseDetection
     
     # %% Special case: extrinsics trial.
@@ -95,6 +96,18 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
         augmenterModel = sessionMetadata['augmentermodel']
     else:
         augmenterModel = augmenter_model
+        
+    # Lowpass filter frequency of 2D keypoints for gait and everything else.
+    # If overwriteFilterFrequency is True, the filter frequency is the one
+    # passed as an argument to main(). This is useful for local testing.
+    if 'filterfrequency' in sessionMetadata and not overwriteFilterFrequency:
+        filterfrequency = sessionMetadata['filterfrequency']
+    else:
+        filterfrequency = filter_frequency
+    if filterfrequency == 'default':
+        filtFreqs = {'gait':12, 'default':500} # defaults to framerate/2
+    else:
+        filtFreqs = {'gait':filterfrequency, 'default':filterfrequency}
 
     # %% Paths to pose detector folder for local testing.
     if poseDetector == 'OpenPose':
@@ -440,10 +453,21 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
             pathTRCFile4Scaling = pathAugmentedOutputFiles[trialName]
             # Get time range.
             try:
-                timeRange4Scaling = getScaleTimeRange(pathTRCFile4Scaling,
-                                                      thresholdPosition=0.007,
-                                                      thresholdTime=0.1,
-                                                      removeRoot=True)          
+                thresholdPosition = 0.003
+                maxThreshold = 0.015
+                increment = 0.001
+                success = False
+                while thresholdPosition <= maxThreshold and not success:
+                    try:
+                        timeRange4Scaling = getScaleTimeRange(
+                            pathTRCFile4Scaling,
+                            thresholdPosition=thresholdPosition,
+                            thresholdTime=0.1, removeRoot=True)
+                        success = True
+                    except Exception as e:
+                        print(f"Attempt with thresholdPosition {thresholdPosition} failed: {e}")
+                        thresholdPosition += increment  # Increase the threshold for the next iteration
+
                 # Run scale tool.
                 print('Running Scaling')
                 pathScaledModel = runScaleTool(
