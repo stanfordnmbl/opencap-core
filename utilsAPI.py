@@ -85,7 +85,7 @@ def get_number_of_pending_trials(period=60):
     start_time = end_time - timedelta(minutes=1)
 
     # Fetch the metric data
-    namespace = 'Custom/opencap'  # or 'Custom/opencap' for production
+    namespace = 'Custom/opencap-dev'  # or 'Custom/opencap' for production
     metric_name = 'opencap_trials_pending'
     stats = get_metric_average(
         namespace, metric_name, start_time, end_time, period)
