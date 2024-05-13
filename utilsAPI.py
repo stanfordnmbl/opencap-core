@@ -4,6 +4,7 @@ Created on Wed Jul 13 13:37:39 2022
 
 @author: suhlr
 """
+import os
 from decouple import config
 
 def getAPIURL():
@@ -40,11 +41,14 @@ def getStatusEmails():
     return emailInfo
 
 def getASInstance():
-    try: # look in environment file
-        param = config("AUTOSCALE_INSTANCE").lower()
-        if param == 'true': asInstance=True
-        else: asInstance=False
-    except: # default
+    try:
+        ecs_metadata_file = os.getenv('ECS_CONTAINER_METADATA_FILE')
+        if ecs_metadata_file is not None:
+            asInstance = True
+        else:
+            asInstance = False
+    except Exception as e:
+        print(f"Error occurred while checking ECS_CONTAINER_METADATA_FILE: {e}")
         asInstance = False
     
     return asInstance
