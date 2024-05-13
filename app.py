@@ -8,7 +8,7 @@ import traceback
 import logging
 import glob
 import numpy as np
-from utilsAPI import getAPIURL, getWorkerType, getASInstance
+from utilsAPI import getAPIURL, getWorkerType, getASInstance, unprotect_current_instance
 from utilsAuth import getToken
 from utils import (getDataDirectory, checkTime, checkResourceUsage,
                   sendStatusEmail, checkForTrialsWithStatus)
@@ -30,7 +30,7 @@ t = time.localtime()
 # for removing AWS machine scale-in protection
 t_lastTrial = time.localtime()
 justProcessed = True
-minutesBeforeShutdown = 5
+minutesBeforeRemoveScaleInProtection = 5
 
 while True:
     # Run test trial at a given frequency to check status of machine. Stop machine if fails.
@@ -57,11 +57,11 @@ while True:
         # when using autoscaling, we will remove the instance scale-in protection if it hasn't
         # pulled a trial recently and there are no actively recording trials
         if (autoScalingInstance and not justProcessed and 
-            checkTime(t_lastTrial,minutesElapsed=minutesBeforeShutdown)):
-            if checkForTrialsWithStatus('recording',hours=2/60) == 0:
+            checkTime(t_lastTrial, minutesElapsed=minutesBeforeRemoveScaleInProtection)):
+            if checkForTrialsWithStatus('recording', hours=2/60) == 0:
                 # AWS CLI to remove machine scale-in protection
-                print('TODO placeholder: removing AWS machine scale-in protection.')
-                break
+                unprotect_current_instance()
+                time.sleep(3600)
             else:
                 t_lastTrial = time.localtime()
         if autoScalingInstance and justProcessed:
