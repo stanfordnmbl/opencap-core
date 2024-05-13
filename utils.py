@@ -1459,7 +1459,7 @@ def getVideoExtension(pathFileWithoutExtension):
 # check how much time has passed since last status check
 def checkTime(t,minutesElapsed=30):
     t2 = time.localtime()
-    return (t2.tm_hour - t.tm_hour) * 360 + (t2.tm_min - t.tm_min)*60 + (t2.tm_sec - t.tm_sec) >= minutesElapsed*60
+    return (t2.tm_hour - t.tm_hour) * 3600 + (t2.tm_min - t.tm_min)*60 + (t2.tm_sec - t.tm_sec) >= minutesElapsed*60
 
 # check for trials with certain status
 def checkForTrialsWithStatus(status,hours=9999999,relativeTime='newer'):
