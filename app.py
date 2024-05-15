@@ -27,7 +27,7 @@ isDocker = True
 initialStatusCheck = False
 t = time.localtime()
 
-# for removing AWS machine scale-in protection
+# For removing AWS machine scale-in protection
 t_lastTrial = time.localtime()
 justProcessed = True
 with_on_prem = True
