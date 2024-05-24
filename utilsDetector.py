@@ -201,7 +201,7 @@ def runOpenPoseCMD(pathOpenPose, resolutionPoseDetection, cameraDirectory,
                 if not os.path.isfile(vid_path):
                     break
                 
-                if start + 60*30 < time.time():
+                if start + 60*60 < time.time():
                     raise Exception("Pose detection timed out. This is unlikely to be your fault, please report this issue on the forum. You can proceed with your data collection (videos are uploaded to the server) and later reprocess errored trials.", 'timeout - openpose')
                 
                 time.sleep(0.1)
@@ -312,7 +312,7 @@ def runMMposeVideo(
                     if not os.path.isfile(vid_path):
                         break
                     
-                    if start + 60*30 < time.time():
+                    if start + 60*60 < time.time():
                         raise Exception("Pose detection timed out. This is unlikely to be your fault, please report this issue on the forum. You can proceed with your data collection (videos are uploaded to the server) and later reprocess errored trials.", 'timeout - hrnet')
                 
                     time.sleep(0.1)
