@@ -4,7 +4,12 @@ Created on Wed Jul 13 13:37:39 2022
 
 @author: suhlr
 """
+import os
+import boto3
+import requests
+
 from decouple import config
+from datetime import datetime, timedelta
 
 def getAPIURL():
     if 'API_URL' not in globals():
@@ -38,4 +43,85 @@ def getStatusEmails():
         emailInfo = None
     
     return emailInfo
-        
+
+def getASInstance():
+    try:
+        ecs_metadata_file = os.getenv('ECS_CONTAINER_METADATA_FILE')
+        if ecs_metadata_file is not None:
+            asInstance = True
+        else:
+            asInstance = False
+    except Exception as e:
+        print(f"Error occurred while checking ECS_CONTAINER_METADATA_FILE: {e}")
+        asInstance = False
+    
+    return asInstance
+
+def get_metric_average(namespace, metric_name, start_time, end_time, period):
+    """
+    Fetch the average value of a specific metric from AWS CloudWatch.
+
+    Parameters:
+    - namespace (str): The namespace for the metric data.
+    - metric_name (str): The name of the metric.
+    - start_time (datetime): Start time for the data retrieval.
+    - end_time (datetime): End time for the data retrieval.
+    - period (int): The granularity, in seconds, of the data points returned.
+    """
+    client = boto3.client('cloudwatch')
+    response = client.get_metric_statistics(
+        Namespace=namespace,
+        MetricName=metric_name,
+        StartTime=start_time,
+        EndTime=end_time,
+        Period=period,
+        Statistics=['Average']  # Correctly specifying 'Average' here
+    )
+    return response
+
+def get_number_of_pending_trials(period=60):
+    # Time range setup for the last 1 minute
+    end_time = datetime.utcnow()
+    start_time = end_time - timedelta(minutes=1)
+
+    # Fetch the metric data
+    namespace = 'Custom/opencap-dev'  # or 'Custom/opencap' for production
+    metric_name = 'opencap_trials_pending'
+    stats = get_metric_average(
+        namespace, metric_name, start_time, end_time, period)
+
+    if stats['Datapoints']:
+        average = stats['Datapoints'][0]['Average']
+        print(f"Average value of '{metric_name}' over the last minute: {average}")
+    else:
+        print("No data points found.")
+        # Maybe raise an exception or do nothing to have control-loop retry this call later
+        return None
+
+    return average
+
+def get_instance_id():
+    """Retrieve the instance ID from EC2 metadata."""
+    response = requests.get("http://169.254.169.254/latest/meta-data/instance-id")
+    return response.text
+
+def get_auto_scaling_group_name(instance_id):
+    """Retrieve the Auto Scaling Group name using the instance ID."""
+    client = boto3.client('autoscaling')
+    response = client.describe_auto_scaling_instances(InstanceIds=[instance_id])
+    asg_name = response['AutoScalingInstances'][0]['AutoScalingGroupName']
+    return asg_name
+
+def set_instance_protection(instance_id, asg_name, protect):
+    """Set or remove instance protection."""
+    client = boto3.client('autoscaling')
+    client.set_instance_protection(
+        InstanceIds=[instance_id],
+        AutoScalingGroupName=asg_name,
+        ProtectedFromScaleIn=protect
+    )
+
+def unprotect_current_instance():
+    instance_id = get_instance_id()
+    asg_name = get_auto_scaling_group_name(instance_id)
+    set_instance_protection(instance_id, asg_name, protect=False)

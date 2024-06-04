@@ -15,3 +15,4 @@ pingouin==0.5.2
 openpyxl
 ffmpeg-python
 psutil
+boto3
