@@ -45,13 +45,14 @@ while True:
     # the instance scale-in protection if the number of pending trials is below
     # a threshold so that the on-prem workers are prioritized.
     if with_on_prem:
-        # Query the number of pending trials
-        pending_trials = get_number_of_pending_trials()
-        if autoScalingInstance and pending_trials < max_on_prem_pending_trials:
-            # Remove scale-in protection and sleep in the cycle so that the
-            # asg will remove that instance from the group.
-            unprotect_current_instance()
-            time.sleep(3600)
+        # Query the number of pending trials        
+        if autoScalingInstance:
+            pending_trials = get_number_of_pending_trials()
+            if pending_trials < max_on_prem_pending_trials:
+                # Remove scale-in protection and sleep in the cycle so that the
+                # asg will remove that instance from the group.
+                unprotect_current_instance()
+                time.sleep(3600)
            
     # workerType = 'calibration' -> just processes calibration and neutral
     # workerType = 'all' -> processes all types of trials
