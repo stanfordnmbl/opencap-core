@@ -68,7 +68,7 @@ def get_metric_average(namespace, metric_name, start_time, end_time, period):
     - end_time (datetime): End time for the data retrieval.
     - period (int): The granularity, in seconds, of the data points returned.
     """
-    client = boto3.client('cloudwatch')
+    client = boto3.client('cloudwatch', region_name='us-west-2')
     response = client.get_metric_statistics(
         Namespace=namespace,
         MetricName=metric_name,
