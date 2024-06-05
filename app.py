@@ -51,7 +51,9 @@ while True:
             if pending_trials < max_on_prem_pending_trials:
                 # Remove scale-in protection and sleep in the cycle so that the
                 # asg will remove that instance from the group.
+                logging.info("Removing scale-in protection (out loop).")
                 unprotect_current_instance()
+                logging.info("Removed scale-in protection (out loop).")
                 time.sleep(3600)
            
     # workerType = 'calibration' -> just processes calibration and neutral
@@ -77,7 +79,9 @@ while True:
             if checkForTrialsWithStatus('recording', hours=2/60) == 0:
                 # Remove scale-in protection and sleep in the cycle so that the
                 # asg will remove that instance from the group.
+                logging.info("Removing scale-in protection (in loop).")
                 unprotect_current_instance()
+                logging.info("Removed scale-in protection (in loop).")
                 time.sleep(3600)
             else:
                 t_lastTrial = time.localtime()
