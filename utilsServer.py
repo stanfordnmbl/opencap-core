@@ -456,7 +456,7 @@ def runTestSession(pose='all',isDocker=True):
     try: 
         for trial_id in trialList:
             trial = getTrialJson(trial_id)
-            logging.info("Running status check on trial name: " + trial['name'] +  + "_" + str(trial_id) + "\n\n")
+            logging.info("Running status check on trial name: " + trial['name'] + "_" + str(trial_id) + "\n\n")
             processTrial(trial["session"], trial_id, trial_type='static', isDocker=isDocker)
     except:
         logging.info("test trial failed. stopping machine.")
