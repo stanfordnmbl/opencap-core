@@ -94,9 +94,9 @@ def get_number_of_pending_trials(period=60):
 
     if stats['Datapoints']:
         average = stats['Datapoints'][0]['Average']
-        print(f"Average value of '{metric_name}' over the last minute: {average}")
+        logging.info(f"Average value of '{metric_name}' over the last minute: {average}")
     else:
-        print("No data points found.")
+        logging.info("No data points found.")
         # Maybe raise an exception or do nothing to have control-loop retry this call later
         return None
 

@@ -19,6 +19,7 @@ API_TOKEN = getToken()
 API_URL = getAPIURL()
 workerType = getWorkerType()
 autoScalingInstance = getASInstance()
+logging.info(f"AUTOSCALING INSTANCE: {autoScalingInstance}")
 
 # if true, will delete entire data directory when finished with a trial
 isDocker = True
@@ -31,7 +32,7 @@ t = time.localtime()
 t_lastTrial = time.localtime()
 justProcessed = True
 with_on_prem = True
-minutesBeforeRemoveScaleInProtection = 5
+minutesBeforeRemoveScaleInProtection = 2
 max_on_prem_pending_trials = 5
 
 while True:
@@ -48,6 +49,7 @@ while True:
         # Query the number of pending trials        
         if autoScalingInstance:
             pending_trials = get_number_of_pending_trials()
+            logging.info(f"Number of pending trials: {pending_trials}")
             if pending_trials < max_on_prem_pending_trials:
                 # Remove scale-in protection and sleep in the cycle so that the
                 # asg will remove that instance from the group.
@@ -86,6 +88,7 @@ while True:
             else:
                 t_lastTrial = time.localtime()
                 
+        # If a trial was just processed, reset the timer.
         if autoScalingInstance and justProcessed:
             justProcessed = False
             t_lastTrial = time.localtime()
@@ -131,14 +134,12 @@ while True:
     logging.info("processTrial({},{},trial_type={})".format(trial["session"], trial["id"], trial_type))
 
     try:
-        # trigger reset of timer for last processed trial
-        justProcessed = True                    
+        # trigger reset of timer for last processed trial                            
         processTrial(trial["session"], trial["id"], trial_type=trial_type, isDocker=isDocker)   
         # note a result needs to be posted for the API to know we finished, but we are posting them 
         # automatically thru procesTrial now
         r = requests.patch(trial_url, data={"status": "done"},
                          headers = {"Authorization": "Token {}".format(API_TOKEN)})
-        
         logging.info('0.5s pause if need to restart.')
         time.sleep(0.5)
     except Exception as e:
@@ -151,6 +152,7 @@ while True:
             message = "A backend OpenCap machine timed out during pose detection. It has been stopped."
             sendStatusEmail(message=message)
             raise Exception('Worker failed. Stopped.')
+    justProcessed = True
     
     # Clean data directory
     if isDocker:
