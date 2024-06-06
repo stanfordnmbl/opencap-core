@@ -7,6 +7,8 @@ Created on Wed Jul 13 13:37:39 2022
 import os
 import boto3
 import requests
+import logging
+logging.basicConfig(level=logging.INFO)
 
 from decouple import config
 from datetime import datetime, timedelta
@@ -123,5 +125,8 @@ def set_instance_protection(instance_id, asg_name, protect):
 
 def unprotect_current_instance():
     instance_id = get_instance_id()
+    logging.info("Instance ID: " + instance_id)
     asg_name = get_auto_scaling_group_name(instance_id)
+    logging.info("Auto Scaling Group Name: " + asg_name)
     set_instance_protection(instance_id, asg_name, protect=False)
+    logging.info("Done unprotecting instance.")
