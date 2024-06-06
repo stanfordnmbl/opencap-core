@@ -117,14 +117,14 @@ def get_instance_id():
 
 def get_auto_scaling_group_name(instance_id):
     """Retrieve the Auto Scaling Group name using the instance ID."""
-    client = boto3.client('autoscaling')
+    client = boto3.client('autoscaling', region_name='us-west-2')
     response = client.describe_auto_scaling_instances(InstanceIds=[instance_id])
     asg_name = response['AutoScalingInstances'][0]['AutoScalingGroupName']
     return asg_name
 
 def set_instance_protection(instance_id, asg_name, protect):
     """Set or remove instance protection."""
-    client = boto3.client('autoscaling')
+    client = boto3.client('autoscaling', region_name='us-west-2')
     client.set_instance_protection(
         InstanceIds=[instance_id],
         AutoScalingGroupName=asg_name,
