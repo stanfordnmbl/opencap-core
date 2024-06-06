@@ -48,16 +48,22 @@ def getStatusEmails():
 
 def getASInstance():
     try:
+        # Check if the ECS_CONTAINER_METADATA_FILE environment variable exists
         ecs_metadata_file = os.getenv('ECS_CONTAINER_METADATA_FILE')
-        if ecs_metadata_file is not None:
-            asInstance = True
+        if ecs_metadata_file:
+            logging.info(f"ECS_CONTAINER_METADATA_FILE is set to: {ecs_metadata_file}")
+            if os.path.isfile(ecs_metadata_file):
+                logging.info("Metadata file exists.")
+                return True
+            else:
+                logging.warning("Metadata file does not exist at the specified path.")
+                return False
         else:
-            asInstance = False
+            logging.info("ECS_CONTAINER_METADATA_FILE is not set.")
+            return False
     except Exception as e:
-        print(f"Error occurred while checking ECS_CONTAINER_METADATA_FILE: {e}")
-        asInstance = False
-    
-    return asInstance
+        logging.error(f"Error occurred while checking ECS_CONTAINER_METADATA_FILE: {e}")
+        return False
 
 def get_metric_average(namespace, metric_name, start_time, end_time, period):
     """
