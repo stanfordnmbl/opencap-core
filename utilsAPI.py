@@ -7,6 +7,8 @@ Created on Wed Jul 13 13:37:39 2022
 import os
 import boto3
 import requests
+import logging
+logging.basicConfig(level=logging.INFO)
 
 from decouple import config
 from datetime import datetime, timedelta
@@ -46,16 +48,22 @@ def getStatusEmails():
 
 def getASInstance():
     try:
+        # Check if the ECS_CONTAINER_METADATA_FILE environment variable exists
         ecs_metadata_file = os.getenv('ECS_CONTAINER_METADATA_FILE')
-        if ecs_metadata_file is not None:
-            asInstance = True
+        if ecs_metadata_file:
+            logging.info(f"ECS_CONTAINER_METADATA_FILE is set to: {ecs_metadata_file}")
+            if os.path.isfile(ecs_metadata_file):
+                logging.info("Metadata file exists.")
+                return True
+            else:
+                logging.warning("Metadata file does not exist at the specified path.")
+                return False
         else:
-            asInstance = False
+            logging.info("ECS_CONTAINER_METADATA_FILE is not set.")
+            return False
     except Exception as e:
-        print(f"Error occurred while checking ECS_CONTAINER_METADATA_FILE: {e}")
-        asInstance = False
-    
-    return asInstance
+        logging.error(f"Error occurred while checking ECS_CONTAINER_METADATA_FILE: {e}")
+        return False
 
 def get_metric_average(namespace, metric_name, start_time, end_time, period):
     """
@@ -92,9 +100,9 @@ def get_number_of_pending_trials(period=60):
 
     if stats['Datapoints']:
         average = stats['Datapoints'][0]['Average']
-        print(f"Average value of '{metric_name}' over the last minute: {average}")
+        logging.info(f"Average value of '{metric_name}' over the last minute: {average}")
     else:
-        print("No data points found.")
+        logging.info("No data points found.")
         # Maybe raise an exception or do nothing to have control-loop retry this call later
         return None
 
@@ -107,14 +115,14 @@ def get_instance_id():
 
 def get_auto_scaling_group_name(instance_id):
     """Retrieve the Auto Scaling Group name using the instance ID."""
-    client = boto3.client('autoscaling')
+    client = boto3.client('autoscaling', region_name='us-west-2')
     response = client.describe_auto_scaling_instances(InstanceIds=[instance_id])
     asg_name = response['AutoScalingInstances'][0]['AutoScalingGroupName']
     return asg_name
 
 def set_instance_protection(instance_id, asg_name, protect):
     """Set or remove instance protection."""
-    client = boto3.client('autoscaling')
+    client = boto3.client('autoscaling', region_name='us-west-2')
     client.set_instance_protection(
         InstanceIds=[instance_id],
         AutoScalingGroupName=asg_name,
@@ -123,5 +131,8 @@ def set_instance_protection(instance_id, asg_name, protect):
 
 def unprotect_current_instance():
     instance_id = get_instance_id()
+    logging.info("Instance ID: " + instance_id)
     asg_name = get_auto_scaling_group_name(instance_id)
+    logging.info("Auto Scaling Group Name: " + asg_name)
     set_instance_protection(instance_id, asg_name, protect=False)
+    logging.info("Done unprotecting instance.")
