@@ -47,25 +47,25 @@ def getStatusEmails():
     return emailInfo
 
 def getASInstance():
-    # try:
-    #     # Check if the ECS_CONTAINER_METADATA_FILE environment variable exists
-    #     ecs_metadata_file = os.getenv('ECS_CONTAINER_METADATA_FILE')
-    #     if ecs_metadata_file:
-    #         logging.info(f"ECS_CONTAINER_METADATA_FILE is set to: {ecs_metadata_file}")
-    #         if os.path.isfile(ecs_metadata_file):
-    #             logging.info("Metadata file exists.")
-    #             return True
-    #         else:
-    #             logging.warning("Metadata file does not exist at the specified path.")
-    #             return False
-    #     else:
-    #         logging.info("ECS_CONTAINER_METADATA_FILE is not set.")
-    #         return False
-    # except Exception as e:
-    #     logging.error(f"Error occurred while checking ECS_CONTAINER_METADATA_FILE: {e}")
-    #     return False
+    try:
+        # Check if the ECS_CONTAINER_METADATA_FILE environment variable exists
+        ecs_metadata_file = os.getenv('ECS_CONTAINER_METADATA_FILE')
+        if ecs_metadata_file:
+            logging.info(f"ECS_CONTAINER_METADATA_FILE is set to: {ecs_metadata_file}")
+            if os.path.isfile(ecs_metadata_file):
+                logging.info("Metadata file exists.")
+                return True
+            else:
+                logging.warning("Metadata file does not exist at the specified path.")
+                return False
+        else:
+            logging.info("ECS_CONTAINER_METADATA_FILE is not set.")
+            return False
+    except Exception as e:
+        logging.error(f"Error occurred while checking ECS_CONTAINER_METADATA_FILE: {e}")
+        return False
     # Temp
-    return True
+    # return True
 
 def get_metric_average(namespace, metric_name, start_time, end_time, period):
     """
