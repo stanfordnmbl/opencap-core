@@ -56,7 +56,8 @@ while True:
                 logging.info("Removing scale-in protection (out loop).")
                 unprotect_current_instance()
                 logging.info("Removed scale-in protection (out loop).")
-                time.sleep(3600)
+                for i in range(3600):
+                    time.sleep(1)
            
     # workerType = 'calibration' -> just processes calibration and neutral
     # workerType = 'all' -> processes all types of trials
@@ -84,7 +85,8 @@ while True:
                 logging.info("Removing scale-in protection (in loop).")
                 unprotect_current_instance()
                 logging.info("Removed scale-in protection (in loop).")
-                time.sleep(3600)
+                for i in range(3600):
+                    time.sleep(1)
             else:
                 t_lastTrial = time.localtime()
                 

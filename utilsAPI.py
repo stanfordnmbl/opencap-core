@@ -64,8 +64,6 @@ def getASInstance():
     except Exception as e:
         logging.error(f"Error occurred while checking ECS_CONTAINER_METADATA_FILE: {e}")
         return False
-    # Temp
-    # return True
 
 def get_metric_average(namespace, metric_name, start_time, end_time, period):
     """
