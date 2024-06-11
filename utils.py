@@ -13,6 +13,9 @@ import subprocess
 import zipfile
 import time
 
+import logging
+logging.basicConfig(level=logging.INFO)
+
 import numpy as np
 import pandas as pd
 from scipy import signal
@@ -118,6 +121,8 @@ def getSessionJson(session_id):
     return sessionJson
 
 def getSubjectJson(subject_id):
+    logging.info('Getting subject json {}subjects/{}/'.format(API_URL, subject_id))
+    logging.info('API_TOKEN: {}'.format(API_TOKEN))
     subjectJson = requests.get(API_URL + "subjects/{}/".format(subject_id),
                        headers = {"Authorization": "Token {}".format(API_TOKEN)}).json()
     return subjectJson
