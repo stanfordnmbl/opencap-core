@@ -325,7 +325,7 @@ def runMMposeVideo(
                 logging.info("Processing mmpose. Before copying.")
                 # copy /data/output to pathOutputPkl
                 os.system("cp /data/output_mmpose/* {pathOutputPkl}/".format(pathOutputPkl=pathOutputPkl))        
-                logging.info("Processing mmpose. After copying.")    
+                logging.info("Processing mmpose. After copying.")
                 pkl_path_tmp = os.path.join(pathOutputPkl, 'human.pkl')            
                 os.rename(pkl_path_tmp, pklPath)
             
