@@ -33,7 +33,7 @@ name: Deploy to Amazon ECS
 
 jobs:
   deploy:
-    name: Deploy OpenCap
+    name: Deploy openpose
     runs-on: ubuntu-latest
 
     steps:
