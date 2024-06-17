@@ -106,7 +106,7 @@ while True:
         time.sleep(0.1)
         continue
 
-    logging.info("Processing...")
+    logging.info("Processing openpose ...")
 
     if os.path.isdir(output_dir):
         shutil.rmtree(output_dir)
