@@ -75,6 +75,7 @@ def getResolutionCommand(resolutionPoseDetection, horizontal):
 #%% 
 
 logging.info("Waiting for data...")
+check_cuda_device()
 
 video_path = "/openpose/data/video_openpose.mov"
 output_dir = "/openpose/data/output_openpose"
