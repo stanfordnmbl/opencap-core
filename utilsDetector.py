@@ -7,6 +7,9 @@ import json
 import sys
 import time
 
+import logging
+logging.basicConfig(level=logging.INFO)
+
 from decouple import config
 
 from utils import getOpenPoseMarkerNames, getMMposeMarkerNames, getVideoExtension
@@ -308,8 +311,10 @@ def runMMposeVideo(
             try:
                 # wait until the video is processed (i.e. until the video is removed -- then json should be ready)
                 start = time.time()
+                logging.info("Processing mmpose. Before waiting for video to be processed.")
                 while True:
                     if not os.path.isfile(vid_path):
+                        logging.info("Processing mmpose. Video not available. Break.")
                         break
                     
                     if start + 60*60 < time.time():
@@ -317,8 +322,10 @@ def runMMposeVideo(
                 
                     time.sleep(0.1)
                       
+                logging.info("Processing mmpose. Before copying.")
                 # copy /data/output to pathOutputPkl
-                os.system("cp /data/output_mmpose/* {pathOutputPkl}/".format(pathOutputPkl=pathOutputPkl))            
+                os.system("cp /data/output_mmpose/* {pathOutputPkl}/".format(pathOutputPkl=pathOutputPkl))        
+                logging.info("Processing mmpose. After copying.")
                 pkl_path_tmp = os.path.join(pathOutputPkl, 'human.pkl')            
                 os.rename(pkl_path_tmp, pklPath)
             

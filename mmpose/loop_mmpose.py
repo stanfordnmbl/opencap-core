@@ -35,6 +35,13 @@ model_ckpt_pose='/mmpose/hrnet_w48_coco_wholebody_384x288_dark-f5726563_20200918
 if os.path.isfile(video_path):
     os.remove(video_path)
 
+# checkCudaPyTorch()
+if torch.cuda.is_available():
+    num_gpus = torch.cuda.device_count()
+    logging.info(f"Found {num_gpus} GPU(s).")
+else:
+    logging.info("No GPU detected. Exiting.")
+    raise Exception("No GPU detected. Exiting.")
 while True:    
     if not os.path.isfile(video_path):
         time.sleep(0.1)
@@ -47,7 +54,13 @@ while True:
     os.makedirs(output_dir)
     
     try:
-        checkCudaPyTorch()
+        # checkCudaPyTorch()
+        if torch.cuda.is_available():
+            num_gpus = torch.cuda.device_count()
+            logging.info(f"Found {num_gpus} GPU(s).")
+        else:
+            logging.info("No GPU detected. Exiting.")
+            raise Exception("No GPU detected. Exiting.")
         # Run human detection.
         pathModelCkptPerson = model_ckpt_person
         bboxPath = os.path.join(output_dir, 'box.pkl')

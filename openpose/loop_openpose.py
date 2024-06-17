@@ -75,6 +75,16 @@ def getResolutionCommand(resolutionPoseDetection, horizontal):
 #%% 
 
 logging.info("Waiting for data...")
+# check_cuda_device()
+try:
+    # Run the nvidia-smi command and capture the output
+    _ = subprocess.check_output(["nvidia-smi"])
+    # If the command ran successfully, assume a CUDA device is present
+    logging.info("A CUDA-capable device is detected.")
+except subprocess.CalledProcessError as e:
+    # If the command fails, it means no CUDA device is detected
+    logging.info("No CUDA-capable device is detected. Error:", e)
+    raise Exception("No CUDA-capable device is detected.")
 
 video_path = "/openpose/data/video_openpose.mov"
 output_dir = "/openpose/data/output_openpose"
@@ -101,7 +111,16 @@ while True:
     horizontal = getVideoOrientation(video_path)
     cmd_hr = getResolutionCommand(resolutionPoseDetection, horizontal)
 
-    check_cuda_device()
+    # check_cuda_device()
+    try:
+        # Run the nvidia-smi command and capture the output
+        _ = subprocess.check_output(["nvidia-smi"])
+        # If the command ran successfully, assume a CUDA device is present
+        logging.info("A CUDA-capable device is detected.")
+    except subprocess.CalledProcessError as e:
+        # If the command fails, it means no CUDA device is detected
+        logging.info("No CUDA-capable device is detected. Error:", e)
+        raise Exception("No CUDA-capable device is detected.")
     command = "/openpose/build/examples/openpose/openpose.bin\
         --video {video_path}\
         --display 0\
