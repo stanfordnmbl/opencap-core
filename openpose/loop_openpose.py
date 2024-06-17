@@ -74,7 +74,7 @@ def getResolutionCommand(resolutionPoseDetection, horizontal):
 
 #%% 
 
-logging.info("Waiting for data...")
+logging.info("Waiting TEST for data...")
 # check_cuda_device()
 logging.info("Before cuda check")
 try:

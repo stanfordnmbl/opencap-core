@@ -9,7 +9,7 @@ from utilsMMpose import detection_inference, pose_inference
 
 logging.basicConfig(level=logging.INFO)
 
-logging.info("Waiting for data...")
+logging.info("Waiting TEST for data...")
 
 # def checkCudaPyTorch():
 #     if torch.cuda.is_available():
