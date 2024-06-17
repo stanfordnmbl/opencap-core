@@ -11,19 +11,20 @@ logging.basicConfig(level=logging.INFO)
 
 logging.info("Waiting for data...")
 
-def checkCudaPyTorch():
-    if torch.cuda.is_available():
-        num_gpus = torch.cuda.device_count()
-        logging.info(f"Found {num_gpus} GPU(s).")
-    else:
-        logging.info("No GPU detected. Exiting.")
-        raise Exception("No GPU detected. Exiting.")
+# def checkCudaPyTorch():
+#     if torch.cuda.is_available():
+#         num_gpus = torch.cuda.device_count()
+#         logging.info(f"Found {num_gpus} GPU(s).")
+#     else:
+#         logging.info("No GPU detected. Exiting.")
+#         raise Exception("No GPU detected. Exiting.")
 
 video_path = "/mmpose/data/video_mmpose.mov"
 output_dir = "/mmpose/data/output_mmpose"
 
 generateVideo=False
 
+logging.info("Before open")
 with open('/mmpose/defaultOpenCapSettings.json') as f:
     defaultOpenCapSettings = json.load(f)
 bbox_thr = defaultOpenCapSettings['hrnet']
@@ -31,7 +32,8 @@ model_config_person='/mmpose/faster_rcnn_r50_fpn_coco.py'
 model_ckpt_person='/mmpose/faster_rcnn_r50_fpn_1x_coco_20200130-047c8118.pth'
 model_config_pose='/mmpose/hrnet_w48_coco_wholebody_384x288_dark_plus.py'
 model_ckpt_pose='/mmpose/hrnet_w48_coco_wholebody_384x288_dark-f5726563_20200918.pth'
-    
+
+logging.info("isfile")
 if os.path.isfile(video_path):
     os.remove(video_path)
 
