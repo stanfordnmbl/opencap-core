@@ -36,12 +36,16 @@ if os.path.isfile(video_path):
     os.remove(video_path)
 
 # checkCudaPyTorch()
+logging.info("Before cuda check")
 if torch.cuda.is_available():
+    logging.info("cuda check: if")
     num_gpus = torch.cuda.device_count()
     logging.info(f"Found {num_gpus} GPU(s).")
 else:
+    logging.info("cuda check: else")
     logging.info("No GPU detected. Exiting.")
     raise Exception("No GPU detected. Exiting.")
+logging.info("After cuda check")
 while True:    
     if not os.path.isfile(video_path):
         time.sleep(0.1)

@@ -17,7 +17,7 @@ def check_cuda_device():
         logging.info("A CUDA-capable device is detected.")
     except subprocess.CalledProcessError as e:
         # If the command fails, it means no CUDA device is detected
-        logging.info("No CUDA-capable device is detected. Error:", e)
+        logging.info("No CUDA-capable device is detected. Error: %s", e)
         raise Exception("No CUDA-capable device is detected.")
 
 #%%
@@ -76,15 +76,19 @@ def getResolutionCommand(resolutionPoseDetection, horizontal):
 
 logging.info("Waiting for data...")
 # check_cuda_device()
+logging.info("Before cuda check")
 try:
+    logging.info("cuda check: try")
     # Run the nvidia-smi command and capture the output
     _ = subprocess.check_output(["nvidia-smi"])
     # If the command ran successfully, assume a CUDA device is present
     logging.info("A CUDA-capable device is detected.")
 except subprocess.CalledProcessError as e:
+    logging.info("cuda check: except")
     # If the command fails, it means no CUDA device is detected
-    logging.info("No CUDA-capable device is detected. Error:", e)
+    logging.info("No CUDA-capable device is detected. Error: %s", e)
     raise Exception("No CUDA-capable device is detected.")
+logging.info("After cuda check")
 
 video_path = "/openpose/data/video_openpose.mov"
 output_dir = "/openpose/data/output_openpose"
