@@ -6,14 +6,6 @@ build:
 	docker build -t openpose-dev .. -f openpose/Dockerfile
 	docker build -t mmpose-dev .. -f mmpose/Dockerfile
 
-# Push the image to ECR after building dev locally
-.PHONY: push
-push:
-	aws ecr get-login-password --region us-west-2 --profile opencap | docker login --username AWS --password-stdin 660440363484.dkr.ecr.us-west-2.amazonaws.com
-	docker push 660440363484.dkr.ecr.us-west-2.amazonaws.com/opencap/opencap-dev
-	docker push 660440363484.dkr.ecr.us-west-2.amazonaws.com/opencap/openpose-dev
-	docker push 660440363484.dkr.ecr.us-west-2.amazonaws.com/opencap/mmpose-dev
-
 .PHONY: run
 run:
 	docker-compose up --remove-orphans
