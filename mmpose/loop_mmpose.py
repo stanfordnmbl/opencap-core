@@ -9,22 +9,21 @@ from utilsMMpose import detection_inference, pose_inference
 
 logging.basicConfig(level=logging.INFO)
 
-logging.info("Waiting TEST for data...")
+logging.info("Waiting for data...")
 
-# def checkCudaPyTorch():
-#     if torch.cuda.is_available():
-#         num_gpus = torch.cuda.device_count()
-#         logging.info(f"Found {num_gpus} GPU(s).")
-#     else:
-#         logging.info("No GPU detected. Exiting.")
-#         raise Exception("No GPU detected. Exiting.")
+def checkCudaPyTorch():
+    if torch.cuda.is_available():
+        num_gpus = torch.cuda.device_count()
+        logging.info(f"Found {num_gpus} GPU(s).")
+    else:
+        logging.info("No GPU detected. Exiting.")
+        raise Exception("No GPU detected. Exiting.")
 
 video_path = "/mmpose/data/video_mmpose.mov"
 output_dir = "/mmpose/data/output_mmpose"
 
 generateVideo=False
 
-logging.info("Before open")
 with open('/mmpose/defaultOpenCapSettings.json') as f:
     defaultOpenCapSettings = json.load(f)
 bbox_thr = defaultOpenCapSettings['hrnet']
@@ -32,22 +31,11 @@ model_config_person='/mmpose/faster_rcnn_r50_fpn_coco.py'
 model_ckpt_person='/mmpose/faster_rcnn_r50_fpn_1x_coco_20200130-047c8118.pth'
 model_config_pose='/mmpose/hrnet_w48_coco_wholebody_384x288_dark_plus.py'
 model_ckpt_pose='/mmpose/hrnet_w48_coco_wholebody_384x288_dark-f5726563_20200918.pth'
-
-logging.info("isfile")
+    
 if os.path.isfile(video_path):
     os.remove(video_path)
 
-# checkCudaPyTorch()
-logging.info("Before cuda check")
-if torch.cuda.is_available():
-    logging.info("cuda check: if")
-    num_gpus = torch.cuda.device_count()
-    logging.info(f"Found {num_gpus} GPU(s).")
-else:
-    logging.info("cuda check: else")
-    logging.info("No GPU detected. Exiting.")
-    raise Exception("No GPU detected. Exiting.")
-logging.info("After cuda check")
+checkCudaPyTorch()
 while True:    
     if not os.path.isfile(video_path):
         time.sleep(0.1)
@@ -60,13 +48,7 @@ while True:
     os.makedirs(output_dir)
     
     try:
-        # checkCudaPyTorch()
-        if torch.cuda.is_available():
-            num_gpus = torch.cuda.device_count()
-            logging.info(f"Found {num_gpus} GPU(s).")
-        else:
-            logging.info("No GPU detected. Exiting.")
-            raise Exception("No GPU detected. Exiting.")
+        checkCudaPyTorch()
         # Run human detection.
         pathModelCkptPerson = model_ckpt_person
         bboxPath = os.path.join(output_dir, 'box.pkl')
