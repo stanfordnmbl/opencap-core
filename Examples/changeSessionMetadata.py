@@ -23,6 +23,8 @@ the pose estimator used when reprocessing data in the cloud. This is mostly for
 developer use.
 
 The available options for metadata are:
+    - scalingsetup:     upright_standing_pose
+                        any_pose
     - openSimModel:     LaiUhlrich2022
                         LaiUhlrich2022_shoulder
     - posemodel:        openpose
