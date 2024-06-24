@@ -13,6 +13,9 @@ import numpy as np
 import yaml
 import traceback
 
+import logging
+logging.basicConfig(level=logging.INFO)
+
 from utils import importMetadata, loadCameraParameters, getVideoExtension
 from utils import getDataDirectory, getOpenPoseDirectory, getMMposeDirectory
 from utilsChecker import saveCameraParameters
@@ -203,7 +206,7 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
             # Intrinsics and extrinsics already exist for this session.
             if os.path.exists(
                     os.path.join(camDir,"cameraIntrinsicsExtrinsics.pickle")):
-                print("Load extrinsics for {} - already existing".format(
+                logging.info("Load extrinsics for {} - already existing".format(
                     camName))
                 CamParams = loadCameraParameters(
                     os.path.join(camDir, "cameraIntrinsicsExtrinsics.pickle"))
@@ -211,8 +214,7 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
                 
             # Extrinsics do not exist for this session.
             else:
-                print("Compute extrinsics for {} - not yet existing".format(
-                    camName))
+                logging.info("Compute extrinsics for {} - not yet existing".format(camName))
                 # Intrinsics ##################################################
                 # Intrinsics directories.
                 intrinsicDir = os.path.join(baseDir, 'CameraIntrinsics',
@@ -408,7 +410,7 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
     if runMarkerAugmentation:
         os.makedirs(postAugmentationDir, exist_ok=True)    
         augmenterDir = os.path.join(baseDir, "MarkerAugmenter")
-        print('Augmenting marker set')
+        logging.info('Augmenting marker set')
         try:
             vertical_offset = augmentTRC(
                 pathOutputFiles[trialName],sessionMetadata['mass_kg'], 
@@ -480,11 +482,11 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
                             thresholdTime=0.1, removeRoot=True)
                         success = True
                     except Exception as e:
-                        print(f"Attempt with thresholdPosition {thresholdPosition} failed: {e}")
+                        logging.info(f"Attempt identifying scaling time range with thresholdPosition {thresholdPosition} failed: {e}")
                         thresholdPosition += increment  # Increase the threshold for the next iteration
 
                 # Run scale tool.
-                print('Running Scaling')
+                logging.info('Running Scaling')
                 pathScaledModel = runScaleTool(
                     pathGenericSetupFile4Scaling, pathGenericModel4Scaling,
                     sessionMetadata['mass_kg'], pathTRCFile4Scaling, 
@@ -522,7 +524,7 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
                 # Path TRC file.
                 pathTRCFile4IK = pathAugmentedOutputFiles[trialName]
                 # Run IK tool. 
-                print('Running Inverse Kinematics')
+                logging.info('Running Inverse Kinematics')
                 try:
                     pathOutputIK = runIKTool(
                         pathGenericSetupFile4IK, pathScaledModel, 

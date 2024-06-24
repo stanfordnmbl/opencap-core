@@ -45,7 +45,7 @@ def augmentTRC(pathInputTRCFile, subject_mass, subject_height,
         augmenterModelType_all = [augmenterModelType_lower, augmenterModelType_upper]
         feature_markers_all = [feature_markers_lower, feature_markers_upper]
         response_markers_all = [response_markers_lower, response_markers_upper]
-    print('Using augmenter model: {}'.format(augmenter_model))
+    # print('Using augmenter model: {}'.format(augmenter_model))
     
     # %% Process data.
     # Import TRC file
@@ -112,7 +112,7 @@ def augmentTRC(pathInputTRCFile, subject_mass, subject_height,
         json_file.close()
         model = tf.keras.models.model_from_json(pretrainedModel_json)
         model.load_weights(os.path.join(augmenterModelDir, "weights.h5"))  
-        outputs = model.predict(inputs)
+        outputs = model.predict(inputs, verbose=2)
         
         # %% Post-process outputs.
         # Step 1: Reshape if necessary (eg, LSTM)
