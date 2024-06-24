@@ -377,7 +377,7 @@ def getMetadataFromServer(session_id,justCheckerParams=False):
                     session_desc["posemodel"] = session['meta']['subject']['posemodel']
                 except:
                     session_desc["posemodel"] = 'openpose'
-                # This might happen if openSimModel/augmentermodel/filterfrequency was changed post data collection.
+                # This might happen if openSimModel/augmentermodel/filterfrequency/scalingsetup was changed post data collection.
                 if 'settings' in session['meta']:
                     try:
                         session_desc["openSimModel"] = session['meta']['settings']['openSimModel']
@@ -393,6 +393,10 @@ def getMetadataFromServer(session_id,justCheckerParams=False):
                             session_desc["filterfrequency"] = float(session_desc["filterfrequency"])
                     except:
                         session_desc["filterfrequency"] = 'default'
+                    try:
+                        session_desc["scalingsetup"] = session['meta']['settings']['scalingsetup']
+                    except:
+                        session_desc["scalingsetup"] = 'upright_standing_pose'
             else:                
                 subject_info = getSubjectJson(session['subject'])                
                 session_desc["subjectID"] = subject_info['name']
@@ -416,6 +420,10 @@ def getMetadataFromServer(session_id,justCheckerParams=False):
                         session_desc["filterfrequency"] = float(session_desc["filterfrequency"])
                 except:
                     session_desc["filterfrequency"] = 'default'
+                try:
+                    session_desc["scalingsetup"] = session['meta']['settings']['scalingsetup']
+                except:
+                    session_desc["scalingsetup"] = 'upright_standing_pose'
 
         if 'sessionWithCalibration' in session['meta'] and 'checkerboard' not in session['meta']:
             newSessionId = session['meta']['sessionWithCalibration']['id']
@@ -663,7 +671,7 @@ def changeSessionMetadata(session_ids,newMetaDict):
         for newMeta in newMetaDict:
             if not newMeta in addedKey:
                 print("Could not find {} in existing metadata, trying to add it.".format(newMeta))
-                settings_fields = ['framerate', 'posemodel', 'openSimModel', 'augmentermodel', 'filterfrequency']
+                settings_fields = ['framerate', 'posemodel', 'openSimModel', 'augmentermodel', 'filterfrequency', 'scalingsetup']
                 if newMeta in settings_fields:
                     if 'settings' not in existingMeta:
                         existingMeta['settings'] = {}

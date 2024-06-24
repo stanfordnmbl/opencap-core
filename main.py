@@ -37,7 +37,8 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
          scaleModel=False, bbox_thr=0.8, augmenter_model='v0.3',
          genericFolderNames=False, offset=True, benchmark=False,
          dataDir=None, overwriteAugmenterModel=False,
-         filter_frequency='default', overwriteFilterFrequency=False):
+         filter_frequency='default', overwriteFilterFrequency=False,
+         scaling_setup='upright_standing_pose', overwriteScalingSetup=False):
 
     # %% High-level settings.
     # Camera calibration.
@@ -109,6 +110,14 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
     else:
         filtFreqs = {'gait':filterfrequency, 'default':filterfrequency}
 
+    # If scaling setup defined through web app.
+    # If overwriteScalingSetup is True, the scaling setup is the one
+    # passed as an argument to main(). This is useful for local testing.
+    if 'scalingsetup' in sessionMetadata and not overwriteScalingSetup:
+        scalingSetup = sessionMetadata['scalingsetup']
+    else:
+        scalingSetup = scaling_setup
+
     # %% Paths to pose detector folder for local testing.
     if poseDetector == 'OpenPose':
         poseDetectorDirectory = getOpenPoseDirectory(isDocker)
@@ -152,7 +161,10 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
             'poseDetector': poseDetector, 
             'augmenter_model': augmenterModel, 
             'imageUpsampleFactor': imageUpsampleFactor,
-            'openSimModel': sessionMetadata['openSimModel']}
+            'openSimModel': sessionMetadata['openSimModel'],
+            'scalingSetup': scalingSetup,
+            'filterFrequency': filterfrequency,
+            }
         if poseDetector == 'OpenPose':
             settings['resolutionPoseDetection'] = resolutionPoseDetection
         elif poseDetector == 'mmpose':
@@ -441,8 +453,11 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
         if scaleModel:
             os.makedirs(outputScaledModelDir, exist_ok=True)
             # Path setup file.
-            genericSetupFile4ScalingName = (
-                'Setup_scaling_RajagopalModified2016_withArms_KA.xml')
+            if scalingSetup == 'any_pose':
+                genericSetupFile4ScalingName = 'Setup_scaling_LaiUhlrich2022_any_pose.xml'
+            else: # by default, use upright_standing_pose
+                genericSetupFile4ScalingName = 'Setup_scaling_LaiUhlrich2022.xml'
+
             pathGenericSetupFile4Scaling = os.path.join(
                 openSimPipelineDir, 'Scaling', genericSetupFile4ScalingName)
             # Path model file.
