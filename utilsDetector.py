@@ -318,7 +318,7 @@ def runMMposeVideo(
                     time.sleep(0.1)
                       
                 # copy /data/output to pathOutputPkl
-                os.system("cp /data/output_mmpose/* {pathOutputPkl}/".format(pathOutputPkl=pathOutputPkl))        
+                os.system("cp /data/output_mmpose/* {pathOutputPkl}/".format(pathOutputPkl=pathOutputPkl))
                 pkl_path_tmp = os.path.join(pathOutputPkl, 'human.pkl')            
                 os.rename(pkl_path_tmp, pklPath)
             
