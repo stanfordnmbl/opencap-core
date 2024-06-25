@@ -23,6 +23,8 @@ the pose estimator used when reprocessing data in the cloud. This is mostly for
 developer use.
 
 The available options for metadata are:
+    - scalingsetup:     upright_standing_pose
+                        any_pose
     - openSimModel:     LaiUhlrich2022
                         LaiUhlrich2022_shoulder
     - posemodel:        openpose
@@ -44,12 +46,15 @@ sys.path.append(os.path.abspath('./..'))
 
 from utils import changeSessionMetadata
 
-session_ids = ['0d46adef-62cb-455f-9ff3-8116717cc2fe']
+session_ids = ["0d46adef-62cb-455f-9ff3-8116717cc2fe"]
 
 # Dictionary of metadata fields to change (see sessionMetadata.yaml).
-newMetadata = {'openSimModel':'LaiUhlrich2022_shoulder',
-               'posemodel':'hrnet',
-               'augmentermodel':'v0.3',
-               'filterfrequency':15,
-               'datasharing':'Share processed data and identified videos'}
+newMetadata = {
+    'openSimModel':'LaiUhlrich2022_shoulder',
+    'posemodel':'hrnet',
+    'augmentermodel':'v0.3',
+    'filterfrequency':15,
+    'datasharing':'Share processed data and identified videos',
+    'scalingsetup': 'upright_standing_pose'
+}
 changeSessionMetadata(session_ids,newMetadata)

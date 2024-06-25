@@ -13,6 +13,9 @@ import numpy as np
 import yaml
 import traceback
 
+import logging
+logging.basicConfig(level=logging.INFO)
+
 from utils import importMetadata, loadCameraParameters, getVideoExtension
 from utils import getDataDirectory, getOpenPoseDirectory, getMMposeDirectory
 from utilsChecker import saveCameraParameters
@@ -37,7 +40,8 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
          scaleModel=False, bbox_thr=0.8, augmenter_model='v0.3',
          genericFolderNames=False, offset=True, benchmark=False,
          dataDir=None, overwriteAugmenterModel=False,
-         filter_frequency='default', overwriteFilterFrequency=False):
+         filter_frequency='default', overwriteFilterFrequency=False,
+         scaling_setup='upright_standing_pose', overwriteScalingSetup=False):
 
     # %% High-level settings.
     # Camera calibration.
@@ -109,6 +113,14 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
     else:
         filtFreqs = {'gait':filterfrequency, 'default':filterfrequency}
 
+    # If scaling setup defined through web app.
+    # If overwriteScalingSetup is True, the scaling setup is the one
+    # passed as an argument to main(). This is useful for local testing.
+    if 'scalingsetup' in sessionMetadata and not overwriteScalingSetup:
+        scalingSetup = sessionMetadata['scalingsetup']
+    else:
+        scalingSetup = scaling_setup
+
     # %% Paths to pose detector folder for local testing.
     if poseDetector == 'OpenPose':
         poseDetectorDirectory = getOpenPoseDirectory(isDocker)
@@ -152,7 +164,10 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
             'poseDetector': poseDetector, 
             'augmenter_model': augmenterModel, 
             'imageUpsampleFactor': imageUpsampleFactor,
-            'openSimModel': sessionMetadata['openSimModel']}
+            'openSimModel': sessionMetadata['openSimModel'],
+            'scalingSetup': scalingSetup,
+            'filterFrequency': filterfrequency,
+            }
         if poseDetector == 'OpenPose':
             settings['resolutionPoseDetection'] = resolutionPoseDetection
         elif poseDetector == 'mmpose':
@@ -191,7 +206,7 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
             # Intrinsics and extrinsics already exist for this session.
             if os.path.exists(
                     os.path.join(camDir,"cameraIntrinsicsExtrinsics.pickle")):
-                print("Load extrinsics for {} - already existing".format(
+                logging.info("Load extrinsics for {} - already existing".format(
                     camName))
                 CamParams = loadCameraParameters(
                     os.path.join(camDir, "cameraIntrinsicsExtrinsics.pickle"))
@@ -199,8 +214,7 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
                 
             # Extrinsics do not exist for this session.
             else:
-                print("Compute extrinsics for {} - not yet existing".format(
-                    camName))
+                logging.info("Compute extrinsics for {} - not yet existing".format(camName))
                 # Intrinsics ##################################################
                 # Intrinsics directories.
                 intrinsicDir = os.path.join(baseDir, 'CameraIntrinsics',
@@ -396,7 +410,7 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
     if runMarkerAugmentation:
         os.makedirs(postAugmentationDir, exist_ok=True)    
         augmenterDir = os.path.join(baseDir, "MarkerAugmenter")
-        print('Augmenting marker set')
+        logging.info('Augmenting marker set')
         try:
             vertical_offset = augmentTRC(
                 pathOutputFiles[trialName],sessionMetadata['mass_kg'], 
@@ -441,8 +455,11 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
         if scaleModel:
             os.makedirs(outputScaledModelDir, exist_ok=True)
             # Path setup file.
-            genericSetupFile4ScalingName = (
-                'Setup_scaling_RajagopalModified2016_withArms_KA.xml')
+            if scalingSetup == 'any_pose':
+                genericSetupFile4ScalingName = 'Setup_scaling_LaiUhlrich2022_any_pose.xml'
+            else: # by default, use upright_standing_pose
+                genericSetupFile4ScalingName = 'Setup_scaling_LaiUhlrich2022.xml'
+
             pathGenericSetupFile4Scaling = os.path.join(
                 openSimPipelineDir, 'Scaling', genericSetupFile4ScalingName)
             # Path model file.
@@ -465,11 +482,11 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
                             thresholdTime=0.1, removeRoot=True)
                         success = True
                     except Exception as e:
-                        print(f"Attempt with thresholdPosition {thresholdPosition} failed: {e}")
+                        logging.info(f"Attempt identifying scaling time range with thresholdPosition {thresholdPosition} failed: {e}")
                         thresholdPosition += increment  # Increase the threshold for the next iteration
 
                 # Run scale tool.
-                print('Running Scaling')
+                logging.info('Running Scaling')
                 pathScaledModel = runScaleTool(
                     pathGenericSetupFile4Scaling, pathGenericModel4Scaling,
                     sessionMetadata['mass_kg'], pathTRCFile4Scaling, 
@@ -507,7 +524,7 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
                 # Path TRC file.
                 pathTRCFile4IK = pathAugmentedOutputFiles[trialName]
                 # Run IK tool. 
-                print('Running Inverse Kinematics')
+                logging.info('Running Inverse Kinematics')
                 try:
                     pathOutputIK = runIKTool(
                         pathGenericSetupFile4IK, pathScaledModel, 
