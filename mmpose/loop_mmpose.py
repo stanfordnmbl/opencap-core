@@ -35,6 +35,7 @@ model_ckpt_pose='/mmpose/hrnet_w48_coco_wholebody_384x288_dark-f5726563_20200918
 if os.path.isfile(video_path):
     os.remove(video_path)
 
+checkCudaPyTorch()
 while True:    
     if not os.path.isfile(video_path):
         time.sleep(0.1)
