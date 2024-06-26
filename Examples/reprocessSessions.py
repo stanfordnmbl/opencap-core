@@ -55,7 +55,7 @@ API_TOKEN = getToken()
 # Enter the identifier(s) of the session(s) you want to reprocess. This is a list of one
 # or more session identifiers. The identifier is found as the 36-character string at the
 # end of the session url: app.opencap.ai/session/<session_id>
-session_ids = ['23d52d41-69fe-47cf-8b60-838e4268dd50']
+session_ids = ['24192a02-5d1c-4302-834d-c620415575af']
 
 # Select which trials to reprocess. You can reprocess all trials in the session 
 # by entering None in all fields below. The correct calibration and static
@@ -68,7 +68,9 @@ session_ids = ['23d52d41-69fe-47cf-8b60-838e4268dd50']
 
 calib_id = [] # None (auto-selected trial), [] (skip), or string of specific trial_id
 static_id = [] # None (auto-selected trial), [] (skip), or string of specific trial_id
-dynamic_trialNames = None # None (all dynamic trials), [] (skip), or list of trial names
+dynamic_trialNames = ['WC90_L'] # None (all dynamic trials), [] (skip), or list of trial names
+# dynamic_trialNames = ['WSLS_R2'] # None (all dynamic trials), [] (skip), or list of trial names
+
 
 # Select which pose estimation model to use; options are 'OpenPose' and 'hrnet'.
 # If the same pose estimation model was used when collecting data with the web
@@ -79,7 +81,7 @@ dynamic_trialNames = None # None (all dynamic trials), [] (skip), or list of tri
 # selected 'hrnet' when collecting data with the web app. You can however re-
 # process data originally collected with 'hrnet' with 'OpenPose' if you have 
 # installed OpenPose locally (see README.md for instructions).
-poseDetector = 'OpenPose'
+poseDetector = 'hrnet'
 
 # OpenPose only:
 # Select the resolution at which the videos are processed. There are no
@@ -110,4 +112,6 @@ deleteLocalFolder = False
 batchReprocess(session_ids,calib_id,static_id,dynamic_trialNames,
                poseDetector=poseDetector,
                resolutionPoseDetection=resolutionPoseDetection,
-               deleteLocalFolder=deleteLocalFolder)
+               deleteLocalFolder=deleteLocalFolder,
+               camerasToUse=['all_available'])
+test = 1

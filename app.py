@@ -121,10 +121,15 @@ while True:
                          headers = {"Authorization": "Token {}".format(API_TOKEN)})
         continue
 
-    if any([v["video"] is None for v in trial["videos"]]):
-        r = requests.patch(trial_url, data={"status": "error"},
-                     headers = {"Authorization": "Token {}".format(API_TOKEN)})
-        continue
+    camerasToUse_c = ['all']
+    use_all_available_cameras = False
+    if use_all_available_cameras:
+        camerasToUse_c = ['all_available']
+    else:   
+        if any([v["video"] is None for v in trial["videos"]]):
+            r = requests.patch(trial_url, data={"status": "error"},
+                        headers = {"Authorization": "Token {}".format(API_TOKEN)})
+            continue
 
     trial_type = "dynamic"
     if trial["name"] == "calibration":
@@ -137,7 +142,7 @@ while True:
 
     try:
         # trigger reset of timer for last processed trial                            
-        processTrial(trial["session"], trial["id"], trial_type=trial_type, isDocker=isDocker)   
+        processTrial(trial["session"], trial["id"], trial_type=trial_type, isDocker=isDocker, camerasToUse=camerasToUse_c)   
         # note a result needs to be posted for the API to know we finished, but we are posting them 
         # automatically thru procesTrial now
         r = requests.patch(trial_url, data={"status": "done"},

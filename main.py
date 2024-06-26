@@ -316,13 +316,47 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
         else:
             raise Exception('checkerBoard placement value in\
              sessionMetadata.yaml is not currently supported')
+             
+        # Detect all available cameras (ie, cameras with existing videos).
+        cameras_available = []
+        for camName in cameraDirectories:
+            camDir = cameraDirectories[camName]
+            pathVideoWithoutExtension = os.path.join(camDir, 'InputMedia', trialName, trial_id)
+            if len(glob.glob(pathVideoWithoutExtension + '*')) == 0:
+                print(f"Camera {camName} does not have a video for trial {trial_id}")
+            else:
+                if os.path.exists(os.path.join(pathVideoWithoutExtension + getVideoExtension(pathVideoWithoutExtension))):
+                    cameras_available.append(camName)
+                else:
+                    print(f"Camera {camName} does not have a video for trial {trial_id}")
+
+        if camerasToUse[0] == 'all':
+            cameras_all = list(cameraDirectories.keys())
+            if not all([cam in cameras_available for cam in cameras_all]):
+                raise Exception('Not all cameras have videos; consider setting camerasToUse to ["all_available"] or specifying the cameras to use')
+            else:
+                camerasToUse_c = camerasToUse
+        elif camerasToUse[0] == 'all_available':
+            camerasToUse_c = cameras_available
+            print(f"Using available cameras: {camerasToUse_c}")
+        else:
+            if not all([cam in cameras_available for cam in camerasToUse]):
+                raise Exception('Not all specified cameras in camerasToUse have videos; verify the camera names or consider setting camerasToUse to ["all_available"]')
+            else:
+                camerasToUse_c = camerasToUse
+                print(f"Using cameras: {camerasToUse_c}")
+        settings['camerasToUse'] = camerasToUse_c
+        if len(camerasToUse_c) < 2:
+            exception = 'At least two videos are required for 3D reconstruction, video upload likely failed for one or more cameras.'
+            raise Exception(exception, exception)
+             
         # Run pose detection algorithm.
         try:        
             videoExtension = runPoseDetector(
                     cameraDirectories, trialRelativePath, poseDetectorDirectory,
                     trialName, CamParamDict=CamParamDict, 
                     resolutionPoseDetection=resolutionPoseDetection, 
-                    generateVideo=generateVideo, cams2Use=camerasToUse,
+                    generateVideo=generateVideo, cams2Use=camerasToUse_c,
                     poseDetector=poseDetector, bbox_thr=bbox_thr)
             trialRelativePath += videoExtension
         except Exception as e:
@@ -342,7 +376,7 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
                     cameraDirectories, trialRelativePath, poseDetectorDirectory,
                     undistortPoints=True, CamParamDict=CamParamDict,
                     filtFreqs=filtFreqs, confidenceThreshold=0.4,
-                    imageBasedTracker=False, cams2Use=camerasToUse, 
+                    imageBasedTracker=False, cams2Use=camerasToUse_c, 
                     poseDetector=poseDetector, trialName=trialName,
                     resolutionPoseDetection=resolutionPoseDetection))
         except Exception as e:
@@ -549,7 +583,8 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
                                vertical_offset=vertical_offset)  
         
     # %% Rewrite settings, adding offset  
-    if not extrinsicsTrial and offset:
-        settings['verticalOffset'] = vertical_offset_settings 
+    if not extrinsicsTrial:
+        if offset:
+            settings['verticalOffset'] = vertical_offset_settings 
         with open(pathSettings, 'w') as file:
             yaml.dump(settings, file)
