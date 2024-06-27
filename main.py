@@ -333,7 +333,8 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
         if camerasToUse[0] == 'all':
             cameras_all = list(cameraDirectories.keys())
             if not all([cam in cameras_available for cam in cameras_all]):
-                raise Exception('Not all cameras have videos; consider setting camerasToUse to ["all_available"] or specifying the cameras to use')
+                exception = 'Not all cameras have uploaded videos; one or more cameras might have turned off or lost connection'
+                raise Exception(exception, exception)
             else:
                 camerasToUse_c = camerasToUse
         elif camerasToUse[0] == 'all_available':
@@ -346,10 +347,21 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
                 camerasToUse_c = camerasToUse
                 print(f"Using cameras: {camerasToUse_c}")
         settings['camerasToUse'] = camerasToUse_c
-        if len(camerasToUse_c) < 2:
+        if camerasToUse_c[0] != 'all' and len(camerasToUse_c) < 2:
             exception = 'At least two videos are required for 3D reconstruction, video upload likely failed for one or more cameras.'
             raise Exception(exception, exception)
-             
+            
+        # For neutral, we do not allow reprocessing with not all cameras.
+        # The reason is that it affects extrinsics selection, and then you can only process
+        # dynamic trials with the same camera selection (ie, potentially not all cameras). 
+        # This might be addressable, but I (Antoine) do not see an immediate need + this
+        # would be a significant change in the code base. In practice, a data collection
+        # will not go through neutral if not all cameras are available.
+        if scaleModel:
+            if camerasToUse_c[0] != 'all' and len(camerasToUse_c) < len(cameraDirectories):
+                exception = 'All cameras are required for calibration and neutral pose.'
+                raise Exception(exception, exception)
+        
         # Run pose detection algorithm.
         try:        
             videoExtension = runPoseDetector(
@@ -369,7 +381,7 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
                 raise Exception(exception, traceback.format_exc())
         
     if runSynchronization:
-        # Synchronize videos. 
+        # Synchronize videos.
         try:
             keypoints2D, confidence, keypointNames, frameRate, nansInOut, startEndFrames, cameras2Use = (
                 synchronizeVideos( 
@@ -390,6 +402,14 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
                     data collection and https://www.opencap.ai/troubleshooting for 
                     potential causes for a failed trial."""
                 raise Exception(exception, traceback.format_exc())
+                
+    # Note: this should not be necessary, because we prevent reprocessing the neutral trial
+    # with not all cameras, but keeping it in there in case we would want to.
+    if calibrationOptions is not None:
+        allCams = list(calibrationOptions.keys())
+        for cam_t in allCams:
+            if not cam_t in cameras2Use:
+                calibrationOptions.pop(cam_t)
                 
     if scaleModel and calibrationOptions is not None and alternateExtrinsics is None:
         # Automatically select the camera calibration to use

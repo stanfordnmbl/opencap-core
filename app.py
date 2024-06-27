@@ -121,11 +121,17 @@ while True:
                          headers = {"Authorization": "Token {}".format(API_TOKEN)})
         continue
 
-    camerasToUse_c = ['all']
-    use_all_available_cameras = False
-    if use_all_available_cameras:
+    # This is a hack to have the trials with status "reprocess" to be reprocessed
+    # with camerasToUse_c = ['all_available'] instead of ['all']. In practice, this
+    # allows reprocessing on server trials that failed because video(s) were not available.
+    # This is a temporary solution until we have a better way to handle this. By default,
+    # trials with missing videos are error-ed out directly so that we do not spend time
+    # on processing them.
+    status = trial["status"]
+    if status == "reprocess":
         camerasToUse_c = ['all_available']
-    else:   
+    else:
+        camerasToUse_c = ['all']
         if any([v["video"] is None for v in trial["videos"]]):
             r = requests.patch(trial_url, data={"status": "error"},
                         headers = {"Authorization": "Token {}".format(API_TOKEN)})
