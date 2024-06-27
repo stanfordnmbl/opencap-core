@@ -128,7 +128,8 @@ while True:
     # trials with missing videos are error-ed out directly so that we do not spend time
     # on processing them. Problem is that these trials then don't have pose pickles, which
     # makes is hard for local reprocessing (hrnet still a hassle to install locally on Windows).
-    status = trial["status"]
+    # status = trial["status"]
+    status = 'reprocess'
     logging.info(f"Trial status: {status}")
     if status == "reprocess":
         camerasToUse_c = ['all_available']
