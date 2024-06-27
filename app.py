@@ -129,6 +129,7 @@ while True:
     # on processing them. Problem is that these trials then don't have pose pickles, which
     # makes is hard for local reprocessing (hrnet still a hassle to install locally on Windows).
     status = trial["status"]
+    logging.info(f"Trial status: {status}")
     if status == "reprocess":
         camerasToUse_c = ['all_available']
     else:
