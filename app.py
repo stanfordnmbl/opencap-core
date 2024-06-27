@@ -122,12 +122,14 @@ while True:
         continue
 
     # This is a hack to have the trials with status "reprocess" to be reprocessed
-    # with camerasToUse_c = ['all_available'] instead of ['all']. In practice, this
+    # with camerasToUse = ['all_available'] instead of ['all']. In practice, this
     # allows reprocessing on server trials that failed because video(s) were not available.
     # This is a temporary solution until we have a better way to handle this. By default,
     # trials with missing videos are error-ed out directly so that we do not spend time
-    # on processing them.
+    # on processing them. Problem is that these trials then don't have pose pickles, which
+    # makes is hard for local reprocessing (hrnet still a hassle to install locally on Windows).
     status = trial["status"]
+    logging.info(f"Trial status: {status}")
     if status == "reprocess":
         camerasToUse_c = ['all_available']
     else:
