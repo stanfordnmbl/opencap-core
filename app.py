@@ -121,10 +121,21 @@ while True:
                          headers = {"Authorization": "Token {}".format(API_TOKEN)})
         continue
 
-    if any([v["video"] is None for v in trial["videos"]]):
-        r = requests.patch(trial_url, data={"status": "error"},
-                     headers = {"Authorization": "Token {}".format(API_TOKEN)})
-        continue
+    # This is a hack to have the trials with status "reprocess" to be reprocessed
+    # with camerasToUse_c = ['all_available'] instead of ['all']. In practice, this
+    # allows reprocessing on server trials that failed because video(s) were not available.
+    # This is a temporary solution until we have a better way to handle this. By default,
+    # trials with missing videos are error-ed out directly so that we do not spend time
+    # on processing them.
+    status = trial["status"]
+    if status == "reprocess":
+        camerasToUse_c = ['all_available']
+    else:
+        camerasToUse_c = ['all']
+        if any([v["video"] is None for v in trial["videos"]]):
+            r = requests.patch(trial_url, data={"status": "error"},
+                        headers = {"Authorization": "Token {}".format(API_TOKEN)})
+            continue
 
     trial_type = "dynamic"
     if trial["name"] == "calibration":
@@ -137,7 +148,7 @@ while True:
 
     try:
         # trigger reset of timer for last processed trial                            
-        processTrial(trial["session"], trial["id"], trial_type=trial_type, isDocker=isDocker)   
+        processTrial(trial["session"], trial["id"], trial_type=trial_type, isDocker=isDocker, camerasToUse=camerasToUse_c)   
         # note a result needs to be posted for the API to know we finished, but we are posting them 
         # automatically thru procesTrial now
         r = requests.patch(trial_url, data={"status": "done"},

@@ -4,6 +4,10 @@ This is not a comprehensive list of changes but rather a hand-curated collection
 
 Changes
 =======
+- 06/25/2024: Add support for "any pose" scaling ([pull request](https://github.com/stanfordnmbl/opencap-core/pull/168))
+- 05/10/2024: Add reprojection error minimization to improve camera synchronization  ([pull request](https://github.com/stanfordnmbl/opencap-core/pull/159))
+- 04/05/2024: Update range pelvis translations ([pull request](https://github.com/stanfordnmbl/opencap-core/pull/147))
+- 02/23/2024: Add support for setting filter frequency through web app ([pull request](https://github.com/stanfordnmbl/opencap-core/pull/142))
 - 07/11/2023: Add support for marker augmenter model v0.3 ([pull request](https://github.com/stanfordnmbl/opencap-core/pull/90))
 - 06/09/2023: Add support for full body model with ISB shoulder ([pull request](https://github.com/stanfordnmbl/opencap-core/pull/80))
 - 12/07/2022: Add support for iPhone 14, iPhone 14 Plus, iPad (10th gen), iPadPro 12.9 in (6th gen), and iPadPro 11 in (4th gen) ([pull request](https://github.com/stanfordnmbl/opencap-core/pull/17)).
