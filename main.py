@@ -31,7 +31,7 @@ from utilsDetector  import runPoseDetector
 from utilsAugmenter import augmentTRC
 from utilsOpenSim import runScaleTool, getScaleTimeRange, runIKTool, generateVisualizerJson
 
-def main(sessionName, trialName, trial_id, camerasToUse=['all'],
+def main(sessionName, trialName, trial_id, cameras_to_use=['all'],
          intrinsicsFinalFolder='Deployed', isDocker=False,
          extrinsicsTrial=False, alternateExtrinsics=None, 
          calibrationOptions=None,
@@ -41,7 +41,8 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
          genericFolderNames=False, offset=True, benchmark=False,
          dataDir=None, overwriteAugmenterModel=False,
          filter_frequency='default', overwriteFilterFrequency=False,
-         scaling_setup='upright_standing_pose', overwriteScalingSetup=False):
+         scaling_setup='upright_standing_pose', overwriteScalingSetup=False,
+         overwriteCamerasToUse=False):
 
     # %% High-level settings.
     # Camera calibration.
@@ -121,11 +122,14 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
     else:
         scalingSetup = scaling_setup
 
-    # If reprocess is in sessionMetadata, reprocess with all cameras available
-    # instead of all cameras. This allows reprocessing of trials with missing
-    # videos.
-    if 'reprocess' in sessionMetadata:
-        camerasToUse = ['all_available']
+    # If camerastouse is in sessionMetadata, reprocess with specified cameras.
+    # This allows reprocessing trials with missing videos. If
+    # overwriteCamerasToUse is True, the camera selection is the one
+    # passed as an argument to main(). This is useful for local testing.
+    if 'camerastouse' in sessionMetadata and not overwriteCamerasToUse:
+        camerasToUse = sessionMetadata['camerastouse']
+    else:
+        camerasToUse = cameras_to_use
 
     # %% Paths to pose detector folder for local testing.
     if poseDetector == 'OpenPose':
