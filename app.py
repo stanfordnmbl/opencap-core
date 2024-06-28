@@ -121,24 +121,11 @@ while True:
                          headers = {"Authorization": "Token {}".format(API_TOKEN)})
         continue
 
-    # This is a hack to have the trials with status "reprocess" to be reprocessed
-    # with camerasToUse = ['all_available'] instead of ['all']. In practice, this
-    # allows reprocessing on server trials that failed because video(s) were not available.
-    # This is a temporary solution until we have a better way to handle this. By default,
-    # trials with missing videos are error-ed out directly so that we do not spend time
-    # on processing them. Problem is that these trials then don't have pose pickles, which
-    # makes is hard for local reprocessing (hrnet still a hassle to install locally on Windows).
-    # status = trial["status"]
-    # status = 'reprocess'
-    # logging.info(f"Trial status: {status}")
-    # if status == "reprocess":
-    #     camerasToUse_c = ['all_available']
-    # else:
-    #     camerasToUse_c = ['all']
-    #     if any([v["video"] is None for v in trial["videos"]]):
-    #         r = requests.patch(trial_url, data={"status": "error"},
-    #                     headers = {"Authorization": "Token {}".format(API_TOKEN)})
-    #         continue
+    # The following is now done in main, to allow reprocessing trials with missing videos
+    # if any([v["video"] is None for v in trial["videos"]]):
+    #     r = requests.patch(trial_url, data={"status": "error"},
+    #                 headers = {"Authorization": "Token {}".format(API_TOKEN)})
+    #     continue
 
     trial_type = "dynamic"
     if trial["name"] == "calibration":
