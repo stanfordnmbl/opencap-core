@@ -46,16 +46,15 @@ sys.path.append(os.path.abspath('./..'))
 
 from utils import changeSessionMetadata
 
-session_ids = ["6dc0721a-7457-4ce1-8523-577900b5399f"]
+session_ids = ["0d46adef-62cb-455f-9ff3-8116717cc2fe"]
 
 # Dictionary of metadata fields to change (see sessionMetadata.yaml).
 newMetadata = {
-    'camerastouse': ['all_available']
-    # 'openSimModel':'LaiUhlrich2022_shoulder',
-    # 'posemodel':'hrnet',
-    # 'augmentermodel':'v0.3',
-    # 'filterfrequency':15,
-    # 'datasharing':'Share processed data and identified videos',
-    # 'scalingsetup': 'upright_standing_pose'
+    'openSimModel':'LaiUhlrich2022_shoulder',
+    'posemodel':'hrnet',
+    'augmentermodel':'v0.3',
+    'filterfrequency':15,
+    'datasharing':'Share processed data and identified videos',
+    'scalingsetup': 'upright_standing_pose'
 }
 changeSessionMetadata(session_ids,newMetadata)
