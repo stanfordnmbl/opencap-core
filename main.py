@@ -121,6 +121,12 @@ def main(sessionName, trialName, trial_id, camerasToUse=['all'],
     else:
         scalingSetup = scaling_setup
 
+    # If reprocess is in sessionMetadata, reprocess with all cameras available
+    # instead of all cameras. This allows reprocessing of trials with missing
+    # videos.
+    if 'reprocess' in sessionMetadata:
+        camerasToUse = ['all_available']
+
     # %% Paths to pose detector folder for local testing.
     if poseDetector == 'OpenPose':
         poseDetectorDirectory = getOpenPoseDirectory(isDocker)
