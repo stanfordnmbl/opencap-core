@@ -129,16 +129,16 @@ while True:
     # on processing them. Problem is that these trials then don't have pose pickles, which
     # makes is hard for local reprocessing (hrnet still a hassle to install locally on Windows).
     # status = trial["status"]
-    status = 'reprocess'
-    logging.info(f"Trial status: {status}")
-    if status == "reprocess":
-        camerasToUse_c = ['all_available']
-    else:
-        camerasToUse_c = ['all']
-        if any([v["video"] is None for v in trial["videos"]]):
-            r = requests.patch(trial_url, data={"status": "error"},
-                        headers = {"Authorization": "Token {}".format(API_TOKEN)})
-            continue
+    # status = 'reprocess'
+    # logging.info(f"Trial status: {status}")
+    # if status == "reprocess":
+    #     camerasToUse_c = ['all_available']
+    # else:
+    #     camerasToUse_c = ['all']
+    #     if any([v["video"] is None for v in trial["videos"]]):
+    #         r = requests.patch(trial_url, data={"status": "error"},
+    #                     headers = {"Authorization": "Token {}".format(API_TOKEN)})
+    #         continue
 
     trial_type = "dynamic"
     if trial["name"] == "calibration":
@@ -151,7 +151,7 @@ while True:
 
     try:
         # trigger reset of timer for last processed trial                            
-        processTrial(trial["session"], trial["id"], trial_type=trial_type, isDocker=isDocker, camerasToUse=camerasToUse_c)   
+        processTrial(trial["session"], trial["id"], trial_type=trial_type, isDocker=isDocker)   
         # note a result needs to be posted for the API to know we finished, but we are posting them 
         # automatically thru procesTrial now
         r = requests.patch(trial_url, data={"status": "done"},
