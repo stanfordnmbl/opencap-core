@@ -15,7 +15,6 @@ import traceback
 
 import logging
 logging.basicConfig(level=logging.INFO)
-import time
 
 from utils import importMetadata, loadCameraParameters, getVideoExtension
 from utils import getDataDirectory, getOpenPoseDirectory, getMMposeDirectory
@@ -44,9 +43,6 @@ def main(sessionName, trialName, trial_id, cameras_to_use=['all'],
          filter_frequency='default', overwriteFilterFrequency=False,
          scaling_setup='upright_standing_pose', overwriteScalingSetup=False,
          overwriteCamerasToUse=False):
-    
-    # Start time.
-    start_time = time.time()
 
     # %% High-level settings.
     # Camera calibration.
@@ -306,9 +302,6 @@ def main(sessionName, trialName, trial_id, cameras_to_use=['all'],
     # Trial relative path
     trialRelativePath = os.path.join('InputMedia', trialName, trial_id)
     
-    # Time.
-    time_before_pose_detection = time.time()
-    logging.info('Before pose detection elapsed time: {}'.format(time_before_pose_detection - start_time))
     if runPoseDetection:
         # Detect if checkerboard is upside down.
         upsideDownChecker = isCheckerboardUpsideDown(CamParamDict)
@@ -396,9 +389,7 @@ def main(sessionName, trialName, trial_id, cameras_to_use=['all'],
                     Visit https://www.opencap.ai/best-pratices to learn more about data collection
                     and https://www.opencap.ai/troubleshooting for potential causes for a failed trial."""
                 raise Exception(exception, traceback.format_exc())
-
-    time_before_synchronization = time.time()
-    logging.info('Pose estimation elapsed time: {}'.format(time_before_synchronization - time_before_pose_detection))    
+      
     if runSynchronization:
         # Synchronize videos.
         try:
@@ -433,9 +424,7 @@ def main(sessionName, trialName, trial_id, cameras_to_use=['all'],
     if scaleModel and calibrationOptions is not None and alternateExtrinsics is None:
         # Automatically select the camera calibration to use
         CamParamDict = autoSelectExtrinsicSolution(sessionDir,keypoints2D,confidence,calibrationOptions)
-
-    time_before_triangulation = time.time()
-    logging.info('Synchronization elapsed time: {}'.format(time_before_triangulation - time_before_synchronization))      
+     
     if runTriangulation:
         # Triangulate.
         try:
@@ -482,8 +471,6 @@ def main(sessionName, trialName, trial_id, cameras_to_use=['all'],
             pathAugmentedOutputFiles[trialName] = os.path.join(
                     postAugmentationDir, trial_id + "_" + augmenterModelName +".trc")
     
-    time_before_augmentation = time.time()
-    logging.info('Triangulation elapsed time: {}'.format(time_before_augmentation - time_before_triangulation))  
     if runMarkerAugmentation:
         os.makedirs(postAugmentationDir, exist_ok=True)    
         augmenterDir = os.path.join(baseDir, "MarkerAugmenter")
@@ -507,8 +494,6 @@ def main(sessionName, trialName, trial_id, cameras_to_use=['all'],
             vertical_offset = 0.01   
         
     # %% OpenSim pipeline.
-    time_before_opensim = time.time()
-    logging.info('Augmentation elapsed time: {}'.format(time_before_opensim - time_before_augmentation))  
     if runOpenSimPipeline:
         openSimPipelineDir = os.path.join(baseDir, "opensimPipeline")        
         
@@ -633,8 +618,3 @@ def main(sessionName, trialName, trial_id, cameras_to_use=['all'],
             settings['verticalOffset'] = vertical_offset_settings 
         with open(pathSettings, 'w') as file:
             yaml.dump(settings, file)
-
-    # End time.
-    end_time = time.time()
-    logging.info('OpenSim elapsed time: {}'.format(end_time - time_before_opensim))  
-    logging.info('Total elapsed time: {}'.format(end_time - start_time))
