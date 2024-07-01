@@ -17,6 +17,8 @@ OUTPUTS = [f'{datadir}/opencap_data/{sid}' for sid in sids]
 rule all:
     input:
         OUTPUTS
+    script:
+        'rename_models.py'
 
 # TODO this should be multithreaded with async instead of multiprocessed w/ snakemake cores
 

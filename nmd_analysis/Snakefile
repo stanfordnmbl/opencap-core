@@ -15,12 +15,6 @@ SHOULDER_OUTPUTS = df_shoulder.apply(sto_path, axis=1).to_list()
 print(len(SHOULDER_OUTPUTS))
 # SHOULDER_OUTPUTS = SHOULDER_OUTPUTS[:5]
 
-print()
-print()
-for o in SHOULDER_OUTPUTS:
-    print(o)
-    print()
-
 rule all:
     input:
         SHOULDER_OUTPUTS
