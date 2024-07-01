@@ -671,7 +671,7 @@ def changeSessionMetadata(session_ids,newMetaDict):
         for newMeta in newMetaDict:
             if not newMeta in addedKey:
                 print("Could not find {} in existing metadata, trying to add it.".format(newMeta))
-                settings_fields = ['framerate', 'posemodel', 'openSimModel', 'augmentermodel', 'filterfrequency', 'scalingsetup']
+                settings_fields = ['framerate', 'posemodel', 'openSimModel', 'augmentermodel', 'filterfrequency', 'scalingsetup', 'camerastouse']
                 if newMeta in settings_fields:
                     if 'settings' not in existingMeta:
                         existingMeta['settings'] = {}
@@ -770,9 +770,11 @@ def postMotionData(trial_id,session_path,trial_name=None,isNeutral=False,
     camDirs = glob.glob(os.path.join(session_path,'Videos','Cam*'))
     for camDir in camDirs:
         outputPklFolder = os.path.join(camDir,pklDir)
-        pklPath = glob.glob(os.path.join(outputPklFolder,'*_pp.pkl'))[0]
-        _,camName = os.path.split(camDir)
-        postFileToTrial(pklPath,trial_id,tag='pose_pickle',device_id=camName)
+        pickle_files = glob.glob(os.path.join(outputPklFolder,'*_pp.pkl'))
+        if pickle_files:
+            pklPath = pickle_files[0]
+            _,camName = os.path.split(camDir)
+            postFileToTrial(pklPath,trial_id,tag='pose_pickle',device_id=camName)
         
     # post marker data
     deleteResult(trial_id, tag='marker_data')
