@@ -35,6 +35,10 @@ with_on_prem = True
 minutesBeforeRemoveScaleInProtection = 2
 max_on_prem_pending_trials = 5
 
+# test that tensorflow can use the gpu
+# import tensorflow as tf; 
+# logging.info(tf.config.list_physical_devices('GPU'))
+
 while True:
     # Run test trial at a given frequency to check status of machine. Stop machine if fails.
     if checkTime(t,minutesElapsed=30) or not initialStatusCheck:
