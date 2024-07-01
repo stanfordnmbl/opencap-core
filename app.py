@@ -125,10 +125,11 @@ while True:
                          headers = {"Authorization": "Token {}".format(API_TOKEN)})
         continue
 
-    if any([v["video"] is None for v in trial["videos"]]):
-        r = requests.patch(trial_url, data={"status": "error"},
-                     headers = {"Authorization": "Token {}".format(API_TOKEN)})
-        continue
+    # The following is now done in main, to allow reprocessing trials with missing videos
+    # if any([v["video"] is None for v in trial["videos"]]):
+    #     r = requests.patch(trial_url, data={"status": "error"},
+    #                 headers = {"Authorization": "Token {}".format(API_TOKEN)})
+    #     continue
 
     trial_type = "dynamic"
     if trial["name"] == "calibration":

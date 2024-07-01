@@ -40,7 +40,8 @@ def processTrial(session_id, trial_id, trial_type = 'dynamic',
                  deleteLocalFolder = True,
                  hasWritePermissions = True,
                  use_existing_pose_pickle = False,
-                 batchProcess = False):
+                 batchProcess = False,
+                 cameras_to_use=['all']):
 
     # Get session directory
     session_name = session_id 
@@ -61,7 +62,8 @@ def processTrial(session_id, trial_id, trial_type = 'dynamic',
         # run calibration
         try:
             main(session_name, trial_name, trial_id, isDocker=isDocker, extrinsicsTrial=True,
-                 imageUpsampleFactor=imageUpsampleFactor,genericFolderNames = True)
+                 imageUpsampleFactor=imageUpsampleFactor,genericFolderNames = True,
+                 cameras_to_use=cameras_to_use)
         except Exception as e:
             error_msg = {}
             error_msg['error_msg'] = e.args[0]
@@ -122,7 +124,8 @@ def processTrial(session_id, trial_id, trial_type = 'dynamic',
                  resolutionPoseDetection = resolutionPoseDetection,
                  genericFolderNames = True,
                  bbox_thr = bbox_thr,
-                 calibrationOptions = calibrationOptions)
+                 calibrationOptions = calibrationOptions,
+                 cameras_to_use=cameras_to_use)
         except Exception as e:       
             # Try to post pose pickles so can be used offline. This function will 
             # error at kinematics most likely, but if pose estimation completed,
@@ -211,7 +214,8 @@ def processTrial(session_id, trial_id, trial_type = 'dynamic',
                  imageUpsampleFactor=imageUpsampleFactor,
                  resolutionPoseDetection = resolutionPoseDetection,
                  genericFolderNames = True,
-                 bbox_thr = bbox_thr)
+                 bbox_thr = bbox_thr,
+                 cameras_to_use=cameras_to_use)
         except Exception as e:
             # Try to post pose pickles so can be used offline. This function will 
             # error at kinematics most likely, but if pose estimation completed,
@@ -331,7 +335,8 @@ def newSessionSameSetup(session_id_old,session_id_new,extrinsicTrialName='calibr
     
 def batchReprocess(session_ids,calib_id,static_id,dynamic_trialNames,poseDetector='OpenPose', 
                    resolutionPoseDetection='1x736',deleteLocalFolder=True,
-                   isServer=False, use_existing_pose_pickle=True):
+                   isServer=False, use_existing_pose_pickle=True,
+                   cameras_to_use=['all']):
 
     # extract trial ids from trial names
     if dynamic_trialNames is not None and len(dynamic_trialNames)>0:
@@ -366,7 +371,8 @@ def batchReprocess(session_ids,calib_id,static_id,dynamic_trialNames,poseDetecto
                               poseDetector = poseDetector,
                               deleteLocalFolder = deleteLocalFolder,
                               isDocker=isServer,
-                              hasWritePermissions = hasWritePermissions)
+                              hasWritePermissions = hasWritePermissions,
+                              cameras_to_use=cameras_to_use)
                 statusData = {'status':'done'}
                 _ = requests.patch(API_URL + "trials/{}/".format(calib_id_toProcess), data=statusData,
                          headers = {"Authorization": "Token {}".format(API_TOKEN)})
@@ -392,7 +398,8 @@ def batchReprocess(session_ids,calib_id,static_id,dynamic_trialNames,poseDetecto
                               isDocker=isServer,
                               hasWritePermissions = hasWritePermissions,
                               use_existing_pose_pickle = use_existing_pose_pickle,
-                              batchProcess = True)
+                              batchProcess = True,
+                              cameras_to_use=cameras_to_use)
                 statusData = {'status':'done'}
                 _ = requests.patch(API_URL + "trials/{}/".format(static_id_toProcess), data=statusData,
                          headers = {"Authorization": "Token {}".format(API_TOKEN)})
@@ -423,7 +430,8 @@ def batchReprocess(session_ids,calib_id,static_id,dynamic_trialNames,poseDetecto
                           isDocker=isServer,
                           hasWritePermissions = hasWritePermissions,
                           use_existing_pose_pickle = use_existing_pose_pickle,
-                          batchProcess = True)
+                          batchProcess = True,
+                          cameras_to_use=cameras_to_use)
                 
                 statusData = {'status':'done'}
                 _ = requests.patch(API_URL + "trials/{}/".format(dID), data=statusData,
