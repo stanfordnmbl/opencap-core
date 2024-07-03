@@ -1037,12 +1037,9 @@ def synchronizeVideoKeypoints(keypointList, confidenceList,
     allMarkerList = [p[:,idxStart:idxEnd] for p in allMarkerList]
     confSyncList= [c[:,idxStart:idxEnd] for c in confidenceList]
     
-    
+    # We do this again, since it might have changed after finding the overlap period.
     keypointList = list(keypointList)
     confidenceList = list(confidenceList)
-    
-    # We do this check again, since it might have have changed after finding
-    # the overlap period.
     badCamerasOverlap = []
     for icam, conf in enumerate(confSyncList):
         if np.mean(conf) <= 0.01: # Looser than sum=0 to disregard very few frames with data
@@ -1069,7 +1066,6 @@ def synchronizeVideoKeypoints(keypointList, confidenceList,
     # to use. Input right and left ankle marker speeds. Gait should be
     # detected for all cameras (all but one camera is > 2 cameras) for the
     # trial to be considered a gait trial.
-
     try:
         isGait = detectGaitAllVideos(mkrSpeedList,allMarkerList,confSyncList,markers4Ankles,sampleFreq)
     except:
