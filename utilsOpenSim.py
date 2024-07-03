@@ -171,32 +171,26 @@ def runIKTool(pathGenericSetupFile, pathScaledModel, pathTRCFile,
     model = opensim.Model(pathScaledModel)
     # Remove all actuators.                                         
     forceSet = model.getForceSet()
-    i = 0
-    while i < forceSet.getSize():
-        forceSet.remove(i)
-    # Remove all constraints.
+    forceSet.setSize(0)
+    # Remove patellofemoral constraints.
     constraintSet = model.getConstraintSet()
-    i = 0
-    while i < constraintSet.getSize():
-        constraintSet.remove(i)        
+    patellofemoral_constraints = [
+        'patellofemoral_knee_angle_r_con', 'patellofemoral_knee_angle_l_con']
+    for patellofemoral_constraint in patellofemoral_constraints:
+        i = constraintSet.getIndex(patellofemoral_constraint, 0)
+        constraintSet.remove(i)       
     # Remove patella bodies.
     bodySet = model.getBodySet()
     patella_bodies = ['patella_r', 'patella_l']
     for patella in patella_bodies:
-        for i in range(bodySet.getSize()):        
-            c_body = bodySet.get(i).getName()
-            if c_body == patella:
-                bodySet.remove(i)
-                break
+        i = bodySet.getIndex(patella, 0)
+        bodySet.remove(i)
     # Remove patellofemoral joints.
     jointSet = model.getJointSet()
     patellofemoral_joints = ['patellofemoral_r', 'patellofemoral_l']
     for patellofemoral in patellofemoral_joints:
-        for i in range(jointSet.getSize()):
-            c_joint = jointSet.get(i).getName()
-            if c_joint == patellofemoral:
-                jointSet.remove(i)
-                break
+        i = jointSet.getIndex(patellofemoral, 0)
+        jointSet.remove(i)
     # Print the model to a new file.
     model.finalizeConnections
     model.initSystem()
