@@ -932,9 +932,11 @@ def synchronizeVideoKeypoints(keypointList, confidenceList,
         if np.max(conf) == 0.0:
             badCameras.append(icam)
     idxBadCameras = [badCameras[i]-i for i in range(len(badCameras))]
+    cameras2NotUse = []
     for idxBadCamera in idxBadCameras:
         print('{} kicked out of synchronization'.format(
             c_cameras2Use[idxBadCamera]))
+        cameras2NotUse.append(c_cameras2Use[idxBadCamera])
         keypointList.pop(idxBadCamera)
         confidenceList.pop(idxBadCamera)
         c_CameraParams.pop(idxBadCamera)
@@ -1035,14 +1037,46 @@ def synchronizeVideoKeypoints(keypointList, confidenceList,
     allMarkerList = [p[:,idxStart:idxEnd] for p in allMarkerList]
     confSyncList= [c[:,idxStart:idxEnd] for c in confidenceList]
     
+    
+    keypointList = list(keypointList)
+    confidenceList = list(confidenceList)
+    
+    # We do this check again, since it might have have changed after finding
+    # the overlap period.
+    badCamerasOverlap = []
+    for icam, conf in enumerate(confSyncList):
+        if np.mean(conf) <= 0.01: # Looser than sum=0 to disregard very few frames with data
+            badCamerasOverlap.append(icam)
+    idxbadCamerasOverlap = [badCamerasOverlap[i]-i for i in range(len(badCamerasOverlap))]
+    for idxbadCameraOverlap in idxbadCamerasOverlap:
+        print('{} kicked out of synchronization - after overlap check'.format(
+            c_cameras2Use[idxbadCameraOverlap]))
+        cameras2NotUse.append(c_cameras2Use[idxbadCameraOverlap])
+        keypointList.pop(idxbadCameraOverlap)
+        confidenceList.pop(idxbadCameraOverlap)
+        c_CameraParams.pop(idxbadCameraOverlap)
+        c_cameras2Use.pop(idxbadCameraOverlap)
+        c_CameraDirectories.pop(idxbadCameraOverlap)
+        
+        vertVelList.pop(idxbadCameraOverlap)
+        mkrSpeedList.pop(idxbadCameraOverlap)
+        handPunchVertPositionList.pop(idxbadCameraOverlap)
+        allMarkerList.pop(idxbadCameraOverlap)
+        confSyncList.pop(idxbadCameraOverlap)        
+    nCams = len(keypointList)
+    
     # Detect whether it is a gait trial, which determines what sync algorithm
     # to use. Input right and left ankle marker speeds. Gait should be
     # detected for all cameras (all but one camera is > 2 cameras) for the
     # trial to be considered a gait trial.
+
+    try:
+        isGait = detectGaitAllVideos(mkrSpeedList,allMarkerList,confSyncList,markers4Ankles,sampleFreq)
+    except:
+        isGait = False
+        print('Detect gait activity algorithm failed.')
     
     # Detect activity, which determines sync function that gets used
-    isGait = detectGaitAllVideos(mkrSpeedList,allMarkerList,confSyncList,markers4Ankles,sampleFreq)
-    
     isHandPunch,handForPunch = detectHandPunchAllVideos(handPunchVertPositionList,sampleFreq)
     if isHandPunch:
         syncActivity = 'handPunch'
@@ -1199,11 +1233,12 @@ def synchronizeVideoKeypoints(keypointList, confidenceList,
         
     # We need to add back the cameras that have been kicked out.
     # We just add back zeros, they will be kicked out of the triangulation.
-    for badCamera in badCameras:
-        keypointsSync.insert(badCamera, np.zeros(keypointsSync[0].shape))
-        confidenceSync.insert(badCamera, np.zeros(confidenceSync[0].shape))
-        nansInOutSync.insert(badCamera, np.array([np.nan, np.nan]))
-        startEndFrames.insert(badCamera, None)
+    idxCameras2NotUse = [cameras2Use.index(cam) for cam in cameras2NotUse]
+    for idxCamera2NotUse in idxCameras2NotUse:
+        keypointsSync.insert(idxCamera2NotUse, np.zeros(keypointsSync[0].shape))
+        confidenceSync.insert(idxCamera2NotUse, np.zeros(confidenceSync[0].shape))
+        nansInOutSync.insert(idxCamera2NotUse, np.array([np.nan, np.nan]))
+        startEndFrames.insert(idxCamera2NotUse, None)
  
     return keypointsSync, confidenceSync, nansInOutSync, startEndFrames
 
@@ -1480,6 +1515,13 @@ def findClosestBox(bbox,keyBoxes,imageSize,iPerson=None):
 def trackKeypointBox(videoPath,bbStart,allPeople,allBoxes,dataOut,frameStart = 0 ,
                      frameIncrement = 1, visualize = False, poseDetector='OpenPose',
                      badFramesBeforeStop = 0):
+    
+    # Extract camera name
+    if videoPath.split('InputMedia')[0][-5:-2] == 'Cam': # <= 10 cams
+        camName = videoPath.split('InputMedia')[0][-5:-1]
+    else:
+        camName = videoPath.split('InputMedia')[0][-6:-1]
+
     # Tracks closest keypoint bounding boxes until the box changes too much.
     bboxKey = bbStart # starting bounding box
     frameNum = frameStart
@@ -1523,7 +1565,7 @@ def trackKeypointBox(videoPath,bbStart,allPeople,allBoxes,dataOut,frameStart = 0
             
         if not samePerson and not justStarted:
             if len(badFrames) >= badFramesBeforeStop:
-                print('not same person at ' + str(frameNum - frameIncrement*badFramesBeforeStop))
+                print('{}: not same person at {}'.format(camName, frameNum - frameIncrement*badFramesBeforeStop))
                 # Replace the data from the badFrames with zeros
                 if len(badFrames) > 1:
                     dataOut[badFrames,:] = np.zeros(len(badFrames),dataOut.shape[0])
