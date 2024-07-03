@@ -570,7 +570,8 @@ def main(sessionName, trialName, trial_id, cameras_to_use=['all'],
             popNeutralPoseImages(cameraDirectories, cameras2Use, 
                                  timeRange4Scaling[0], staticImagesFolderDir,
                                  trial_id, writeVideo = True)   
-            pathOutputIK = pathScaledModel[:-5]+'.mot'     
+            pathOutputIK = pathScaledModel[:-5] + '.mot'
+            pathModelIK = pathScaledModel
         
         # Inverse kinematics.
         if not scaleModel:
