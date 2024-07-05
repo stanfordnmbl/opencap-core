@@ -464,7 +464,6 @@ def runTestSession(pose='all',isDocker=True):
         for trial_id in trialList:
             trial = getTrialJson(trial_id)
             logging.info("Running status check on trial name: " + trial['name'] + "_" + str(trial_id) + "\n\n")
-            raise Exception('Simulated error')
             processTrial(trial["session"], trial_id, trial_type='static', isDocker=isDocker)
     except:
         logging.info("test trial failed. stopping machine.")
