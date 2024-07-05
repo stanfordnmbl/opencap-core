@@ -1500,7 +1500,7 @@ def sendStatusEmail(message=None,subject=None):
         message = message + ' IP: ' + ip
        
     if message is None:
-        message = "A backend server is down and has been stopped.".format(ip)
+        message = "A backend server is down and has been stopped."
     if subject is None:
         subject = "OpenCap backend server down"
         
