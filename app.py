@@ -149,12 +149,12 @@ while True:
         r = requests.patch(trial_url, data={"status": "error"},
                          headers = {"Authorization": "Token {}".format(API_TOKEN)})
         traceback.print_exc()
-        args_as_strings = [str(arg) for arg in e.args]
-        if len(args_as_strings) > 1 and 'pose detection timed out' in args_as_strings[1].lower():
-            logging.info("Worker failed. Stopping machine.")
-            message = "A backend OpenCap machine timed out during pose detection. It has been stopped."
-            sendStatusEmail(message=message)
-            raise Exception('Worker failed. Stopped.')
+        # args_as_strings = [str(arg) for arg in e.args]
+        # if len(args_as_strings) > 1 and 'pose detection timed out' in args_as_strings[1].lower():
+        #     logging.info("Worker failed. Stopping machine.")
+        #     message = "A backend OpenCap machine timed out during pose detection. It has been stopped."
+        #     sendStatusEmail(message=message)
+        #     raise Exception('Worker failed. Stopped.')
     justProcessed = True
     
     # Clean data directory

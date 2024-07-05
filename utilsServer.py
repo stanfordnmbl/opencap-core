@@ -4,7 +4,6 @@ import shutil
 import requests
 import json
 import logging
-import socket
 
 from main import main
 from utils import getDataDirectory
@@ -469,7 +468,7 @@ def runTestSession(pose='all',isDocker=True):
     except:
         logging.info("test trial failed. stopping machine.")
         # send email
-        message = "A backend OpenCap machine failed the status check: " + socket.gethostname() + ". It has been stopped."
+        message = "A backend OpenCap machine failed the status check. It has been stopped."
         sendStatusEmail(message=message)
         raise Exception('Failed status check. Stopped.')
         
