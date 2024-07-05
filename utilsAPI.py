@@ -42,6 +42,10 @@ def getStatusEmails():
         emailInfo['ip'] = json.loads(config("STATUS_EMAIL_IP"))
     except:
         emailInfo = None
+    try:
+        emailInfo['ip'] = json.loads(config("STATUS_EMAIL_IP"))    
+    except:
+        pass
     
     return emailInfo
 
