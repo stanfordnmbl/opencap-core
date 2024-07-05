@@ -149,6 +149,11 @@ while True:
         r = requests.patch(trial_url, data={"status": "error"},
                          headers = {"Authorization": "Token {}".format(API_TOKEN)})
         traceback.print_exc()
+
+        # Antoine: Removing this, it is too often causing the machines to stop. Not because
+        # the machines are failing, but because for instance the video is very long with a lot
+        # of people in it. We should not stop the machine for that. Originally the check was
+        # to catch a bug where the machine would hang, I have not seen this bug in a long time.
         # args_as_strings = [str(arg) for arg in e.args]
         # if len(args_as_strings) > 1 and 'pose detection timed out' in args_as_strings[1].lower():
         #     logging.info("Worker failed. Stopping machine.")

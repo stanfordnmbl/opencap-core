@@ -1537,7 +1537,7 @@ def checkResourceUsage(stop_machine_and_email=True):
     
     if stop_machine_and_email and resourceUsage['disk_perc'] > 95:
             
-        message = "Disc is full on an OpenCap machine backend machine. It has been stopped. Data: " \
+        message = "Disc is full on an OpenCap backend machine. It has been stopped. Data: " \
                             + json.dumps(resourceUsage)
         sendStatusEmail(message=message)
         
@@ -1554,7 +1554,7 @@ def checkCudaTF():
         for gpu in gpus:
             print(f"GPU: {gpu.name}")
     else:
-        message = "Cuda check failed on an OpenCap machine backend machine. It has been stopped."
+        message = "Cuda check failed on an OpenCap backend machine. It has been stopped."
         sendStatusEmail(message=message)
         raise Exception("No GPU detected. Exiting.")
 
