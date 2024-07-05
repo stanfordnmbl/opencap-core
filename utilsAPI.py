@@ -39,6 +39,7 @@ def getStatusEmails():
         emailInfo['fromEmail'] = config("STATUS_EMAIL_FROM")
         emailInfo['password'] = config("STATUS_EMAIL_FROM_PW")
         emailInfo['toEmails'] = json.loads(config("STATUS_EMAIL_TO"))
+        emailInfo['ip'] = json.loads(config("STATUS_EMAIL_IP"))
     except:
         emailInfo = None
     

@@ -4,6 +4,7 @@ This is not a comprehensive list of changes but rather a hand-curated collection
 
 Changes
 =======
+- 07/03/2024: Speed up IK by removing patella constraints from model ([pull request](https://github.com/stanfordnmbl/opencap-core/pull/174))
 - 06/25/2024: Add support for "any pose" scaling ([pull request](https://github.com/stanfordnmbl/opencap-core/pull/168))
 - 05/10/2024: Add reprojection error minimization to improve camera synchronization  ([pull request](https://github.com/stanfordnmbl/opencap-core/pull/159))
 - 04/05/2024: Update range pelvis translations ([pull request](https://github.com/stanfordnmbl/opencap-core/pull/147))

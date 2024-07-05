@@ -570,7 +570,8 @@ def main(sessionName, trialName, trial_id, cameras_to_use=['all'],
             popNeutralPoseImages(cameraDirectories, cameras2Use, 
                                  timeRange4Scaling[0], staticImagesFolderDir,
                                  trial_id, writeVideo = True)   
-            pathOutputIK = pathScaledModel[:-5]+'.mot'     
+            pathOutputIK = pathScaledModel[:-5] + '.mot'
+            pathModelIK = pathScaledModel
         
         # Inverse kinematics.
         if not scaleModel:
@@ -590,7 +591,7 @@ def main(sessionName, trialName, trial_id, cameras_to_use=['all'],
                 # Run IK tool. 
                 logging.info('Running Inverse Kinematics')
                 try:
-                    pathOutputIK = runIKTool(
+                    pathOutputIK, pathModelIK = runIKTool(
                         pathGenericSetupFile4IK, pathScaledModel, 
                         pathTRCFile4IK, outputIKDir)
                 except Exception as e:
@@ -608,7 +609,7 @@ def main(sessionName, trialName, trial_id, cameras_to_use=['all'],
         os.makedirs(outputJsonVisDir,exist_ok=True)
         outputJsonVisPath = os.path.join(outputJsonVisDir,
                                          trialName + '.json')
-        generateVisualizerJson(pathScaledModel, pathOutputIK,
+        generateVisualizerJson(pathModelIK, pathOutputIK,
                                outputJsonVisPath, 
                                vertical_offset=vertical_offset)  
         
