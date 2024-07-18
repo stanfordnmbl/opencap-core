@@ -10,6 +10,8 @@ services:
       - DOCKERCOMPOSE=1
     deploy:
       resources:
+        limits:
+          cpus: '8.0'
         reservations:
           devices:
             - driver: nvidia
@@ -21,6 +23,8 @@ services:
       - data:/openpose/data
     deploy:
       resources:
+        limits:
+          cpus: '8.0'
         reservations:
           devices:
             - driver: nvidia
@@ -32,6 +36,8 @@ services:
       - data:/mmpose/data
     deploy:
       resources:
+        limits:
+          cpus: '8.0'
         reservations:
           devices:
             - driver: nvidia
