@@ -17,6 +17,7 @@ Examples/Data/*
 
 # Files for re-processing
 Examples/reprocessSessionServer.py
+Examples/reprocessDataServer.py
 
 *.ini
 *.stats
