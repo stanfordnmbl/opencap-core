@@ -14,6 +14,8 @@ sids = df_trial[~df_trial.trial_clean.isna()].sid.unique()
 
 OUTPUTS = [f'{datadir}/opencap_data/{sid}' for sid in sids]
 
+print(OUTPUTS)
+
 rule all:
     input:
         OUTPUTS
@@ -23,9 +25,6 @@ rule all:
 # TODO this should be multithreaded with async instead of multiprocessed w/ snakemake cores
 
 rule download_session:
-    # input:
-    #     trc='{datadir}/opencap_data/{sid}/MarkerData/PostAugmentation/{trial}/{trial}.trc',
-    #     sto='{datadir}/opencap_data/{sid}/OpenSimData/Dynamics/{trial}_shoulder.sto'
     output:
         directory('{datadir}/opencap_data/{sid}')
     script:

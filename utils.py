@@ -1472,3 +1472,17 @@ def get_entry_with_largest_number(trialList):
             continue
 
     return max_entry
+
+
+# Returns a list of all subjects of the user.
+def get_user_subjects(user_token=API_TOKEN):
+    subjects = requests.get(
+            API_URL + "subjects/",
+            headers = {"Authorization": "Token {}".format(user_token)}).json()
+
+    return subjects
+
+def set_session_subject(session_id, subject_id):
+    requests.patch(API_URL+"sessions/{}/".format(session_id), data={'subject': subject_id},
+                     headers = {"Authorization": "Token {}".format(API_TOKEN)})
+
