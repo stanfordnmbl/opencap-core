@@ -2,6 +2,7 @@ version: "3.9"
 services:
   opencap-dev:
     image: opencap-dev
+    #cpuset: '0'
     volumes:
       - data:/data
     env_file:
@@ -10,6 +11,9 @@ services:
       - DOCKERCOMPOSE=1
     deploy:
       resources:
+        #limits:
+          #cpus: '24.0'
+          #memory: 20G
         reservations:
           devices:
             - driver: nvidia
@@ -17,10 +21,14 @@ services:
               capabilities: [gpu]
   openpose-dev:
     image: openpose-dev
+    #cpuset: '0'
     volumes:
       - data:/openpose/data
     deploy:
       resources:
+        #limits:
+          #cpus: '24.0'
+          #memory: 20G
         reservations:
           devices:
             - driver: nvidia
@@ -28,10 +36,14 @@ services:
               capabilities: [gpu]
   mmpose-dev:
     image: mmpose-dev
+    #cpuset: '0'
     volumes:
       - data:/mmpose/data
     deploy:
       resources:
+        #limits:
+          #cpus: '24.0'
+          #memory: 20G
         reservations:
           devices:
             - driver: nvidia

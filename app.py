@@ -20,6 +20,7 @@ API_URL = getAPIURL()
 workerType = getWorkerType()
 autoScalingInstance = getASInstance()
 logging.info(f"AUTOSCALING TEST INSTANCE: {autoScalingInstance}")
+logging.info(f"API_URL = {API_URL}")
 
 # if true, will delete entire data directory when finished with a trial
 isDocker = True
