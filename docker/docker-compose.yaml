@@ -1,7 +1,7 @@
 version: "3.9"
 services:
-  opencap-dev:
-    image: opencap-dev
+  mobilecap:
+    image: 660440363484.dkr.ecr.us-west-2.amazonaws.com/opencap/opencap-dev
     volumes:
       - data:/data
     env_file:
@@ -15,8 +15,8 @@ services:
             - driver: nvidia
               count: 1
               capabilities: [gpu]
-  openpose-dev:
-    image: openpose-dev
+  openpose:
+    image: 660440363484.dkr.ecr.us-west-2.amazonaws.com/opencap/openpose-dev
     volumes:
       - data:/openpose/data
     deploy:
@@ -26,8 +26,8 @@ services:
             - driver: nvidia
               count: 1
               capabilities: [gpu]
-  mmpose-dev:
-    image: mmpose-dev
+  mmpose:
+    image: 660440363484.dkr.ecr.us-west-2.amazonaws.com/opencap/mmpose-dev
     volumes:
       - data:/mmpose/data
     deploy:
