@@ -11,14 +11,9 @@ services:
       - DOCKERCOMPOSE=1
     deploy:
       resources:
-<<<<<<< HEAD
         #limits:
           #cpus: '24.0'
           #memory: 20G
-=======
-        limits:
-          cpus: '8.0'
->>>>>>> 4cce2732fdfadb64a534a4879de7a86b3bbc8145
         reservations:
           devices:
             - driver: nvidia
@@ -31,14 +26,9 @@ services:
       - data:/openpose/data
     deploy:
       resources:
-<<<<<<< HEAD
         #limits:
           #cpus: '24.0'
           #memory: 20G
-=======
-        limits:
-          cpus: '8.0'
->>>>>>> 4cce2732fdfadb64a534a4879de7a86b3bbc8145
         reservations:
           devices:
             - driver: nvidia
@@ -51,14 +41,9 @@ services:
       - data:/mmpose/data
     deploy:
       resources:
-<<<<<<< HEAD
         #limits:
           #cpus: '24.0'
           #memory: 20G
-=======
-        limits:
-          cpus: '8.0'
->>>>>>> 4cce2732fdfadb64a534a4879de7a86b3bbc8145
         reservations:
           devices:
             - driver: nvidia
