@@ -1613,3 +1613,21 @@ def get_entry_with_largest_number(trialList):
             continue
 
     return max_entry
+
+# Get local client info and update
+
+def getCommitHash():
+    return os.getenv('GIT_COMMIT_HASH')
+
+def getHostname():
+    return socket.gethostname()
+
+def postLocalClientInfo(trial_url):
+    data = {
+            "git_commit": getCommitHash(),
+            "hostname": getHostname()
+        }
+    r = requests.patch(trial_url, data=data,
+          headers = {"Authorization": "Token {}".format(API_TOKEN)})
+    
+    return r

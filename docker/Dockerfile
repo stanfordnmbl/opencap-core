@@ -15,4 +15,7 @@ RUN pip3 install -r requirements.txt
 
 COPY . /workspace/
 
+ARG GIT_COMMIT_HASH
+ENV GIT_COMMIT_HASH=${GIT_COMMIT_HASH}
+
 CMD python3.8 app.py

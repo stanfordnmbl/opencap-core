@@ -11,7 +11,8 @@ import numpy as np
 from utilsAPI import getAPIURL, getWorkerType, getASInstance, unprotect_current_instance, get_number_of_pending_trials
 from utilsAuth import getToken
 from utils import (getDataDirectory, checkTime, checkResourceUsage,
-                  sendStatusEmail, checkForTrialsWithStatus)
+                  sendStatusEmail, checkForTrialsWithStatus,
+                  getCommitHash, getHostname, postLocalClientInfo)
 
 logging.basicConfig(level=logging.INFO)
 
@@ -72,7 +73,7 @@ while True:
         continue
 
     if r.status_code == 404:
-        logging.info("...pulling " + workerType + " trials.")
+        logging.info("...pulling " + workerType + " trials from " + API_URL)
         time.sleep(1)
         
         # When using autoscaling, we will remove the instance scale-in protection if it hasn't
@@ -137,6 +138,7 @@ while True:
     logging.info("processTrial({},{},trial_type={})".format(trial["session"], trial["id"], trial_type))
 
     try:
+        postLocalClientInfo(trial_url)
         # trigger reset of timer for last processed trial                            
         processTrial(trial["session"], trial["id"], trial_type=trial_type, isDocker=isDocker)   
         # note a result needs to be posted for the API to know we finished, but we are posting them 
