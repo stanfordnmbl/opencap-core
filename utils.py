@@ -1631,3 +1631,12 @@ def postLocalClientInfo(trial_url):
           headers = {"Authorization": "Token {}".format(API_TOKEN)})
     
     return r
+
+def postProcessedDuration(trial_url, duration):
+    data = {
+        "processed_duration": duration
+    }
+    r = requests.patch(trial_url, data=data,
+            headers = {"Authorization": "Token {}".format(API_TOKEN)})
+    
+    return r

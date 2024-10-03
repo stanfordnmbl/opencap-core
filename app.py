@@ -7,12 +7,14 @@ from utilsServer import processTrial, runTestSession
 import traceback
 import logging
 import glob
+from datetime import datetime, timedelta
 import numpy as np
 from utilsAPI import getAPIURL, getWorkerType, getASInstance, unprotect_current_instance, get_number_of_pending_trials
 from utilsAuth import getToken
 from utils import (getDataDirectory, checkTime, checkResourceUsage,
                   sendStatusEmail, checkForTrialsWithStatus,
-                  getCommitHash, getHostname, postLocalClientInfo)
+                  getCommitHash, getHostname, postLocalClientInfo,
+                  postProcessedDuration)
 
 logging.basicConfig(level=logging.INFO)
 
@@ -139,8 +141,13 @@ while True:
 
     try:
         postLocalClientInfo(trial_url)
-        # trigger reset of timer for last processed trial                            
-        processTrial(trial["session"], trial["id"], trial_type=trial_type, isDocker=isDocker)   
+        process_start_time = datetime.now()
+
+        # trigger reset of timer for last processed trial              
+        processTrial(trial["session"], trial["id"], trial_type=trial_type, isDocker=isDocker)
+        process_end_time = datetime.now()
+        postProcessedDuration(trial_url, process_end_time - process_start_time)
+
         # note a result needs to be posted for the API to know we finished, but we are posting them 
         # automatically thru procesTrial now
         r = requests.patch(trial_url, data={"status": "done"},
