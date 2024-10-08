@@ -1617,12 +1617,20 @@ def get_entry_with_largest_number(trialList):
 # Get local client info and update
 
 def getCommitHash():
+    """Get the git commit hash stored in the environment variable
+    GIT_COMMIT_HASH. This is assumed to be set in the Docker build
+    step. If not set, returns Null (default value for os.getenv())
+    """
     return os.getenv('GIT_COMMIT_HASH')
 
 def getHostname():
+    """Get the hostname. For a docker container, this is the container ID."""
     return socket.gethostname()
 
 def postLocalClientInfo(trial_url):
+    """Given a trial_url, updates the Trial fields for 
+    'git_commit' and 'hostname'.
+    """
     data = {
             "git_commit": getCommitHash(),
             "hostname": getHostname()
@@ -1633,6 +1641,9 @@ def postLocalClientInfo(trial_url):
     return r
 
 def postProcessedDuration(trial_url, duration):
+    """Given a trial_url and duration (formed from difference in datetime
+    objects), updates the Trial field for 'processed_duration'.
+    """
     data = {
         "processed_duration": duration
     }

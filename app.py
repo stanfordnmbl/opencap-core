@@ -140,11 +140,14 @@ while True:
     logging.info("processTrial({},{},trial_type={})".format(trial["session"], trial["id"], trial_type))
 
     try:
+        # Post new client info to Trial and start timer for processing duration
         postLocalClientInfo(trial_url)
         process_start_time = datetime.now()
 
         # trigger reset of timer for last processed trial              
         processTrial(trial["session"], trial["id"], trial_type=trial_type, isDocker=isDocker)
+
+        # End process duration timer and post duration to database
         process_end_time = datetime.now()
         postProcessedDuration(trial_url, process_end_time - process_start_time)
 
