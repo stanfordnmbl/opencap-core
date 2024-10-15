@@ -7,11 +7,14 @@ from utilsServer import processTrial, runTestSession
 import traceback
 import logging
 import glob
+from datetime import datetime, timedelta
 import numpy as np
 from utilsAPI import getAPIURL, getWorkerType, getASInstance, unprotect_current_instance, get_number_of_pending_trials
 from utilsAuth import getToken
 from utils import (getDataDirectory, checkTime, checkResourceUsage,
-                  sendStatusEmail, checkForTrialsWithStatus)
+                  sendStatusEmail, checkForTrialsWithStatus,
+                  getCommitHash, getHostname, postLocalClientInfo,
+                  postProcessedDuration)
 
 logging.basicConfig(level=logging.INFO)
 
@@ -72,7 +75,7 @@ while True:
         continue
 
     if r.status_code == 404:
-        logging.info("...pulling " + workerType + " trials.")
+        logging.info("...pulling " + workerType + " trials from " + API_URL)
         time.sleep(1)
         
         # When using autoscaling, we will remove the instance scale-in protection if it hasn't
@@ -137,8 +140,17 @@ while True:
     logging.info("processTrial({},{},trial_type={})".format(trial["session"], trial["id"], trial_type))
 
     try:
-        # trigger reset of timer for last processed trial                            
-        processTrial(trial["session"], trial["id"], trial_type=trial_type, isDocker=isDocker)   
+        # Post new client info to Trial and start timer for processing duration
+        postLocalClientInfo(trial_url)
+        process_start_time = datetime.now()
+
+        # trigger reset of timer for last processed trial              
+        processTrial(trial["session"], trial["id"], trial_type=trial_type, isDocker=isDocker)
+
+        # End process duration timer and post duration to database
+        process_end_time = datetime.now()
+        postProcessedDuration(trial_url, process_end_time - process_start_time)
+
         # note a result needs to be posted for the API to know we finished, but we are posting them 
         # automatically thru procesTrial now
         r = requests.patch(trial_url, data={"status": "done"},
