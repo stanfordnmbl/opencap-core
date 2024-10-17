@@ -1,7 +1,7 @@
 version: "3.9"
 services:
   mobilecap:
-    image: 660440363484.dkr.ecr.us-west-2.amazonaws.com/opencap/opencap
+    image: ${OPENCAP_IMAGE_NAME}
     volumes:
       - data:/data
     env_file:
@@ -16,7 +16,7 @@ services:
               count: 1
               capabilities: [gpu]
   openpose:
-    image: 660440363484.dkr.ecr.us-west-2.amazonaws.com/opencap/openpose
+    image: ${OPENPOSE_IMAGE_NAME}
     volumes:
       - data:/openpose/data
     deploy:
@@ -27,7 +27,7 @@ services:
               count: 1
               capabilities: [gpu]
   mmpose:
-    image: 660440363484.dkr.ecr.us-west-2.amazonaws.com/opencap/mmpose
+    image: ${MMPOSE_IMAGE_NAME}
     volumes:
       - data:/mmpose/data
     deploy:
