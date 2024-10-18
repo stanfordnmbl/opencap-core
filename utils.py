@@ -369,6 +369,8 @@ def getMetadataFromServer(session_id,justCheckerParams=False):
                 session_desc["subjectID"] = session['meta']['subject']['id']
                 session_desc["mass_kg"] = float(session['meta']['subject']['mass'])
                 session_desc["height_m"] = float(session['meta']['subject']['height'])
+                if 'gender' in session['meta']['subject']:
+                    session_desc["gender_mf"] = session['meta']['subject']['gender']
                 # Before implementing the subject feature, the posemodel was stored
                 # in session['meta']['subject']. After implementing the subject
                 # feature, the posemodel is stored in session['meta']['settings']
@@ -402,6 +404,7 @@ def getMetadataFromServer(session_id,justCheckerParams=False):
                 session_desc["subjectID"] = subject_info['name']
                 session_desc["mass_kg"] = subject_info['weight']
                 session_desc["height_m"] = subject_info['height']
+                session_desc["gender_mf"] = subject_info['gender']
                 try:
                     session_desc["posemodel"] = session['meta']['settings']['posemodel']
                 except:
