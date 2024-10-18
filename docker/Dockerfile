@@ -4,14 +4,14 @@ FROM stanfordnmbl/opensim-python:4.3
 # RUN add-apt-repository ppa:jonathonf/ffmpeg-4 ; apt update
 # RUN apt-get install ffmpeg -y --fix-missing
 
-RUN apt update
-RUN apt install ffmpeg -y
+# Combine apt commands into a single layer to reduce image size
+RUN apt update && apt install --no-install-recommends -y ffmpeg && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /workspace/
 COPY requirements.txt /workspace/
 
-RUN pip3 install --upgrade pip
-RUN pip3 install -r requirements.txt
+# Upgrade pip and install Python dependencies in one layer to reduce intermediate image size
+RUN pip3 install --upgrade pip --no-cache-dir && pip3 install -r requirements.txt --no-cache-dir
 
 COPY . /workspace/
 
