@@ -16,11 +16,11 @@ from utilsChecker import computeAverageIntrinsics
 from utilsChecker import saveCameraParameters
 
 # %% Required user inputs.
-sessionName = '6d956718-fc0c-47c2-8a96-8474ec8d1fe2'
+sessionName = 'iPhone15_720_60FPS_20231107'
 CheckerBoardParams = {'dimensions':(11,8),'squareSize':60} # gets replaced if metadata present in sessionName folder
 
 #List of trials - intrinsics from each video are averaged
-trials = ['2ff3ec29-770b-493a-8312-9dd5a2b89e09','ec17c7de-8974-4753-88c9-5917f0659514']
+trials = ['3dc7b63a-71d8-48d6-b906-28372a527129']
 
 loadTrialInfo = False # Load previous trial names and CheckerBoardParams from file
 saveIntrinsicsForDeployment = True
