@@ -147,16 +147,13 @@ while True:
         # trigger reset of timer for last processed trial              
         processTrial(trial["session"], trial["id"], trial_type=trial_type, isDocker=isDocker)
 
-        # End process duration timer and post duration to database
-        process_end_time = datetime.now()
-        postProcessedDuration(trial_url, process_end_time - process_start_time)
-
         # note a result needs to be posted for the API to know we finished, but we are posting them 
         # automatically thru procesTrial now
         r = requests.patch(trial_url, data={"status": "done"},
                          headers = {"Authorization": "Token {}".format(API_TOKEN)})
         logging.info('0.5s pause if need to restart.')
         time.sleep(0.5)
+
     except Exception as e:
         r = requests.patch(trial_url, data={"status": "error"},
                          headers = {"Authorization": "Token {}".format(API_TOKEN)})
@@ -172,6 +169,12 @@ while True:
         #     message = "A backend OpenCap machine timed out during pose detection. It has been stopped."
         #     sendStatusEmail(message=message)
         #     raise Exception('Worker failed. Stopped.')
+    
+    finally:
+        # End process duration timer and post duration to database
+        process_end_time = datetime.now()
+        postProcessedDuration(trial_url, process_end_time - process_start_time)
+
     justProcessed = True
     
     # Clean data directory
