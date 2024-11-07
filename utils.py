@@ -809,7 +809,7 @@ def getMotionData(trial_id,session_path,simplePath=False):
     resultTags = [res['tag'] for res in trial['results']]
 
     # get marker data
-    if 'ik_results' in resultTags:
+    if 'marker_data' in resultTags:
         markerFolder = os.path.join(session_path,'MarkerData','PostAugmentation',trial_name)
         if simplePath:
             markerFolder = os.path.join(session_path,'MarkerData')
