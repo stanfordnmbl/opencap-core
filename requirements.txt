@@ -16,3 +16,4 @@ openpyxl
 ffmpeg-python
 psutil
 boto3
+pytest
