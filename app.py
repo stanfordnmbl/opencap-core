@@ -67,9 +67,8 @@ while True:
     # no query string -> defaults to 'all'
     queue_path = "trials/dequeue/?workerType=" + workerType
     try:
-        r = makeRequestWithRetry('GET',
-                                 "{}{}".format(API_URL, queue_path),
-                                 headers = {"Authorization": "Token {}".format(API_TOKEN)})
+        r = requests.get("{}{}".format(API_URL, queue_path),
+                         headers = {"Authorization": "Token {}".format(API_TOKEN)})
     except Exception as e:
         traceback.print_exc()
         time.sleep(15)
