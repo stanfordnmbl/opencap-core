@@ -1679,14 +1679,15 @@ def makeRequestWithRetry(method, url,
         retry_strategy = Retry(
             total=retries,
             backoff_factor=backoff_factor,
-            status_forcelist=[429, 500, 502, 503, 504]
+            status_forcelist=[429, 500, 502, 503, 504],
+            allowed_methods={'DELETE', 'GET', 'POST', 'PUT'}
         )
 
         adapter = requests.adapters.HTTPAdapter(max_retries=retry_strategy)
         with requests.Session() as session:
             session.mount("https://", adapter)
-            response = session.request(method=method,
-                                       url=url,
+            response = session.request(method,
+                                       url,
                                        headers=headers,
                                        data=data,
                                        params=params)
