@@ -24,6 +24,7 @@ import copy
 from utilsCameraPy3 import Camera, nview_linear_triangulations
 from utils import getOpenPoseMarkerNames, getOpenPoseFaceMarkers
 from utils import numpy2TRC, rewriteVideos, delete_multiple_element,loadCameraParameters
+from utils import makeRequestWithRetry
 from utilsAPI import getAPIURL
 
 from utilsAuth import getToken
@@ -198,8 +199,9 @@ def computeAverageIntrinsics(session_path,trialIDs,CheckerBoardParams,nImages=25
     camModels = []
     
     for trial_id in trialIDs:
-        resp = requests.get(API_URL + "trials/{}/".format(trial_id),
-                         headers = {"Authorization": "Token {}".format(API_TOKEN)})
+        resp = makeRequestWithRetry('GET',
+                                    API_URL + "trials/{}/".format(trial_id),
+                                    headers = {"Authorization": "Token {}".format(API_TOKEN)})
         trial = resp.json()
         camModels.append(trial['videos'][0]['parameters']['model'])
         trial_name = trial['name']

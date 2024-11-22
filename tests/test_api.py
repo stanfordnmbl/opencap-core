@@ -17,7 +17,10 @@ class TestMakeRequestWithRetry:
         response = makeRequestWithRetry('GET', 'https://test.com', retries=2)
         assert response.status_code == status_code
         mock_response.assert_called_once_with('GET', 'https://test.com',
-                                             headers=ANY, data=ANY, params=ANY)
+                                              headers=None,
+                                              data=None,
+                                              params=None,
+                                              files=None)
 
     @patch("requests.Session.request")
     def test_put(self, mock_response):
@@ -45,7 +48,8 @@ class TestMakeRequestWithRetry:
                                              'https://test.com',
                                              data=data,
                                              headers={"Authorization": "my_token"},
-                                             params=params)
+                                             params=params,
+                                             files=None)
 
     @patch("urllib3.connectionpool.HTTPConnectionPool._get_conn")
     def test_success_after_retries(self, mock_response):

@@ -25,6 +25,7 @@ from utils import sendStatusEmail
 from utils import importMetadata
 from utils import checkAndGetPosePickles
 from utils import getTrialNameIdMapping
+from utils import makeRequestWithRetry
 from utilsAuth import getToken
 from utilsAPI import getAPIURL
 
@@ -67,8 +68,10 @@ def processTrial(session_id, trial_id, trial_type = 'dynamic',
             error_msg = {}
             error_msg['error_msg'] = e.args[0]
             error_msg['error_msg_dev'] = e.args[1]
-            _ = requests.patch(trial_url, data={"meta": json.dumps(error_msg)},
-                   headers = {"Authorization": "Token {}".format(API_TOKEN)})   
+            _ = makeRequestWithRetry('PATCH',
+                                     trial_url,
+                                     data={"meta": json.dumps(error_msg)},
+                                     headers = {"Authorization": "Token {}".format(API_TOKEN)}) 
             raise Exception('Calibration failed', e.args[0], e.args[1])
         
         if not hasWritePermissions:
@@ -143,8 +146,10 @@ def processTrial(session_id, trial_id, trial_type = 'dynamic',
             error_msg = {}
             error_msg['error_msg'] = e.args[0]
             error_msg['error_msg_dev'] = e.args[1]
-            _ = requests.patch(trial_url, data={"meta": json.dumps(error_msg)},
-                   headers = {"Authorization": "Token {}".format(API_TOKEN)})
+            _ = makeRequestWithRetry('PATCH',
+                                     trial_url,
+                                     data={"meta": json.dumps(error_msg)},
+                                     headers = {"Authorization": "Token {}".format(API_TOKEN)})
             raise Exception('Static trial failed', e.args[0], e.args[1])
         
         if not hasWritePermissions:
@@ -233,8 +238,10 @@ def processTrial(session_id, trial_id, trial_type = 'dynamic',
             error_msg = {}
             error_msg['error_msg'] = e.args[0]
             error_msg['error_msg_dev'] = e.args[1]
-            _ = requests.patch(trial_url, data={"meta": json.dumps(error_msg)},
-                   headers = {"Authorization": "Token {}".format(API_TOKEN)})   
+            _ = makeRequestWithRetry('PATCH',
+                                     trial_url,
+                                     data={"meta": json.dumps(error_msg)},
+                                     headers = {"Authorization": "Token {}".format(API_TOKEN)})
             raise Exception('Dynamic trial failed.\n' + error_msg['error_msg_dev'], e.args[0], e.args[1])
         
         if not hasWritePermissions:
@@ -352,8 +359,10 @@ def batchReprocess(session_ids,calib_id,static_id,dynamic_trialNames,poseDetecto
         print('Processing ' + session_id)
         
         # check if write permissions (session owner or admin)
-        permissions = requests.get(API_URL + "sessions/{}/get_session_permission/".format(session_id),
-                     headers = {"Authorization": "Token {}".format(API_TOKEN)}).json()
+        response = makeRequestWithRetry('GET',
+                                        API_URL + "sessions/{}/get_session_permission/".format(session_id),
+                                        headers = {"Authorization": "Token {}".format(API_TOKEN)})
+        permissions = response.json()
         hasWritePermissions = permissions['isAdmin'] or permissions['isOwner']
 
 
@@ -373,13 +382,17 @@ def batchReprocess(session_ids,calib_id,static_id,dynamic_trialNames,poseDetecto
                               hasWritePermissions = hasWritePermissions,
                               cameras_to_use=cameras_to_use)
                 statusData = {'status':'done'}
-                _ = requests.patch(API_URL + "trials/{}/".format(calib_id_toProcess), data=statusData,
-                         headers = {"Authorization": "Token {}".format(API_TOKEN)})
+                _ = makeRequestWithRetry('PATCH',
+                                         API_URL + "trials/{}/".format(calib_id_toProcess),
+                                         data=statusData,
+                                         headers = {"Authorization": "Token {}".format(API_TOKEN)})
             except Exception as e:
                 print(e)
                 statusData = {'status':'error'}
-                _ = requests.patch(API_URL + "trials/{}/".format(calib_id_toProcess), data=statusData,
-                         headers = {"Authorization": "Token {}".format(API_TOKEN)})
+                _ = makeRequestWithRetry('PATCH',
+                                         API_URL + "trials/{}/".format(calib_id_toProcess),
+                                         data=statusData,
+                                         headers = {"Authorization": "Token {}".format(API_TOKEN)})
         
         if static_id == None:
             static_id_toProcess = getNeutralTrialID(session_id)
@@ -400,17 +413,22 @@ def batchReprocess(session_ids,calib_id,static_id,dynamic_trialNames,poseDetecto
                               batchProcess = True,
                               cameras_to_use=cameras_to_use)
                 statusData = {'status':'done'}
-                _ = requests.patch(API_URL + "trials/{}/".format(static_id_toProcess), data=statusData,
-                         headers = {"Authorization": "Token {}".format(API_TOKEN)})
+                _ = makeRequestWithRetry('PATCH',
+                                         API_URL + "trials/{}/".format(static_id_toProcess),
+                                         data=statusData,
+                                         headers = {"Authorization": "Token {}".format(API_TOKEN)})
             except Exception as e:
                 print(e)
                 statusData = {'status':'error'}
-                _ = requests.patch(API_URL + "trials/{}/".format(static_id_toProcess), data=statusData,
-                         headers = {"Authorization": "Token {}".format(API_TOKEN)})
+                _ = makeRequestWithRetry('PATCH',
+                                         API_URL + "trials/{}/".format(static_id_toProcess),
+                                         data=statusData,
+                                         headers = {"Authorization": "Token {}".format(API_TOKEN)})
         if dynamic_ids == None:
-
-            session = requests.get(API_URL + "sessions/{}/".format(session_id),
-                                   headers = {"Authorization": "Token {}".format(API_TOKEN)}).json()
+            response = makeRequestWithRetry('GET',
+                                            API_URL + "sessions/{}/".format(session_id),
+                                            headers = {"Authorization": "Token {}".format(API_TOKEN)})
+            session = response.json()
             dynamic_ids_toProcess = [t['id'] for t in session['trials'] if (t['name'] != 'calibration' and t['name'] !='neutral')]
         else:
             if type(dynamic_ids) == str:
@@ -433,13 +451,17 @@ def batchReprocess(session_ids,calib_id,static_id,dynamic_trialNames,poseDetecto
                           cameras_to_use=cameras_to_use)
                 
                 statusData = {'status':'done'}
-                _ = requests.patch(API_URL + "trials/{}/".format(dID), data=statusData,
-                         headers = {"Authorization": "Token {}".format(API_TOKEN)})
+                _ = makeRequestWithRetry('PATCH',
+                                         API_URL + "trials/{}/".format(dID),
+                                         data=statusData,
+                                         headers = {"Authorization": "Token {}".format(API_TOKEN)})
             except Exception as e:
                 print(e)
                 statusData = {'status':'error'}
-                _ = requests.patch(API_URL + "trials/{}/".format(dID), data=statusData,
-                         headers = {"Authorization": "Token {}".format(API_TOKEN)})
+                _ = makeRequestWithRetry('PATCH',
+                                         API_URL + "trials/{}/".format(dID),
+                                         data=statusData,
+                                         headers = {"Authorization": "Token {}".format(API_TOKEN)})
 
 def runTestSession(pose='all',isDocker=True):
     trials = {}
