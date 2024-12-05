@@ -360,8 +360,7 @@ def getMetadataFromServer(session_id,justCheckerParams=False):
     session_desc = importMetadata(defaultMetadataPath)
     
     # Get session-specific metadata from api.
-
-    session = getSessionJson(session_id)
+    session = getSessionJson(session_id) 
     if session['meta'] is not None:
         if not justCheckerParams:
             # Backward compatibility
@@ -370,7 +369,7 @@ def getMetadataFromServer(session_id,justCheckerParams=False):
                 session_desc["mass_kg"] = float(session['meta']['subject']['mass'])
                 session_desc["height_m"] = float(session['meta']['subject']['height'])
                 if 'gender' in session['meta']['subject']:
-                    session_desc["gender_mf"] = session['meta']['subject']['gender']
+                    session_desc["gender_mf"] = getGendersDict().get(session['meta']['subject']['gender'])
                 # Before implementing the subject feature, the posemodel was stored
                 # in session['meta']['subject']. After implementing the subject
                 # feature, the posemodel is stored in session['meta']['settings']
@@ -404,7 +403,7 @@ def getMetadataFromServer(session_id,justCheckerParams=False):
                 session_desc["subjectID"] = subject_info['name']
                 session_desc["mass_kg"] = subject_info['weight']
                 session_desc["height_m"] = subject_info['height']
-                session_desc["gender_mf"] = subject_info['gender']
+                session_desc["gender_mf"] = getGendersDict().get(subject_info['gender'])
                 try:
                     session_desc["posemodel"] = session['meta']['settings']['posemodel']
                 except:
@@ -1616,6 +1615,16 @@ def get_entry_with_largest_number(trialList):
             continue
 
     return max_entry
+
+def getGendersDict():
+    genders_dict = {
+          "woman": "Woman",
+          "man": "Man",
+          "transgender": "Transgender",
+          "non-binary": "Non-Binary/Non-Conforming",
+          "prefer-not-respond": "Prefer not to respond",
+        }
+    return genders_dict
 
 # Get local client info and update
 
