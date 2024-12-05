@@ -14,7 +14,7 @@ from utilsAuth import getToken
 from utils import (getDataDirectory, checkTime, checkResourceUsage,
                   sendStatusEmail, checkForTrialsWithStatus,
                   getCommitHash, getHostname, postLocalClientInfo,
-                  postProcessedDuration)
+                  postProcessedDuration, makeRequestWithRetry)
 
 logging.basicConfig(level=logging.INFO)
 
@@ -120,8 +120,10 @@ while True:
         error_msg['error_msg'] = 'No videos uploaded. Ensure phones are connected and you have stable internet connection.'
         error_msg['error_msg_dev'] = 'No videos uploaded.'
 
-        r = requests.patch(trial_url, data={"status": "error", "meta": json.dumps(error_msg)},
-                         headers = {"Authorization": "Token {}".format(API_TOKEN)})
+        r = makeRequestWithRetry('PATCH',
+                                 trial_url,
+                                 data={"status": "error", "meta": json.dumps(error_msg)},
+                                 headers = {"Authorization": "Token {}".format(API_TOKEN)})
         continue
 
     # The following is now done in main, to allow reprocessing trials with missing videos
@@ -149,14 +151,18 @@ while True:
 
         # note a result needs to be posted for the API to know we finished, but we are posting them 
         # automatically thru procesTrial now
-        r = requests.patch(trial_url, data={"status": "done"},
-                         headers = {"Authorization": "Token {}".format(API_TOKEN)})
+        r = makeRequestWithRetry('PATCH',
+                                 trial_url,
+                                 data={"status": "done"},
+                                 headers = {"Authorization": "Token {}".format(API_TOKEN)})
+
         logging.info('0.5s pause if need to restart.')
         time.sleep(0.5)
 
     except Exception as e:
-        r = requests.patch(trial_url, data={"status": "error"},
-                         headers = {"Authorization": "Token {}".format(API_TOKEN)})
+        r = makeRequestWithRetry('PATCH',
+                                 trial_url, data={"status": "error"},
+                                 headers = {"Authorization": "Token {}".format(API_TOKEN)})
         traceback.print_exc()
 
         # Antoine: Removing this, it is too often causing the machines to stop. Not because

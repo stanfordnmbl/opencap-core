@@ -16,6 +16,7 @@ import time
 import numpy as np
 import pandas as pd
 from scipy import signal
+from urllib3.util.retry import Retry
 
 from utilsAuth import getToken
 from utilsAPI import getAPIURL
@@ -102,13 +103,17 @@ def download_file(url, file_name):
         shutil.copyfileobj(response, out_file)
         
 def getTrialJson(trial_id):
-    trialJson = requests.get(API_URL + "trials/{}/".format(trial_id),
-                         headers = {"Authorization": "Token {}".format(API_TOKEN)}).json()
+    response = makeRequestWithRetry('GET',
+                                    API_URL + "trials/{}/".format(trial_id),
+                                    headers = {"Authorization": "Token {}".format(API_TOKEN)})
+    trialJson = response.json()
     return trialJson
 
 def getSessionJson(session_id):
-    sessionJson = requests.get(API_URL + "sessions/{}/".format(session_id),
-                       headers = {"Authorization": "Token {}".format(API_TOKEN)}).json()
+    response = makeRequestWithRetry('GET',
+                                    API_URL + "sessions/{}/".format(session_id),
+                                    headers = {"Authorization": "Token {}".format(API_TOKEN)})
+    sessionJson = response.json()
     
     # sort trials by time recorded
     def getCreatedAt(trial):
@@ -118,8 +123,10 @@ def getSessionJson(session_id):
     return sessionJson
 
 def getSubjectJson(subject_id):
-    subjectJson = requests.get(API_URL + "subjects/{}/".format(subject_id),
-                       headers = {"Authorization": "Token {}".format(API_TOKEN)}).json()
+    response = makeRequestWithRetry('GET',
+                                    API_URL + "subjects/{}/".format(subject_id),
+                                    headers = {"Authorization": "Token {}".format(API_TOKEN)})
+    subjectJson = response.json()
     return subjectJson
     
 def getTrialName(trial_id):
@@ -182,8 +189,10 @@ def postCalibrationOptions(session_path,session_id,overwrite=False):
                 "meta":json.dumps({'calibration':calibOptionsJson})
             }
         trial_url = "{}{}{}/".format(API_URL, "trials/", calibration_id)
-        r= requests.patch(trial_url, data=data,
-              headers = {"Authorization": "Token {}".format(API_TOKEN)})
+        r = makeRequestWithRetry('PATCH',
+                                 trial_url,
+                                 data=data,
+                                 headers = {"Authorization": "Token {}".format(API_TOKEN)})
         
         if r.status_code == 200:
             print('Wrote calibration selections to metadata.')
@@ -456,8 +465,9 @@ def deleteResult(trial_id, tag=None,resultNum=None):
         resultNums = [r['id'] for r in trial['results']]
 
     for rNum in resultNums:
-        requests.delete(API_URL + "results/{}/".format(rNum),
-                        headers = {"Authorization": "Token {}".format(API_TOKEN)})
+        makeRequestWithRetry('DELETE',
+                             API_URL + "results/{}/".format(rNum),
+                             headers = {"Authorization": "Token {}".format(API_TOKEN)})
         
 def deleteAllResults(session_id):
 
@@ -685,8 +695,10 @@ def changeSessionMetadata(session_ids,newMetaDict):
         
         data = {"meta":json.dumps(existingMeta)}
         
-        r= requests.patch(session_url, data=data,
-              headers = {"Authorization": "Token {}".format(API_TOKEN)})
+        r = makeRequestWithRetry('PATCH',
+                                 session_url,
+                                 data=data,
+                                 headers = {"Authorization": "Token {}".format(API_TOKEN)})
         
         if r.status_code !=200:
             print('Changing metadata failed.')
@@ -733,9 +745,11 @@ def makeSessionPublic(session_id,publicStatus=True):
     data = {
             "public":publicStatus
         }
-        
-    r= requests.patch(session_url, data=data,
-          headers = {"Authorization": "Token {}".format(API_TOKEN)})
+    
+    r = makeRequestWithRetry('PATCH',
+                             session_url,
+                             data=data,
+                             headers = {"Authorization": "Token {}".format(API_TOKEN)})
     
     if r.status_code == 200:
         print('Successfully made ' + session_id + ' public.')
@@ -859,11 +873,17 @@ def postFileToTrial(filePath,trial_id,tag,device_id):
         
     # get S3 link
     data = {'fileName':os.path.split(filePath)[1]}
-    r = requests.get(API_URL + "sessions/null/get_presigned_url/",data=data).json()
+    response = makeRequestWithRetry('GET',
+                                    API_URL + "sessions/null/get_presigned_url/",
+                                    data=data)
+    r = response.json()
     
     # upload to S3
     files = {'file': open(filePath, 'rb')}
-    requests.post(r['url'], data=r['fields'],files=files)   
+    makeRequestWithRetry('POST',
+                         r['url'],
+                         data=r['fields'],
+                         files=files)
     files["file"].close()
 
     # post link to and data to results   
@@ -874,8 +894,10 @@ def postFileToTrial(filePath,trial_id,tag,device_id):
         "media_url" : r['fields']['key']
     }
     
-    rResult = requests.post(API_URL + "results/", data=data,
-                  headers = {"Authorization": "Token {}".format(API_TOKEN)})
+    rResult = makeRequestWithRetry('POST',
+                                   API_URL + "results/", 
+                                   data=data,
+                                   headers = {"Authorization": "Token {}".format(API_TOKEN)})
     
     if rResult.status_code != 201:
         print('server response was + ' + str(r.status_code))
@@ -1482,8 +1504,11 @@ def checkForTrialsWithStatus(status,hours=9999999,relativeTime='newer'):
               'justNumber':1,
               'relativeTime':relativeTime}
     
-    r = requests.get(API_URL+"trials/get_trials_with_status/",params=params,
-        headers = {"Authorization": "Token {}".format(API_TOKEN)}).json()
+    response = makeRequestWithRetry('GET',
+                                    API_URL+"trials/get_trials_with_status/",
+                                    params=params,
+                                    headers = {"Authorization": "Token {}".format(API_TOKEN)})
+    r = response.json()
     
     return r['nTrials']
 
@@ -1563,8 +1588,10 @@ def checkCudaTF():
 # %% Some functions for loading subject data
 
 def getSubjectNumber(subjectName):
-    subjects = requests.get(API_URL + "subjects/",
-                           headers = {"Authorization": "Token {}".format(API_TOKEN)}).json()
+    response = makeRequestWithRetry('GET',
+                                    API_URL + "subjects/",
+                                    headers = {"Authorization": "Token {}".format(API_TOKEN)})
+    subjects = response.json()
     sNum = [s['id'] for s in subjects if s['name'] == subjectName]
     if len(sNum)>1:
         print(len(sNum) + ' subjects with the name ' + subjectName + '. Will use the first one.')   
@@ -1574,8 +1601,10 @@ def getSubjectNumber(subjectName):
     return sNum[0]
 
 def getUserSessions():
-    sessionJson = requests.get(API_URL + "sessions/valid/",
-                           headers = {"Authorization": "Token {}".format(API_TOKEN)}).json()
+    response = makeRequestWithRetry('GET',
+                                    API_URL + "sessions/valid/",
+                                    headers = {"Authorization": "Token {}".format(API_TOKEN)})
+    sessionJson = response.json()
     return sessionJson
 
 def getSubjectSessions(subjectName):
@@ -1647,8 +1676,10 @@ def postLocalClientInfo(trial_url):
             "git_commit": getCommitHash(),
             "hostname": getHostname()
         }
-    r = requests.patch(trial_url, data=data,
-          headers = {"Authorization": "Token {}".format(API_TOKEN)})
+    r = makeRequestWithRetry('PATCH',
+                             trial_url,
+                             data=data,
+                             headers = {"Authorization": "Token {}".format(API_TOKEN)})
     
     return r
 
@@ -1659,7 +1690,55 @@ def postProcessedDuration(trial_url, duration):
     data = {
         "processed_duration": duration
     }
-    r = requests.patch(trial_url, data=data,
-            headers = {"Authorization": "Token {}".format(API_TOKEN)})
+    r = makeRequestWithRetry('PATCH',
+                             trial_url,
+                             data=data,
+                             headers = {"Authorization": "Token {}".format(API_TOKEN)})
     
     return r
+
+# utils for common HTTP requests
+def makeRequestWithRetry(method, url,
+                         headers=None, data=None, params=None, files=None,
+                         retries=5, backoff_factor=1):
+    """
+    Makes an HTTP request with retry logic and returns the Response object.
+
+    Args:
+        method (str): HTTP method (e.g., 'GET', 'POST', 'PUT', etc.) as used in 
+            requests.Session().request()
+        url (str): The endpoint URL.
+        headers (dict): Headers to include in the request.
+        data (dict): Data to send in the request body.
+        params (dict): URL query parameters.
+        retries (int): Number of retry attempts.
+        backoff_factor (float): Backoff factor for exponential delays.
+
+    Returns:
+        requests.Response: The response object for further processing.
+    """
+    try:
+        retry_strategy = Retry(
+            total=retries,
+            backoff_factor=backoff_factor,
+            status_forcelist=[429, 500, 502, 503, 504],
+            allowed_methods={'DELETE', 'GET', 'POST', 'PUT', 'PATCH'}
+        )
+
+        adapter = requests.adapters.HTTPAdapter(max_retries=retry_strategy)
+        with requests.Session() as session:
+            session.mount("https://", adapter)
+            response = session.request(method,
+                                       url,
+                                       headers=headers,
+                                       data=data,
+                                       params=params,
+                                       files=files)
+        response.raise_for_status()
+        return response
+            
+    except requests.exceptions.HTTPError as e:
+        raise Exception(f"HTTP error occurred: {e}") 
+    
+    except Exception as e:
+        raise Exception(f"An error occurred: {e}")
