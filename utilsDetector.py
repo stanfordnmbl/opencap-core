@@ -319,13 +319,9 @@ def runMMposeVideo(
                       
                 # copy /data/output to pathOutputPkl
                 os.system("cp /data/output_mmpose/* {pathOutputPkl}/".format(pathOutputPkl=pathOutputPkl))
-                pkl_path_tmp = os.path.join(pathOutputPkl, 'human.pkl')
-                if os.path.exists(pkl_path_tmp):
-                    os.rename(pkl_path_tmp, pklPath)
-                else:
-                    raise FileNotFoundError(
-                        "We could not detect any pose in your video. Please verify that the subject is correctly in front of the camera."
-                    )
+                pkl_path_tmp = os.path.join(pathOutputPkl, 'human.pkl')            
+                os.rename(pkl_path_tmp, pklPath)
+            
             except Exception as e:
                 if len(e.args) == 2: # specific exception
                     raise Exception(e.args[0], e.args[1])
