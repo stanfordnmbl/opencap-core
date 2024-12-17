@@ -37,19 +37,39 @@ def runPoseDetector(CameraDirectories, trialRelativePath, pathPoseDetector,
                                              trialRelativePath)
     extension = getVideoExtension(pathVideoWithoutExtension)            
     trialRelativePath += extension
-        
+
+    successful_cams = 0  # Counter for successful cameras
+    last_exception = None  # To store the last exception
+
     for camName in CameraDirectories_selectedCams:
         cameraDirectory = CameraDirectories_selectedCams[camName]
         print('Running {} for {}'.format(poseDetector, camName))
-        if poseDetector == 'OpenPose':
-            runOpenPoseVideo(
-                cameraDirectory,trialRelativePath,pathPoseDetector, trialName,
-                resolutionPoseDetection=resolutionPoseDetection,
-                generateVideo=generateVideo)
-        elif poseDetector == 'mmpose':
-            runMMposeVideo(
-                cameraDirectory,trialRelativePath,pathPoseDetector, trialName,
-                generateVideo=generateVideo, bbox_thr=bbox_thr)
+
+        try:
+            if poseDetector == 'OpenPose':
+                runOpenPoseVideo(
+                    cameraDirectory, trialRelativePath, pathPoseDetector, trialName,
+                    resolutionPoseDetection=resolutionPoseDetection,
+                    generateVideo=generateVideo)
+                successful_cams += 1
+            elif poseDetector == 'mmpose':
+                runMMposeVideo(
+                    cameraDirectory, trialRelativePath, pathPoseDetector, trialName,
+                    generateVideo=generateVideo, bbox_thr=bbox_thr)
+                successful_cams += 1
+        except Exception as e:
+            print(f"Exception for {camName}: {e}")
+            last_exception = e
+
+    # After the loop, decide based on the successful count
+    if successful_cams == 0:
+        print("No cameras succeeded.")
+        raise last_exception
+    elif successful_cams == 1:
+        print("Only 1 camera succeeded.")
+        raise last_exception
+    else:
+        print(f"At least 2 cameras succeeded ({successful_cams}). Continuing execution.")
             
     return extension
             
@@ -323,8 +343,8 @@ def runMMposeVideo(
                 if os.path.exists(pkl_path_tmp):
                     os.rename(pkl_path_tmp, pklPath)
                 else:
-                    raise FileNotFoundError(
-                        "We could not detect any pose in your video. Please verify that the subject is correctly in front of the camera."
+                    raise Exception(
+                        "We could not detect any pose in your video. Please verify that the subject is correctly in front of the camera.", 'missing file - hrnet'
                     )
             except Exception as e:
                 if len(e.args) == 2: # specific exception
