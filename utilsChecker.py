@@ -820,12 +820,18 @@ def synchronizeVideos(CameraDirectories, trialRelativePath, pathPoseDetector,
         openposePklDir = os.path.join(outputPklFolder, trialName)
         pathOutputPkl = os.path.join(cameraDirectory, openposePklDir)
         ppPklPath = os.path.join(pathOutputPkl, trialPrefix+'_rotated_pp.pkl')
+        # Check if the pkl file exists before trying to use it.
+        if not os.path.exists(ppPklPath):
+            print(f"{ppPklPath} does not exist. Excluding {camName}.")
+            camsToExclude.append(camName)
+            continue
         key2D, confidence = loadPklVideo(
             ppPklPath, videoFullPath, imageBasedTracker=imageBasedTracker,
             poseDetector=poseDetector,confidenceThresholdForBB=0.3)
         thisVideo = cv2.VideoCapture(videoFullPath.replace('.mov', '_rotated.avi'))
         frameRate = np.round(thisVideo.get(cv2.CAP_PROP_FPS))        
         if key2D.shape[1] == 0 and confidence.shape[1] == 0:
+            print(f"Excluding {camName}.")
             camsToExclude.append(camName)
         else:
             pointList.append(key2D)
