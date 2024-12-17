@@ -324,7 +324,7 @@ def runMMposeVideo(
                     os.rename(pkl_path_tmp, pklPath)
                 else:
                     raise FileNotFoundError(
-                        "We could not detect any pose in your video. Please verify that the subject is correctly in front of the camera."
+                        "We could not detect any pose in your video. Please verify that the subject is correctly in front of the camera.", 'missing file - hrnet'
                     )
             except Exception as e:
                 if len(e.args) == 2: # specific exception
