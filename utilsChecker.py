@@ -824,9 +824,13 @@ def synchronizeVideos(CameraDirectories, trialRelativePath, pathPoseDetector,
         components = ppPklPath.split(os.sep)
         is_neutral = 'neutral' in components
         # Check if the pkl file exists before trying to use it.
-        if not is_neutral and not os.path.exists(ppPklPath):
-            print(f"{ppPklPath} does not exist. Excluding {camName}.")
-            camsToExclude.append(camName)
+        if not os.path.exists(ppPklPath):
+            if is_neutral:
+                exception = "Pose detection failed for at least one camera. Verify your setup and try again. Visit https://www.opencap.ai/best-pratices to learn more about data collection and https://www.opencap.ai/troubleshooting for potential causes for a failed neutral pose."
+                raise Exception(exception, exception)
+            else:
+                print(f"{ppPklPath} does not exist. Excluding {camName}.")
+                camsToExclude.append(camName)
             continue
         key2D, confidence = loadPklVideo(
             ppPklPath, videoFullPath, imageBasedTracker=imageBasedTracker,
