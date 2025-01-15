@@ -68,12 +68,9 @@ endif
 
 .PHONY: run
 run:
-ifeq ($(CURRENT_BRANCH),$(PROD_BRANCH))
-	aws ecr get-login-password --region us-west-2 --profile opencap | docker login --username AWS --password-stdin 660440363484.dkr.ecr.us-west-2.amazonaws.com
-	
-else ifeq ($(CURRENT_BRANCH),$(DEV_BRANCH))
-	aws ecr get-login-password --region us-west-2 --profile opencap | docker login --username AWS --password-stdin 660440363484.dkr.ecr.us-west-2.amazonaws.com
-
-endif
-
-	OPENCAP_IMAGE_NAME=$(OPENCAP_IMAGE_NAME) OPENPOSE_IMAGE_NAME=$(OPENPOSE_IMAGE_NAME) MMPOSE_IMAGE_NAME=$(MMPOSE_IMAGE_NAME) docker-compose up
+	@if [ -z "$(INSTANCE_ID)" ]; then echo "INSTANCE_ID is required. Use make run INSTANCE_ID=<unique_id>"; exit 1; fi
+	COMPOSE_PROJECT_NAME=opencap_$(INSTANCE_ID) \
+	OPENCAP_IMAGE_NAME=$(OPENCAP_IMAGE_NAME) \
+	OPENPOSE_IMAGE_NAME=$(OPENPOSE_IMAGE_NAME) \
+	MMPOSE_IMAGE_NAME=$(MMPOSE_IMAGE_NAME) \
+	docker-compose up
