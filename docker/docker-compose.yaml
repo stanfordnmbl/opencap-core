@@ -8,6 +8,7 @@ services:
       - ../.env
     environment:
       - DOCKERCOMPOSE=1
+      - NVIDIA_VISIBLE_DEVICES=${INSTANCE_ID}
     deploy:
       resources:
         reservations:
@@ -15,10 +16,13 @@ services:
             - driver: nvidia
               count: 1
               capabilities: [gpu]
+    cpuset: "${CPU_SET}"
   openpose:
     image: ${OPENPOSE_IMAGE_NAME}
     volumes:
       - data:/openpose/data
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=${INSTANCE_ID}
     deploy:
       resources:
         reservations:
@@ -26,10 +30,13 @@ services:
             - driver: nvidia
               count: 1
               capabilities: [gpu]
+    cpuset: "${CPU_SET}"
   mmpose:
     image: ${MMPOSE_IMAGE_NAME}
     volumes:
       - data:/mmpose/data
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=${INSTANCE_ID}
     deploy:
       resources:
         reservations:
@@ -37,5 +44,7 @@ services:
             - driver: nvidia
               count: 1
               capabilities: [gpu]
+    cpuset: "${CPU_SET}"
+
 volumes:
   data: {}

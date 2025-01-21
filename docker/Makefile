@@ -68,9 +68,18 @@ endif
 
 .PHONY: run
 run:
-	@if [ -z "$(INSTANCE_ID)" ]; then echo "INSTANCE_ID is required. Use make run INSTANCE_ID=<unique_id>"; exit 1; fi
+	@if [ -z "$(INSTANCE_ID)" ]; then \
+		echo "INSTANCE_ID is required. Use make run INSTANCE_ID=<unique_id> CPU_SET=<cpu_set>"; \
+		exit 1; \
+	fi
+	@if [ -z "$(CPU_SET)" ]; then \
+		echo "CPU_SET is required. Use make run INSTANCE_ID=<unique_id> CPU_SET=<cpu_set>"; \
+		exit 1; \
+	fi
 	COMPOSE_PROJECT_NAME=opencap_$(INSTANCE_ID) \
 	OPENCAP_IMAGE_NAME=$(OPENCAP_IMAGE_NAME) \
 	OPENPOSE_IMAGE_NAME=$(OPENPOSE_IMAGE_NAME) \
 	MMPOSE_IMAGE_NAME=$(MMPOSE_IMAGE_NAME) \
-	docker-compose up
+	INSTANCE_ID=$(INSTANCE_ID) \
+	CPU_SET=$(CPU_SET) \
+	docker compose up -d
