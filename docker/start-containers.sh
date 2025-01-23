@@ -49,9 +49,11 @@ for (( i=0; i<NUM_INSTANCES; i++ )); do
   CPU_SET="${CPU_START}-${CPU_END}"
 
   echo "Starting instance $INSTANCE_ID with CPU_SET=${CPU_SET} and GPU=${INSTANCE_ID}"
-  
+
   # Run docker-compose for each instance
   make run INSTANCE_ID=$INSTANCE_ID CPU_SET=$CPU_SET
+
+  sleep 10
 done
 
 echo "All instances started successfully."
