@@ -178,8 +178,11 @@ while True:
     
     finally:
         # End process duration timer and post duration to database
-        process_end_time = datetime.now()
-        postProcessedDuration(trial_url, process_end_time - process_start_time)
+        try:
+            process_end_time = datetime.now()
+            postProcessedDuration(trial_url, process_end_time - process_start_time)
+        except Exception as e:
+            traceback.print_exc()
 
     justProcessed = True
     
