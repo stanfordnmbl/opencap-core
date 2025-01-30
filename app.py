@@ -160,10 +160,13 @@ while True:
         time.sleep(0.5)
 
     except Exception as e:
-        r = makeRequestWithRetry('PATCH',
-                                 trial_url, data={"status": "error"},
-                                 headers = {"Authorization": "Token {}".format(API_TOKEN)})
-        traceback.print_exc()
+        try:
+            r = makeRequestWithRetry('PATCH',
+                                     trial_url, data={"status": "error"},
+                                     headers = {"Authorization": "Token {}".format(API_TOKEN)})
+            traceback.print_exc()
+        except:
+            traceback.print_exc()
 
         # Antoine: Removing this, it is too often causing the machines to stop. Not because
         # the machines are failing, but because for instance the video is very long with a lot
