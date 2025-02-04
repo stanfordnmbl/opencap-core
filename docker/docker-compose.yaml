@@ -8,14 +8,13 @@ services:
       - ../.env
     environment:
       - DOCKERCOMPOSE=1
-      - NVIDIA_VISIBLE_DEVICES=${INSTANCE_ID}
     deploy:
       resources:
         reservations:
           devices:
             - driver: nvidia
-              count: 1
               capabilities: [gpu]
+              device_ids: ["${INSTANCE_ID}"]
     cpuset: "${CPU_SET}"
     logging:
       driver: "json-file"
@@ -26,15 +25,13 @@ services:
     image: ${OPENPOSE_IMAGE_NAME}
     volumes:
       - data:/openpose/data
-    environment:
-      - NVIDIA_VISIBLE_DEVICES=${INSTANCE_ID}
     deploy:
       resources:
         reservations:
           devices:
             - driver: nvidia
-              count: 1
               capabilities: [gpu]
+              device_ids: ["${INSTANCE_ID}"]
     cpuset: "${CPU_SET}"
     logging:
       driver: "json-file"
@@ -45,15 +42,13 @@ services:
     image: ${MMPOSE_IMAGE_NAME}
     volumes:
       - data:/mmpose/data
-    environment:
-      - NVIDIA_VISIBLE_DEVICES=${INSTANCE_ID}
     deploy:
       resources:
         reservations:
           devices:
             - driver: nvidia
-              count: 1
               capabilities: [gpu]
+              device_ids: ["${INSTANCE_ID}"]
     cpuset: "${CPU_SET}"
     logging:
       driver: "json-file"
