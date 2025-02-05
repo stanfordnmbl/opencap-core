@@ -3,6 +3,10 @@ REPO_NAME := opencap
 PROD_BRANCH := main
 DEV_BRANCH := dev
 
+# Initialize variables if not passed in
+INSTANCE_ID ?= 0
+CPU_SET ?= ""
+
 # Determine the branch name
 CURRENT_BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
 
@@ -68,14 +72,9 @@ endif
 
 .PHONY: run
 run:
-	@if [ -z "$(INSTANCE_ID)" ]; then \
-		echo "INSTANCE_ID is required. Use make run INSTANCE_ID=<unique_id> CPU_SET=<cpu_set>"; \
-		exit 1; \
-	fi
-	@if [ -z "$(CPU_SET)" ]; then \
-		echo "CPU_SET is required. Use make run INSTANCE_ID=<unique_id> CPU_SET=<cpu_set>"; \
-		exit 1; \
-	fi
+	@echo "Usage: sudo make run INSTANCE_ID=<unique_id> CPU_SET=<cpu_set>"
+	@echo "Defaults: INSTANCE_ID=0, CPU_SET=\"\""	
+
 	COMPOSE_PROJECT_NAME=opencap_$(INSTANCE_ID) \
 	OPENCAP_IMAGE_NAME=$(OPENCAP_IMAGE_NAME) \
 	OPENPOSE_IMAGE_NAME=$(OPENPOSE_IMAGE_NAME) \
