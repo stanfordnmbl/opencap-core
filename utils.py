@@ -12,6 +12,7 @@ import mimetypes
 import subprocess
 import zipfile
 import time
+import datetime
 
 import numpy as np
 import pandas as pd
@@ -1584,6 +1585,35 @@ def checkCudaTF():
         message = "Cuda check failed on an OpenCap backend machine. It has been stopped."
         sendStatusEmail(message=message)
         raise Exception("No GPU detected. Exiting.")
+
+def writeToJsonLog(path, new_dict, max_entries=1000):
+    dir_name = os.path.dirname(path)
+    if not os.path.exists(dir_name):
+        os.makedirs(dir_name)
+
+    if os.path.exists(path):
+        with open(path, 'r') as f:
+            data = json.load(f)
+    else:
+        data = []
+
+    data.append(new_dict)
+
+    while len(data) > max_entries:
+        data.pop(0)
+
+    with open(path, 'w') as f:
+        json.dump(data, f)
+
+def writeToErrorLog(path, session_id, trial_id, error, stack, max_entries=1000):
+    error_entry = {
+        'session_id': session_id,
+        'trial_id': trial_id,
+        'datetime': datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S"),
+        'error': str(error),
+        'stack': stack
+    }
+    writeToJsonLog(path, error_entry, max_entries)
 
 # %% Some functions for loading subject data
 
