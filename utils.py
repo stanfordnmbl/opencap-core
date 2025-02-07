@@ -1747,28 +1747,22 @@ def makeRequestWithRetry(method, url,
     Returns:
         requests.Response: The response object for further processing.
     """
-    try:
-        retry_strategy = Retry(
-            total=retries,
-            backoff_factor=backoff_factor,
-            status_forcelist=[429, 500, 502, 503, 504],
-            allowed_methods={'DELETE', 'GET', 'POST', 'PUT', 'PATCH'}
-        )
+    retry_strategy = Retry(
+        total=retries,
+        backoff_factor=backoff_factor,
+        status_forcelist=[429, 500, 502, 503, 504],
+        allowed_methods={'DELETE', 'GET', 'POST', 'PUT', 'PATCH'}
+    )
 
-        adapter = requests.adapters.HTTPAdapter(max_retries=retry_strategy)
-        with requests.Session() as session:
-            session.mount("https://", adapter)
-            response = session.request(method,
-                                       url,
-                                       headers=headers,
-                                       data=data,
-                                       params=params,
-                                       files=files)
-        response.raise_for_status()
-        return response
-            
-    except requests.exceptions.HTTPError as e:
-        raise Exception(f"HTTP error occurred: {e}") 
-    
-    except Exception as e:
-        raise Exception(f"An error occurred: {e}")
+    adapter = requests.adapters.HTTPAdapter(max_retries=retry_strategy)
+    with requests.Session() as session:
+        session.mount("https://", adapter)
+        response = session.request(method,
+                                    url,
+                                    headers=headers,
+                                    data=data,
+                                    params=params,
+                                    files=files)
+    response.raise_for_status()
+    return response
+

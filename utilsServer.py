@@ -4,6 +4,8 @@ import shutil
 import requests
 import json
 import logging
+import time
+import random
 
 from main import main
 from utils import getDataDirectory
@@ -463,35 +465,63 @@ def batchReprocess(session_ids,calib_id,static_id,dynamic_trialNames,poseDetecto
                                          data=statusData,
                                          headers = {"Authorization": "Token {}".format(API_TOKEN)})
 
-def runTestSession(pose='all',isDocker=True):
-    trials = {}
-    
-    if not any(s in API_URL for s in ['dev.opencap', '127.0']) : # prod trials
-        trials['openpose'] = '3f2960c7-ca29-45b0-9be5-8d74db6131e5' # session ae2d50f1-537a-44f1-96a5-f5b7717452a3 
-        trials['hrnet'] = '299ca938-8765-4a84-9adf-6bdf0e072451' # session faef80d3-0c26-452c-a7be-28dbfe04178e
-        # trials['failure'] = '698162c8-3980-46e5-a3c5-8d4f081db4c4' # failed trial for testing
-    else: # dev trials
-        trials['openpose'] = '89d77579-8371-4760-a019-95f2c793622c' # session acd0e19c-6c86-4ba4-95fd-94b97229a926
-        trials['hrnet'] = 'e0e02393-42ee-46d4-9ae1-a6fbb0b89c42' # session 3510c726-a1b8-4de4-a4a2-52b021b4aab2
-     
-    if pose == 'all':
-        trialList = list(trials.values())
-    else:
-        try: 
-            trialList = [trials[pose]]
-        except:
+def runTestSession(pose='all',isDocker=True,maxNumTries=3):
+    # We retry test sessions because different sometimes when different
+    # containers are processing the test trial, the API can change the
+    # URL, causing 404 errors. 
+    numTries = 0
+    while numTries < maxNumTries:
+        numTries += 1
+        logging.info(f"Starting test trial attempt #{numTries} of {maxNumTries}")
+        trials = {}
+        
+        if not any(s in API_URL for s in ['dev.opencap', '127.0']) : # prod trials
+            trials['openpose'] = '3f2960c7-ca29-45b0-9be5-8d74db6131e5' # session ae2d50f1-537a-44f1-96a5-f5b7717452a3 
+            trials['hrnet'] = '299ca938-8765-4a84-9adf-6bdf0e072451' # session faef80d3-0c26-452c-a7be-28dbfe04178e
+            # trials['failure'] = '698162c8-3980-46e5-a3c5-8d4f081db4c4' # failed trial for testing
+        else: # dev trials
+            trials['openpose'] = '89d77579-8371-4760-a019-95f2c793622c' # session acd0e19c-6c86-4ba4-95fd-94b97229a926
+            trials['hrnet'] = 'e0e02393-42ee-46d4-9ae1-a6fbb0b89c42' # session 3510c726-a1b8-4de4-a4a2-52b021b4aab2
+        
+        if pose == 'all':
             trialList = list(trials.values())
+        else:
+            try: 
+                trialList = [trials[pose]]
+            except:
+                trialList = list(trials.values())
         
-    try: 
-        for trial_id in trialList:
-            trial = getTrialJson(trial_id)
-            logging.info("Running status check on trial name: " + trial['name'] + "_" + str(trial_id) + "\n\n")
-            processTrial(trial["session"], trial_id, trial_type='static', isDocker=isDocker)
-    except:
-        logging.info("test trial failed. stopping machine.")
-        # send email
-        message = "A backend OpenCap machine failed the status check. It has been stopped."
-        sendStatusEmail(message=message)
-        raise Exception('Failed status check. Stopped.')
+        try: 
+            for trial_id in trialList:
+                trial = getTrialJson(trial_id)
+                logging.info("Running status check on trial name: " + trial['name'] + "_" + str(trial_id) + "\n\n")
+                processTrial(trial["session"], trial_id, trial_type='static', isDocker=isDocker)
+
+            logging.info("\n\n\nStatus check succeeded. \n\n")
+            return
         
-    logging.info("\n\n\nStatus check succeeded. \n\n")
+        # Catch and re-enter while loop if it's an HTTPError (could be more
+        # than just 404 errors). Wait between 30 and 60 seconds before 
+        # retrying.
+        except requests.exceptions.HTTPError as e:
+            if numTries < maxNumTries:
+                logging.info(f"test trial failed on try #{numTries} due to HTTPError. Retrying.")
+                wait_time = random.randint(30,60)
+                logging.info(f"waiting {wait_time} seconds then retrying...")
+                time.sleep(wait_time)
+                continue
+            else:
+                logging.info(f"test trial failed on try #{numTries} due to HTTPError.")
+                # send email
+                message = "A backend OpenCap machine failed the status check (HTTPError). It has been stopped."
+                sendStatusEmail(message=message)
+                raise Exception('Failed status check (HTTPError). Stopped.')
+        
+        # Catch other errors and stop
+        except:
+            logging.info("test trial failed. stopping machine.")
+            # send email
+            message = "A backend OpenCap machine failed the status check. It has been stopped."
+            sendStatusEmail(message=message)
+            raise Exception('Failed status check. Stopped.')
+            

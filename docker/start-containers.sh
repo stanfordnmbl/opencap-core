@@ -53,7 +53,7 @@ for (( i=0; i<NUM_INSTANCES; i++ )); do
   # Run docker-compose for each instance
   make run INSTANCE_ID=$INSTANCE_ID CPU_SET=$CPU_SET
 
-  sleep 10
+  sleep 2
 done
 
 echo "All instances started successfully."
