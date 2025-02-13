@@ -12,6 +12,7 @@ import mimetypes
 import subprocess
 import zipfile
 import time
+import datetime
 
 import numpy as np
 import pandas as pd
@@ -1585,6 +1586,35 @@ def checkCudaTF():
         sendStatusEmail(message=message)
         raise Exception("No GPU detected. Exiting.")
 
+def writeToJsonLog(path, new_dict, max_entries=1000):
+    dir_name = os.path.dirname(path)
+    if not os.path.exists(dir_name):
+        os.makedirs(dir_name)
+
+    if os.path.exists(path):
+        with open(path, 'r') as f:
+            data = json.load(f)
+    else:
+        data = []
+
+    data.append(new_dict)
+
+    while len(data) > max_entries:
+        data.pop(0)
+
+    with open(path, 'w') as f:
+        json.dump(data, f)
+
+def writeToErrorLog(path, session_id, trial_id, error, stack, max_entries=1000):
+    error_entry = {
+        'session_id': session_id,
+        'trial_id': trial_id,
+        'datetime': datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S"),
+        'error': str(error),
+        'stack': stack
+    }
+    writeToJsonLog(path, error_entry, max_entries)
+
 # %% Some functions for loading subject data
 
 def getSubjectNumber(subjectName):
@@ -1717,28 +1747,22 @@ def makeRequestWithRetry(method, url,
     Returns:
         requests.Response: The response object for further processing.
     """
-    try:
-        retry_strategy = Retry(
-            total=retries,
-            backoff_factor=backoff_factor,
-            status_forcelist=[429, 500, 502, 503, 504],
-            allowed_methods={'DELETE', 'GET', 'POST', 'PUT', 'PATCH'}
-        )
+    retry_strategy = Retry(
+        total=retries,
+        backoff_factor=backoff_factor,
+        status_forcelist=[429, 500, 502, 503, 504],
+        allowed_methods={'DELETE', 'GET', 'POST', 'PUT', 'PATCH'}
+    )
 
-        adapter = requests.adapters.HTTPAdapter(max_retries=retry_strategy)
-        with requests.Session() as session:
-            session.mount("https://", adapter)
-            response = session.request(method,
-                                       url,
-                                       headers=headers,
-                                       data=data,
-                                       params=params,
-                                       files=files)
-        response.raise_for_status()
-        return response
-            
-    except requests.exceptions.HTTPError as e:
-        raise Exception(f"HTTP error occurred: {e}") 
-    
-    except Exception as e:
-        raise Exception(f"An error occurred: {e}")
+    adapter = requests.adapters.HTTPAdapter(max_retries=retry_strategy)
+    with requests.Session() as session:
+        session.mount("https://", adapter)
+        response = session.request(method,
+                                    url,
+                                    headers=headers,
+                                    data=data,
+                                    params=params,
+                                    files=files)
+    response.raise_for_status()
+    return response
+

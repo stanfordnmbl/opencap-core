@@ -9,12 +9,13 @@ import logging
 import glob
 from datetime import datetime, timedelta
 import numpy as np
-from utilsAPI import getAPIURL, getWorkerType, getASInstance, unprotect_current_instance, get_number_of_pending_trials
+from utilsAPI import getAPIURL, getWorkerType, getErrorLogBool, getASInstance, unprotect_current_instance, get_number_of_pending_trials
 from utilsAuth import getToken
 from utils import (getDataDirectory, checkTime, checkResourceUsage,
                   sendStatusEmail, checkForTrialsWithStatus,
                   getCommitHash, getHostname, postLocalClientInfo,
-                  postProcessedDuration, makeRequestWithRetry)
+                  postProcessedDuration, makeRequestWithRetry,
+                  writeToErrorLog)
 
 logging.basicConfig(level=logging.INFO)
 
@@ -23,6 +24,9 @@ API_URL = getAPIURL()
 workerType = getWorkerType()
 autoScalingInstance = getASInstance()
 logging.info(f"AUTOSCALING TEST INSTANCE: {autoScalingInstance}")
+
+ERROR_LOG = getErrorLogBool()
+error_log_path = "/data/error_log.json"
 
 # if true, will delete entire data directory when finished with a trial
 isDocker = True
@@ -160,10 +164,24 @@ while True:
         time.sleep(0.5)
 
     except Exception as e:
-        r = makeRequestWithRetry('PATCH',
-                                 trial_url, data={"status": "error"},
-                                 headers = {"Authorization": "Token {}".format(API_TOKEN)})
-        traceback.print_exc()
+        try:
+            r = makeRequestWithRetry('PATCH',
+                                     trial_url, data={"status": "error"},
+                                     headers = {"Authorization": "Token {}".format(API_TOKEN)})
+            traceback.print_exc()
+
+            if ERROR_LOG:
+                stack = traceback.format_exc()
+                writeToErrorLog(error_log_path, trial["session"], trial["id"],
+                                e, stack)
+
+        except:
+            traceback.print_exc()
+
+            if ERROR_LOG:
+                stack = traceback.format_exc()
+                writeToErrorLog(error_log_path, trial["session"], trial["id"],
+                                e, stack)
 
         # Antoine: Removing this, it is too often causing the machines to stop. Not because
         # the machines are failing, but because for instance the video is very long with a lot
@@ -178,8 +196,16 @@ while True:
     
     finally:
         # End process duration timer and post duration to database
-        process_end_time = datetime.now()
-        postProcessedDuration(trial_url, process_end_time - process_start_time)
+        try:
+            process_end_time = datetime.now()
+            postProcessedDuration(trial_url, process_end_time - process_start_time)
+        except Exception as e:
+            traceback.print_exc()
+
+            if ERROR_LOG:
+                stack = traceback.format_exc()
+                writeToErrorLog(error_log_path, trial["session"], trial["id"],
+                                e, stack)
 
     justProcessed = True
     
