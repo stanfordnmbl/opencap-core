@@ -13,8 +13,14 @@ services:
         reservations:
           devices:
             - driver: nvidia
-              count: 1
               capabilities: [gpu]
+              device_ids: ["${INSTANCE_ID}"]
+    cpuset: "${CPU_SET}"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"  # Rotate when the log reaches 10MB
+        max-file: "7"    # Keep the last 7 log files
   openpose:
     image: ${OPENPOSE_IMAGE_NAME}
     volumes:
@@ -24,8 +30,14 @@ services:
         reservations:
           devices:
             - driver: nvidia
-              count: 1
               capabilities: [gpu]
+              device_ids: ["${INSTANCE_ID}"]
+    cpuset: "${CPU_SET}"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"  # Rotate when the log reaches 10MB
+        max-file: "7"    # Keep the last 7 log files
   mmpose:
     image: ${MMPOSE_IMAGE_NAME}
     volumes:
@@ -35,7 +47,14 @@ services:
         reservations:
           devices:
             - driver: nvidia
-              count: 1
               capabilities: [gpu]
+              device_ids: ["${INSTANCE_ID}"]
+    cpuset: "${CPU_SET}"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"  # Rotate when the log reaches 10MB
+        max-file: "7"    # Keep the last 7 log files
+
 volumes:
   data: {}

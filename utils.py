@@ -12,10 +12,12 @@ import mimetypes
 import subprocess
 import zipfile
 import time
+import datetime
 
 import numpy as np
 import pandas as pd
 from scipy import signal
+from urllib3.util.retry import Retry
 
 from utilsAuth import getToken
 from utilsAPI import getAPIURL
@@ -102,13 +104,17 @@ def download_file(url, file_name):
         shutil.copyfileobj(response, out_file)
         
 def getTrialJson(trial_id):
-    trialJson = requests.get(API_URL + "trials/{}/".format(trial_id),
-                         headers = {"Authorization": "Token {}".format(API_TOKEN)}).json()
+    response = makeRequestWithRetry('GET',
+                                    API_URL + "trials/{}/".format(trial_id),
+                                    headers = {"Authorization": "Token {}".format(API_TOKEN)})
+    trialJson = response.json()
     return trialJson
 
 def getSessionJson(session_id):
-    sessionJson = requests.get(API_URL + "sessions/{}/".format(session_id),
-                       headers = {"Authorization": "Token {}".format(API_TOKEN)}).json()
+    response = makeRequestWithRetry('GET',
+                                    API_URL + "sessions/{}/".format(session_id),
+                                    headers = {"Authorization": "Token {}".format(API_TOKEN)})
+    sessionJson = response.json()
     
     # sort trials by time recorded
     def getCreatedAt(trial):
@@ -118,8 +124,10 @@ def getSessionJson(session_id):
     return sessionJson
 
 def getSubjectJson(subject_id):
-    subjectJson = requests.get(API_URL + "subjects/{}/".format(subject_id),
-                       headers = {"Authorization": "Token {}".format(API_TOKEN)}).json()
+    response = makeRequestWithRetry('GET',
+                                    API_URL + "subjects/{}/".format(subject_id),
+                                    headers = {"Authorization": "Token {}".format(API_TOKEN)})
+    subjectJson = response.json()
     return subjectJson
     
 def getTrialName(trial_id):
@@ -182,8 +190,10 @@ def postCalibrationOptions(session_path,session_id,overwrite=False):
                 "meta":json.dumps({'calibration':calibOptionsJson})
             }
         trial_url = "{}{}{}/".format(API_URL, "trials/", calibration_id)
-        r= requests.patch(trial_url, data=data,
-              headers = {"Authorization": "Token {}".format(API_TOKEN)})
+        r = makeRequestWithRetry('PATCH',
+                                 trial_url,
+                                 data=data,
+                                 headers = {"Authorization": "Token {}".format(API_TOKEN)})
         
         if r.status_code == 200:
             print('Wrote calibration selections to metadata.')
@@ -360,8 +370,7 @@ def getMetadataFromServer(session_id,justCheckerParams=False):
     session_desc = importMetadata(defaultMetadataPath)
     
     # Get session-specific metadata from api.
-
-    session = getSessionJson(session_id)
+    session = getSessionJson(session_id) 
     if session['meta'] is not None:
         if not justCheckerParams:
             # Backward compatibility
@@ -370,7 +379,7 @@ def getMetadataFromServer(session_id,justCheckerParams=False):
                 session_desc["mass_kg"] = float(session['meta']['subject']['mass'])
                 session_desc["height_m"] = float(session['meta']['subject']['height'])
                 if 'gender' in session['meta']['subject']:
-                    session_desc["gender_mf"] = session['meta']['subject']['gender']
+                    session_desc["gender_mf"] = getGendersDict().get(session['meta']['subject']['gender'])
                 # Before implementing the subject feature, the posemodel was stored
                 # in session['meta']['subject']. After implementing the subject
                 # feature, the posemodel is stored in session['meta']['settings']
@@ -404,7 +413,7 @@ def getMetadataFromServer(session_id,justCheckerParams=False):
                 session_desc["subjectID"] = subject_info['name']
                 session_desc["mass_kg"] = subject_info['weight']
                 session_desc["height_m"] = subject_info['height']
-                session_desc["gender_mf"] = subject_info['gender']
+                session_desc["gender_mf"] = getGendersDict().get(subject_info['gender'])
                 try:
                     session_desc["posemodel"] = session['meta']['settings']['posemodel']
                 except:
@@ -457,8 +466,9 @@ def deleteResult(trial_id, tag=None,resultNum=None):
         resultNums = [r['id'] for r in trial['results']]
 
     for rNum in resultNums:
-        requests.delete(API_URL + "results/{}/".format(rNum),
-                        headers = {"Authorization": "Token {}".format(API_TOKEN)})
+        makeRequestWithRetry('DELETE',
+                             API_URL + "results/{}/".format(rNum),
+                             headers = {"Authorization": "Token {}".format(API_TOKEN)})
         
 def deleteAllResults(session_id):
 
@@ -686,8 +696,10 @@ def changeSessionMetadata(session_ids,newMetaDict):
         
         data = {"meta":json.dumps(existingMeta)}
         
-        r= requests.patch(session_url, data=data,
-              headers = {"Authorization": "Token {}".format(API_TOKEN)})
+        r = makeRequestWithRetry('PATCH',
+                                 session_url,
+                                 data=data,
+                                 headers = {"Authorization": "Token {}".format(API_TOKEN)})
         
         if r.status_code !=200:
             print('Changing metadata failed.')
@@ -734,9 +746,11 @@ def makeSessionPublic(session_id,publicStatus=True):
     data = {
             "public":publicStatus
         }
-        
-    r= requests.patch(session_url, data=data,
-          headers = {"Authorization": "Token {}".format(API_TOKEN)})
+    
+    r = makeRequestWithRetry('PATCH',
+                             session_url,
+                             data=data,
+                             headers = {"Authorization": "Token {}".format(API_TOKEN)})
     
     if r.status_code == 200:
         print('Successfully made ' + session_id + ' public.')
@@ -860,11 +874,17 @@ def postFileToTrial(filePath,trial_id,tag,device_id):
         
     # get S3 link
     data = {'fileName':os.path.split(filePath)[1]}
-    r = requests.get(API_URL + "sessions/null/get_presigned_url/",data=data).json()
+    response = makeRequestWithRetry('GET',
+                                    API_URL + "sessions/null/get_presigned_url/",
+                                    data=data)
+    r = response.json()
     
     # upload to S3
     files = {'file': open(filePath, 'rb')}
-    requests.post(r['url'], data=r['fields'],files=files)   
+    makeRequestWithRetry('POST',
+                         r['url'],
+                         data=r['fields'],
+                         files=files)
     files["file"].close()
 
     # post link to and data to results   
@@ -875,8 +895,10 @@ def postFileToTrial(filePath,trial_id,tag,device_id):
         "media_url" : r['fields']['key']
     }
     
-    rResult = requests.post(API_URL + "results/", data=data,
-                  headers = {"Authorization": "Token {}".format(API_TOKEN)})
+    rResult = makeRequestWithRetry('POST',
+                                   API_URL + "results/", 
+                                   data=data,
+                                   headers = {"Authorization": "Token {}".format(API_TOKEN)})
     
     if rResult.status_code != 201:
         print('server response was + ' + str(r.status_code))
@@ -1483,8 +1505,11 @@ def checkForTrialsWithStatus(status,hours=9999999,relativeTime='newer'):
               'justNumber':1,
               'relativeTime':relativeTime}
     
-    r = requests.get(API_URL+"trials/get_trials_with_status/",params=params,
-        headers = {"Authorization": "Token {}".format(API_TOKEN)}).json()
+    response = makeRequestWithRetry('GET',
+                                    API_URL+"trials/get_trials_with_status/",
+                                    params=params,
+                                    headers = {"Authorization": "Token {}".format(API_TOKEN)})
+    r = response.json()
     
     return r['nTrials']
 
@@ -1561,11 +1586,42 @@ def checkCudaTF():
         sendStatusEmail(message=message)
         raise Exception("No GPU detected. Exiting.")
 
+def writeToJsonLog(path, new_dict, max_entries=1000):
+    dir_name = os.path.dirname(path)
+    if not os.path.exists(dir_name):
+        os.makedirs(dir_name)
+
+    if os.path.exists(path):
+        with open(path, 'r') as f:
+            data = json.load(f)
+    else:
+        data = []
+
+    data.append(new_dict)
+
+    while len(data) > max_entries:
+        data.pop(0)
+
+    with open(path, 'w') as f:
+        json.dump(data, f)
+
+def writeToErrorLog(path, session_id, trial_id, error, stack, max_entries=1000):
+    error_entry = {
+        'session_id': session_id,
+        'trial_id': trial_id,
+        'datetime': datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S"),
+        'error': str(error),
+        'stack': stack
+    }
+    writeToJsonLog(path, error_entry, max_entries)
+
 # %% Some functions for loading subject data
 
 def getSubjectNumber(subjectName):
-    subjects = requests.get(API_URL + "subjects/",
-                           headers = {"Authorization": "Token {}".format(API_TOKEN)}).json()
+    response = makeRequestWithRetry('GET',
+                                    API_URL + "subjects/",
+                                    headers = {"Authorization": "Token {}".format(API_TOKEN)})
+    subjects = response.json()
     sNum = [s['id'] for s in subjects if s['name'] == subjectName]
     if len(sNum)>1:
         print(len(sNum) + ' subjects with the name ' + subjectName + '. Will use the first one.')   
@@ -1575,8 +1631,10 @@ def getSubjectNumber(subjectName):
     return sNum[0]
 
 def getUserSessions():
-    sessionJson = requests.get(API_URL + "sessions/valid/",
-                           headers = {"Authorization": "Token {}".format(API_TOKEN)}).json()
+    response = makeRequestWithRetry('GET',
+                                    API_URL + "sessions/valid/",
+                                    headers = {"Authorization": "Token {}".format(API_TOKEN)})
+    sessionJson = response.json()
     return sessionJson
 
 def getSubjectSessions(subjectName):
@@ -1617,6 +1675,16 @@ def get_entry_with_largest_number(trialList):
 
     return max_entry
 
+def getGendersDict():
+    genders_dict = {
+          "woman": "Woman",
+          "man": "Man",
+          "transgender": "Transgender",
+          "non-binary": "Non-Binary/Non-Conforming",
+          "prefer-not-respond": "Prefer not to respond",
+        }
+    return genders_dict
+
 # Get local client info and update
 
 def getCommitHash():
@@ -1638,8 +1706,10 @@ def postLocalClientInfo(trial_url):
             "git_commit": getCommitHash(),
             "hostname": getHostname()
         }
-    r = requests.patch(trial_url, data=data,
-          headers = {"Authorization": "Token {}".format(API_TOKEN)})
+    r = makeRequestWithRetry('PATCH',
+                             trial_url,
+                             data=data,
+                             headers = {"Authorization": "Token {}".format(API_TOKEN)})
     
     return r
 
@@ -1650,7 +1720,49 @@ def postProcessedDuration(trial_url, duration):
     data = {
         "processed_duration": duration
     }
-    r = requests.patch(trial_url, data=data,
-            headers = {"Authorization": "Token {}".format(API_TOKEN)})
+    r = makeRequestWithRetry('PATCH',
+                             trial_url,
+                             data=data,
+                             headers = {"Authorization": "Token {}".format(API_TOKEN)})
     
     return r
+
+# utils for common HTTP requests
+def makeRequestWithRetry(method, url,
+                         headers=None, data=None, params=None, files=None,
+                         retries=5, backoff_factor=1):
+    """
+    Makes an HTTP request with retry logic and returns the Response object.
+
+    Args:
+        method (str): HTTP method (e.g., 'GET', 'POST', 'PUT', etc.) as used in 
+            requests.Session().request()
+        url (str): The endpoint URL.
+        headers (dict): Headers to include in the request.
+        data (dict): Data to send in the request body.
+        params (dict): URL query parameters.
+        retries (int): Number of retry attempts.
+        backoff_factor (float): Backoff factor for exponential delays.
+
+    Returns:
+        requests.Response: The response object for further processing.
+    """
+    retry_strategy = Retry(
+        total=retries,
+        backoff_factor=backoff_factor,
+        status_forcelist=[429, 500, 502, 503, 504],
+        allowed_methods={'DELETE', 'GET', 'POST', 'PUT', 'PATCH'}
+    )
+
+    adapter = requests.adapters.HTTPAdapter(max_retries=retry_strategy)
+    with requests.Session() as session:
+        session.mount("https://", adapter)
+        response = session.request(method,
+                                    url,
+                                    headers=headers,
+                                    data=data,
+                                    params=params,
+                                    files=files)
+    response.raise_for_status()
+    return response
+
