@@ -1586,7 +1586,7 @@ def checkCudaTF():
         sendStatusEmail(message=message)
         raise Exception("No GPU detected. Exiting.")
 
-def writeToJsonLog(path, new_dict, max_entries=1000):
+def writeToJsonLog(path, new_dict, max_entries=1000, indent=2):
     dir_name = os.path.dirname(path)
     if not os.path.exists(dir_name):
         os.makedirs(dir_name)
@@ -1603,7 +1603,7 @@ def writeToJsonLog(path, new_dict, max_entries=1000):
         data.pop(0)
 
     with open(path, 'w') as f:
-        json.dump(data, f)
+        json.dump(data, f, indent=indent)
 
 def writeToErrorLog(path, session_id, trial_id, error, stack, max_entries=1000):
     error_entry = {
