@@ -79,7 +79,8 @@ while True:
         continue
 
     if r.status_code == 404:
-        logging.info("...pulling " + workerType + " trials from " + API_URL)
+        logging.info(f"...pulling {workerType} trials from {API_URL} "
+                     f"using commit {getCommitHash()}")
         time.sleep(1)
         
         # When using autoscaling, we will remove the instance scale-in protection if it hasn't
