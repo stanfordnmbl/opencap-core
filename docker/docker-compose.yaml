@@ -38,6 +38,7 @@ services:
       options:
         max-size: "100m"  # Rotate when the log reaches 10MB
         max-file: "7"    # Keep the last 7 log files
+    restart: on-failure:3
   mmpose:
     image: ${MMPOSE_IMAGE_NAME}
     volumes:
@@ -55,6 +56,7 @@ services:
       options:
         max-size: "100m"  # Rotate when the log reaches 10MB
         max-file: "7"    # Keep the last 7 log files
+    restart: on-failure:3
 
 volumes:
   data: {}

@@ -69,8 +69,8 @@ while True:
         if os.path.isfile(bboxPath):
             os.remove(bboxPath)
         
-        logging.info("Done. Cleaning up")
+        logging.info("mmpose: Done. Cleaning up")
         
     except:
-        logging.info("Pose detection failed.")
+        logging.info("mmpose: Pose detection failed.")
         os.remove(video_path)

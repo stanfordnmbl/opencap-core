@@ -6,6 +6,7 @@ import json
 import logging
 import time
 import random
+import urllib
 
 from main import main
 from utils import getDataDirectory
@@ -500,28 +501,28 @@ def runTestSession(pose='all',isDocker=True,maxNumTries=3):
             logging.info("\n\n\nStatus check succeeded. \n\n")
             return
         
-        # Catch and re-enter while loop if it's an HTTPError (could be more
-        # than just 404 errors). Wait between 30 and 60 seconds before 
-        # retrying.
-        except requests.exceptions.HTTPError as e:
+        # Catch and re-enter while loop if it's an HTTPError or URLError 
+        # (could be more than just 404 errors). Wait between 30 and 60 seconds 
+        # before retrying.
+        except (requests.exceptions.HTTPError, urllib.error.URLError) as e:
             if numTries < maxNumTries:
-                logging.info(f"test trial failed on try #{numTries} due to HTTPError. Retrying.")
+                logging.info(f"test trial failed on try #{numTries} due to HTTPError or URLError. Retrying.")
                 wait_time = random.randint(30,60)
                 logging.info(f"waiting {wait_time} seconds then retrying...")
                 time.sleep(wait_time)
                 continue
             else:
-                logging.info(f"test trial failed on try #{numTries} due to HTTPError.")
+                logging.info(f"test trial failed on try #{numTries} due to HTTPError or URLError.")
                 # send email
-                message = "A backend OpenCap machine failed the status check (HTTPError). It has been stopped."
+                message = "A backend OpenCap machine failed the status check (HTTPError or URLError). It has been stopped."
                 sendStatusEmail(message=message)
-                raise Exception('Failed status check (HTTPError). Stopped.')
+                raise Exception('Failed status check (HTTPError or URLError). Stopped.')
         
         # Catch other errors and stop
         except:
             logging.info("test trial failed. stopping machine.")
             # send email
-            message = "A backend OpenCap machine failed the status check. It has been stopped."
+            message = "A backend OpenCap machine failed the status check (not HTTPError or URLError). It has been stopped."
             sendStatusEmail(message=message)
             raise Exception('Failed status check. Stopped.')
             
