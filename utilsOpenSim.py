@@ -596,7 +596,7 @@ def compareTRCAndForcesTime(pathTRC,pathForces):
 # %% This takes model and IK and generates a json of body transforms that can 
 # be passed to the webapp visualizer
 def generateVisualizerJson(modelPath,ikPath,jsonOutputPath,statesInDegrees=True,
-                           vertical_offset=None):
+                           vertical_offset=None, roundToRotations=None, roundToTranslations=None):
     
     opensim.Logger.setLevelString('error')
     model = opensim.Model(modelPath)
@@ -693,8 +693,14 @@ def generateVisualizerJson(modelPath,ikPath,jsonOutputPath,statesInDegrees=True,
             # geometry origin. Ayman said getting transform to Geometry::Mesh is safest
             # but we don't have access to it thru API and Ayman said what we're doing
             # is OK for now
-            visualizeDict['bodies'][body.getName()]['rotation'].append(body.getTransformInGround(state).R().convertRotationToBodyFixedXYZ().to_numpy().tolist())
-            visualizeDict['bodies'][body.getName()]['translation'].append(body.getTransformInGround(state).T().to_numpy().tolist())
+            c_rotations = body.getTransformInGround(state).R().convertRotationToBodyFixedXYZ().to_numpy()
+            c_translations = body.getTransformInGround(state).T().to_numpy()
+            if roundToRotations is not None:                
+                c_rotations = np.round(c_rotations, roundToRotations)
+            if roundToTranslations is not None:
+                c_translations = np.round(c_translations, roundToTranslations)
+            visualizeDict['bodies'][body.getName()]['rotation'].append(c_rotations.tolist())
+            visualizeDict['bodies'][body.getName()]['translation'].append(c_translations.tolist())            
             
     with open(jsonOutputPath, 'w') as f:
         json.dump(visualizeDict, f)
