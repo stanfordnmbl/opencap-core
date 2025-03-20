@@ -61,7 +61,7 @@ def main(sessionName, trialName, trial_id, cameras_to_use=['all'],
     resolutionPoseDetection = resolutionPoseDetection
     # Set to False to only generate the json files (default is True).
     # This speeds things up and saves storage space.
-    generateVideo = True
+    generateVideo = False
     # This is a hack to handle a mismatch between the use of mmpose and hrnet,
     # and between the use of OpenPose and openpose.
     if poseDetector == 'hrnet':

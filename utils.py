@@ -97,6 +97,12 @@ def importMetadata(filePath):
     
     return parsedYamlFile
 
+def saveMetadata(metadataDict,filePath):
+    with open(filePath, 'w') as file:
+        yaml.dump(metadataDict, file)
+        
+    return
+
 def download_file(url, file_name):
     with urllib.request.urlopen(url) as response, open(file_name, 'wb') as out_file:
         shutil.copyfileobj(response, out_file)
@@ -369,8 +375,6 @@ def getMetadataFromServer(session_id,justCheckerParams=False):
                 session_desc["subjectID"] = session['meta']['subject']['id']
                 session_desc["mass_kg"] = float(session['meta']['subject']['mass'])
                 session_desc["height_m"] = float(session['meta']['subject']['height'])
-                if 'gender' in session['meta']['subject']:
-                    session_desc["gender_mf"] = session['meta']['subject']['gender']
                 # Before implementing the subject feature, the posemodel was stored
                 # in session['meta']['subject']. After implementing the subject
                 # feature, the posemodel is stored in session['meta']['settings']
@@ -379,32 +383,17 @@ def getMetadataFromServer(session_id,justCheckerParams=False):
                     session_desc["posemodel"] = session['meta']['subject']['posemodel']
                 except:
                     session_desc["posemodel"] = 'openpose'
-                # This might happen if openSimModel/augmentermodel/filterfrequency/scalingsetup was changed post data collection.
+                # This might happen if openSimModel was changed post data collection.
                 if 'settings' in session['meta']:
                     try:
                         session_desc["openSimModel"] = session['meta']['settings']['openSimModel']
                     except:
                         session_desc["openSimModel"] = 'LaiUhlrich2022'
-                    try:
-                        session_desc["augmentermodel"] = session['meta']['settings']['augmentermodel']
-                    except:
-                        session_desc["augmentermodel"] = 'v0.2'
-                    try:
-                        session_desc["filterfrequency"] = session['meta']['settings']['filterfrequency']
-                        if session_desc["filterfrequency"] != 'default':
-                            session_desc["filterfrequency"] = float(session_desc["filterfrequency"])
-                    except:
-                        session_desc["filterfrequency"] = 'default'
-                    try:
-                        session_desc["scalingsetup"] = session['meta']['settings']['scalingsetup']
-                    except:
-                        session_desc["scalingsetup"] = 'upright_standing_pose'
             else:                
                 subject_info = getSubjectJson(session['subject'])                
                 session_desc["subjectID"] = subject_info['name']
                 session_desc["mass_kg"] = subject_info['weight']
                 session_desc["height_m"] = subject_info['height']
-                session_desc["gender_mf"] = subject_info['gender']
                 try:
                     session_desc["posemodel"] = session['meta']['settings']['posemodel']
                 except:
@@ -413,20 +402,6 @@ def getMetadataFromServer(session_id,justCheckerParams=False):
                     session_desc["openSimModel"] = session['meta']['settings']['openSimModel']
                 except:
                     session_desc["openSimModel"] = 'LaiUhlrich2022'
-                try:
-                    session_desc["augmentermodel"] = session['meta']['settings']['augmentermodel']
-                except:
-                    session_desc["augmentermodel"] = 'v0.2'
-                try:
-                    session_desc["filterfrequency"] = session['meta']['settings']['filterfrequency']
-                    if session_desc["filterfrequency"] != 'default':
-                        session_desc["filterfrequency"] = float(session_desc["filterfrequency"])
-                except:
-                    session_desc["filterfrequency"] = 'default'
-                try:
-                    session_desc["scalingsetup"] = session['meta']['settings']['scalingsetup']
-                except:
-                    session_desc["scalingsetup"] = 'upright_standing_pose'
 
         if 'sessionWithCalibration' in session['meta'] and 'checkerboard' not in session['meta']:
             newSessionId = session['meta']['sessionWithCalibration']['id']
@@ -576,7 +551,7 @@ def downloadAndSwitchCalibrationFromDjango(session_id,session_path,calibTrialID 
        
     calibURLs = {t['device_id']:t['media'] for t in trial['results'] if t['tag'] == 'calibration_parameters_options'}
     
-    if 'meta' in trial.keys() and trial['meta'] is not None and 'calibration' in trial['meta'].keys() and trial['meta']['calibration']:
+    if 'meta' in trial.keys() and trial['meta'] is not None and 'calibration' in trial['meta'].keys():
         calibDict = trial['meta']['calibration']
     else:
         print('No metadata for camera switching. Using first solution.')
@@ -610,20 +585,7 @@ def downloadAndSwitchCalibrationFromDjango(session_id,session_path,calibTrialID 
     else:
         return None
     
-def changeSessionMetadata(session_ids,newMetaDict):
-
-    if 'filterfrequency' in newMetaDict and newMetaDict['filterfrequency'] != 'default':
-        if type(newMetaDict['filterfrequency']) is not str:
-            newMetaDict['filterfrequency'] = str(newMetaDict['filterfrequency'])
-        else:
-            raise Exception('Filter frequency should be a number or default.')
-        
-    if 'datasharing' in newMetaDict:
-        if newMetaDict['datasharing'] not in ['Share processed data and identified videos',
-                                                'Share processed data and de-identified videos',
-                                                'Share processed data',
-                                                'Share no data']:
-                raise Exception('datasharing is {} but should be one of the following options: "Share processed data and identified videos", "Share processed data and de-identified videos", "Share processed data", "Share no data".'.format(newMetaDict['datasharing']))
+def changeSessionMetadata(session_ids,newMetaDict):   
    
     for session_id in session_ids:
         session_url = "{}{}{}/".format(API_URL, "sessions/", session_id)
@@ -631,18 +593,6 @@ def changeSessionMetadata(session_ids,newMetaDict):
         # get metadata
         session = getSessionJson(session_id)
         existingMeta = session['meta']
-        
-        # Check if framerate is in metadata. If not, set to 60
-        if 'framerate' not in existingMeta:
-            framerate = 60
-        else:
-            framerate = existingMeta['framerate']
-        if 'filterfrequency' in newMetaDict:
-            if newMetaDict['filterfrequency'] != 'default':
-                if float(newMetaDict['filterfrequency']) > framerate/2:
-                    raise Exception('Filter frequency cannot exceed Nyquist frequency (here {}Hz).'.format(framerate/2))
-                elif float(newMetaDict['filterfrequency']) < 0:
-                    raise Exception('Filter frequency cannot be negative.')        
         
         # change metadata
         # Hack: wrong mapping between metadata and yaml
@@ -674,15 +624,13 @@ def changeSessionMetadata(session_ids,newMetaDict):
         for newMeta in newMetaDict:
             if not newMeta in addedKey:
                 print("Could not find {} in existing metadata, trying to add it.".format(newMeta))
-                settings_fields = ['framerate', 'posemodel', 'openSimModel', 'augmentermodel', 'filterfrequency', 'scalingsetup', 'camerastouse']
+                settings_fields = ['framerate', 'posemodel', 'openSimModel']
                 if newMeta in settings_fields:
-                    if 'settings' not in existingMeta:
-                        existingMeta['settings'] = {}
                     existingMeta['settings'][newMeta] = newMetaDict[newMeta]
                     addedKey[newMeta] = newMetaDict[newMeta]
-                    print("Added {}={} to settings in metadata".format(newMeta, newMetaDict[newMeta]))
+                    print("Added {} to settings in metadata".format(newMetaDict[newMeta]))
                 else:
-                    print("Could not add {}={} to the metadata; not recognized".format(newMeta, newMetaDict[newMeta]))
+                    print("Could not add {} to the metadata; not recognized".format(newMetaDict[newMeta]))
         
         data = {"meta":json.dumps(existingMeta)}
         
@@ -698,34 +646,33 @@ def changeSessionMetadata(session_ids,newMetaDict):
         resultTags = [res['tag'] for res in trial['results']]
         
         metaPath = os.path.join(os.getcwd(),'sessionMetadata.yaml')
-        if 'session_metadata' in resultTags:
-            yamlURL = trial['results'][resultTags.index('session_metadata')]['media']
-            download_file(yamlURL,metaPath)
+        yamlURL = trial['results'][resultTags.index('session_metadata')]['media']
+        download_file(yamlURL,metaPath)
+        
+        metaYaml = importMetadata(metaPath)
+        
+        addedKey= {}
+        for key in metaYaml.keys():
+            if key in newMetaDict.keys():
+                metaYaml[key] = newMetaDict[key]
+                addedKey[key] = newMetaDict[key]
+            if type(metaYaml[key]) is dict:
+                for key2 in metaYaml[key].keys():
+                    if key2 in newMetaDict.keys():
+                        metaYaml[key][key2] = newMetaDict[key2] 
+                        addedKey[key2] = newMetaDict[key2]
+                        
+        for newMeta in newMetaDict:
+            if not newMeta in addedKey:
+               print("Could not find {} in existing yaml, adding it.".format(newMeta))               
+               metaYaml[newMeta] = newMetaDict[newMeta]
+                        
+        with open(metaPath, 'w') as file:
+            yaml.dump(metaYaml, file)
             
-            metaYaml = importMetadata(metaPath)
-            
-            addedKey= {}
-            for key in metaYaml.keys():
-                if key in newMetaDict.keys():
-                    metaYaml[key] = newMetaDict[key]
-                    addedKey[key] = newMetaDict[key]
-                if type(metaYaml[key]) is dict:
-                    for key2 in metaYaml[key].keys():
-                        if key2 in newMetaDict.keys():
-                            metaYaml[key][key2] = newMetaDict[key2] 
-                            addedKey[key2] = newMetaDict[key2]
-                            
-            for newMeta in newMetaDict:
-                if not newMeta in addedKey:
-                    print("Could not find {} in existing yaml, adding it.".format(newMeta))               
-                    metaYaml[newMeta] = newMetaDict[newMeta]
-                            
-            with open(metaPath, 'w') as file:
-                yaml.dump(metaYaml, file)
-                
-            deleteResult(trial_id, tag='session_metadata')
-            postFileToTrial(metaPath,trial_id,tag='session_metadata',device_id='all')
-            os.remove(metaPath)
+        deleteResult(trial_id, tag='session_metadata')
+        postFileToTrial(metaPath,trial_id,tag='session_metadata',device_id='all')
+        os.remove(metaPath)
         
 def makeSessionPublic(session_id,publicStatus=True):
     
@@ -746,41 +693,23 @@ def makeSessionPublic(session_id,publicStatus=True):
     return
 
         
-def postMotionData(trial_id,session_path,trial_name=None,isNeutral=False,
-                   poseDetector='OpenPose', resolutionPoseDetection='default',
-                   bbox_thr=0.8):
-    
+def postMotionData(trial_id,session_path,trial_name=None,isNeutral=False):
     if trial_name == None:
         trial_name = getTrialJson(trial_id)['id']
-
-    if poseDetector.lower() == 'openpose':
-        pklDir = os.path.join("OutputPkl_" + resolutionPoseDetection, trial_name)
-    elif poseDetector.lower() == 'hrnet':
-        pklDir = os.path.join("OutputPkl_mmpose_" + str(bbox_thr), trial_name)
-    else:
-        raise Exception('Unknown pose detector: {}'.format(poseDetector))
-        
-    markerDir = os.path.join(session_path,'MarkerData','PostAugmentation')
-        
-    # post settings
-    deleteResult(trial_id, tag='main_settings')
-    mainSettingsPath = os.path.join(markerDir,'Settings_{}.yaml'.format(trial_id))
-    postFileToTrial(mainSettingsPath,trial_id,tag='main_settings',device_id='all')
         
     # post pose pickles
     # If we parallelize this, this will be redundant, and we will want to delete this posting of pickles
     deleteResult(trial_id, tag='pose_pickle')
     camDirs = glob.glob(os.path.join(session_path,'Videos','Cam*'))
     for camDir in camDirs:
-        outputPklFolder = os.path.join(camDir,pklDir)
-        pickle_files = glob.glob(os.path.join(outputPklFolder,'*_pp.pkl'))
-        if pickle_files:
-            pklPath = pickle_files[0]
-            _,camName = os.path.split(camDir)
-            postFileToTrial(pklPath,trial_id,tag='pose_pickle',device_id=camName)
+        outputPklFolder = glob.glob(os.path.join(camDir,'OutputPkl*'))[0]
+        pklPath = glob.glob(os.path.join(outputPklFolder,trial_name,'*.pkl'))[0]
+        _,camName = os.path.split(camDir)
+        postFileToTrial(pklPath,trial_id,tag='pose_pickle',device_id=camName)
         
     # post marker data
     deleteResult(trial_id, tag='marker_data')
+    markerDir = os.path.join(session_path,'MarkerData','PostAugmentation')
     markerPath = os.path.join(markerDir,trial_id + '.trc')
     postFileToTrial(markerPath,trial_id,tag='marker_data',device_id='all')
     
@@ -800,6 +729,11 @@ def postMotionData(trial_id,session_path,trial_name=None,isNeutral=False,
         deleteResult(trial_id, tag='ik_results')
         ikPath = os.path.join(session_path,'OpenSimData','Kinematics',trial_id + '.mot')
         postFileToTrial(ikPath,trial_id,tag='ik_results',device_id='all')
+    
+    # post settings
+    deleteResult(trial_id, tag='main_settings')
+    mainSettingsPath = os.path.join(markerDir,'Settings_{}.yaml'.format(trial_id))
+    postFileToTrial(mainSettingsPath,trial_id,tag='main_settings',device_id='all')
         
     return
 
@@ -901,85 +835,82 @@ def getSyncdVideos(trial_id,session_path):
                 syncVideoPath = os.path.join(session_path,'Videos',cam,'InputMedia',trial_name,trial_name + '_sync' + suff)
                 download_file(url,syncVideoPath)
 
-def getPosePickles(trial_id,session_path, poseDetector='OpenPose', 
-                   resolutionPoseDetection='default', bbox_thr=0.8):
-    trial = getTrialJson(trial_id)
-    trial_name = trial['name']
-
-    if poseDetector.lower() == 'openpose':
-        pklDir = os.path.join("OutputPkl_" + resolutionPoseDetection, trial_name)
-    elif poseDetector.lower() == 'hrnet':
-        pklDir = os.path.join("OutputPkl_mmpose_" + str(bbox_thr), trial_name)
-    else:
-        raise Exception('Unknown pose detector: {}'.format(poseDetector))
+def downloadSomeStuff(session_id,deleteFolderWhenZipped=True,isDocker=True,
+                          writeToDjango=False,justDownload=False,data_dir=None,
+                          useSubjectNameFolder=False, includeVideos=False):
     
-    trialPrefix = trial_id + "_rotated_pp.pkl"
+    session = getSessionJson(session_id)
     
-    if trial['results']:
-        for result in trial['results']:
-            if result['tag'] == 'pose_pickle':
-                url = result['media']                
-                cam = result['device_id']
-                posePickleDir = os.path.join(session_path,'Videos',cam,pklDir)
-                os.makedirs(posePickleDir,exist_ok=True)
-                posePicklePath = os.path.join(posePickleDir,trialPrefix)
-                download_file(url,posePicklePath)
-
-def checkAndGetPosePickles(trial_id, session_path, poseDetector, resolutionPoseDetection, bbox_thr):
-    # Check if the pose pickles for that set of settings exist.
-    # Load main_settings yaml.
-    main_settings = getMainSettings(trial_id)
-    if 'poseDetector' in main_settings:
-        usedPoseDetector = main_settings['poseDetector']
-        if poseDetector.lower() == 'openpose':
-            if 'resolutionPoseDetection' in main_settings:
-                usedResolution = main_settings['resolutionPoseDetection']
-                if usedPoseDetector.lower() == poseDetector.lower() and usedResolution == resolutionPoseDetection:
-                    print('The pose pickles for {} {} already exist in the database. We will download them to avoid re-running pose estimation'.format(poseDetector, resolutionPoseDetection))
-                    getPosePickles(trial_id,session_path, poseDetector=poseDetector, resolutionPoseDetection=resolutionPoseDetection)
-                else:
-                    print('The pose pickles in the database are for {} {}, but you are now using {} {}. We will re-run pose estimation'.format(usedPoseDetector, usedResolution, poseDetector, resolutionPoseDetection))
-            else:
-                print('It is unclear which settings were used for pose estimation. We will re-run pose estimation')
-        elif poseDetector.lower() == 'hrnet':
-            # Hack: hrnet is sometimes called mmpose
-            if usedPoseDetector.lower() == 'mmpose':
-                usedPoseDetector = 'hrnet'
-            if 'bbox_thr' in main_settings:
-                usedBbox_thr = main_settings['bbox_thr']
-            else:
-                # There was a bug in main, where bbox_thr was not saved in main_settings.yaml.
-                # Since there is in practice no option to change bbox_thr in the GUI, we can
-                # assume that the default value was used.
-                usedBbox_thr = 0.8
-            if usedPoseDetector.lower() == poseDetector.lower() and usedBbox_thr == bbox_thr:
-                print('The pose pickles for {} {} already exist in the database. We will download them to avoid re-running pose estimation'.format(poseDetector, bbox_thr))
-                getPosePickles(trial_id,session_path, poseDetector=poseDetector, bbox_thr=bbox_thr)
-            else:
-                print('The pose pickles in the database are for {} {}, but you are now using {} {}. We will re-run pose estimation'.format(usedPoseDetector, usedBbox_thr, poseDetector, bbox_thr))
-        else:
-            print('It is unclear which settings were used for pose estimation. We will re-run pose estimation')
+    if data_dir is None:
+        data_dir = os.path.join(getDataDirectory(isDocker=isDocker),'Data')
+    if useSubjectNameFolder:
+        folderName = session['name']
     else:
-        print('It is unclear which settings were used for pose estimation. We will re-run pose estimation')
+        folderName = session_id
+    session_path = os.path.join(data_dir,folderName)
+    if not os.path.exists(session_path): 
+        os.makedirs(session_path, exist_ok=True)
+    
+    calib_id = getCalibrationTrialID(session_id)
+    neutral_id = getNeutralTrialID(session_id)
+    dynamic_ids = [t['id'] for t in session['trials'] if (t['name'] != 'calibration' and t['name'] !='neutral')]
+       
+    # Calibration
+    if includeVideos:
+        downloadVideosFromServer(session_id,calib_id,isDocker=isDocker,
+                             isCalibration=True,isStaticPose=False) 
+    if includeVideos:
+        getCalibration(session_id,session_path)
+    
+    # Neutral
+    getModelAndMetadata(session_id,session_path)
+    getMotionData(neutral_id,session_path)
+    if includeVideos:
+        downloadVideosFromServer(session_id,neutral_id,isDocker=isDocker,
+                         isCalibration=False,isStaticPose=True,session_path=session_path)
+        getSyncdVideos(neutral_id,session_path)
 
-def getMainSettings(trial_id):
-    trial = getTrialJson(trial_id)
-    if len(trial['results'])>1:
-        for result in trial['results']:
-            if result['tag'] == 'main_settings':
-                url = result['media']
-                # Load yaml file
-                try:
-                    with urllib.request.urlopen(url) as response:
-                        yaml_content = response.read()
-                        data = yaml.safe_load(yaml_content)
-                        return data
-                except Exception as e:
-                    print("An error occurred:", e)
-                    return {}  # Return an empty dictionary in case of an error
-    else:
-        return {}
+    # Dynamic
+    for dynamic_id in dynamic_ids:
+        getMotionData(dynamic_id,session_path)
+        if includeVideos:
+            downloadVideosFromServer(session_id,dynamic_id,isDocker=isDocker,
+                     isCalibration=False,isStaticPose=False,session_path=session_path)
+            getSyncdVideos(dynamic_id,session_path)
+
+   
+    if not justDownload:
+        # Zip   
+        def zipdir(path, ziph):
+            # ziph is zipfile handle
+            for root, dirs, files in os.walk(path):
+                for file in files:
+                    ziph.write(os.path.join(root, file), 
+                               os.path.relpath(os.path.join(root, file), 
+                                               os.path.join(path, '..')))
         
+        session_zip = '{}.zip'.format(session_path)
+    
+        if os.path.isfile(session_zip):
+            os.remove(session_zip)
+      
+        zipf = zipfile.ZipFile(session_zip, 'w', zipfile.ZIP_DEFLATED)
+        zipdir(session_path, zipf)
+        zipf.close()
+        
+        # write zip as a result to last trial for now
+        if writeToDjango:
+            postFileToTrial(session_zip,dynamic_ids[-1],tag='session_zip',device_id='all')
+        
+        if deleteFolderWhenZipped:
+            if os.path.exists(session_path):
+                shutil.rmtree(session_path)
+            if os.path.exists(session_zip):
+                os.remove(session_zip)
+    
+    return
+
+
 def downloadAndZipSession(session_id,deleteFolderWhenZipped=True,isDocker=True,
                           writeToDjango=False,justDownload=False,data_dir=None,
                           useSubjectNameFolder=False):
@@ -1370,29 +1301,6 @@ def getOpenPoseMarkers_lowerExtremity():
 
     return feature_markers, response_markers
 
-# Different order of markers compared to getOpenPoseMarkers_lowerExtremity 
-def getOpenPoseMarkers_lowerExtremity2():
-
-    feature_markers = [
-        "Neck", "RShoulder", "LShoulder", "RHip", "LHip", "RKnee", "LKnee",
-        "RAnkle", "LAnkle", "RHeel", "LHeel", "RSmallToe", "LSmallToe",
-        "RBigToe", "LBigToe"]
-
-    response_markers = [
-        'r.ASIS_study', 'L.ASIS_study', 'r.PSIS_study',
-        'L.PSIS_study', 'r_knee_study', 'r_mknee_study', 
-        'r_ankle_study', 'r_mankle_study', 'r_toe_study', 
-        'r_5meta_study', 'r_calc_study', 'L_knee_study', 
-        'L_mknee_study', 'L_ankle_study', 'L_mankle_study',
-        'L_toe_study', 'L_calc_study', 'L_5meta_study', 
-        'r_shoulder_study', 'L_shoulder_study', 'C7_study', 
-        'r_thigh1_study', 'r_thigh2_study', 'r_thigh3_study',
-        'L_thigh1_study', 'L_thigh2_study', 'L_thigh3_study',
-        'r_sh1_study', 'r_sh2_study', 'r_sh3_study', 'L_sh1_study',
-        'L_sh2_study', 'L_sh3_study', 'RHJC_study', 'LHJC_study']
-
-    return feature_markers, response_markers
-
 def getMMposeMarkers_lowerExtremity():
 
     # Here we replace RSmallToe_mmpose and LSmallToe_mmpose by RSmallToe and
@@ -1440,19 +1348,6 @@ def getMarkers_upperExtremity_noPelvis():
 
     return feature_markers, response_markers
 
-# Different order of markers compared to getMarkers_upperExtremity_noPelvis.
-def getMarkers_upperExtremity_noPelvis2():
-
-    feature_markers = [
-        "Neck", "RShoulder", "LShoulder", "RElbow", "LElbow", "RWrist",
-        "LWrist"]
-
-    response_markers = ["r_lelbow_study", "r_melbow_study", "r_lwrist_study",
-                        "r_mwrist_study", "L_lelbow_study", "L_melbow_study",
-                        "L_lwrist_study", "L_mwrist_study"]
-
-    return feature_markers, response_markers
-
 def delete_multiple_element(list_object, indices):
     indices = sorted(indices, reverse=True)
     for idx in indices:
@@ -1472,21 +1367,7 @@ def getVideoExtension(pathFileWithoutExtension):
 # check how much time has passed since last status check
 def checkTime(t,minutesElapsed=30):
     t2 = time.localtime()
-    return (t2.tm_hour - t.tm_hour) * 3600 + (t2.tm_min - t.tm_min)*60 + (t2.tm_sec - t.tm_sec) >= minutesElapsed*60
-
-# check for trials with certain status
-def checkForTrialsWithStatus(status,hours=9999999,relativeTime='newer'):
-    
-    # get trials with statusOld
-    params = {'status':status,
-              'hoursSinceUpdate':hours,
-              'justNumber':1,
-              'relativeTime':relativeTime}
-    
-    r = requests.get(API_URL+"trials/get_trials_with_status/",params=params,
-        headers = {"Authorization": "Token {}".format(API_TOKEN)}).json()
-    
-    return r['nTrials']
+    return (t2.tm_hour - t.tm_hour) * 60 + (t2.tm_min - t.tm_min) >= minutesElapsed
 
 # send status email
 def sendStatusEmail(message=None,subject=None):
@@ -1497,10 +1378,6 @@ def sendStatusEmail(message=None,subject=None):
     emailInfo = getStatusEmails()
     if emailInfo is None:
         return('No email info or wrong email info in env file.')
-    
-    if 'ip' in emailInfo:
-        ip = emailInfo['ip']
-        message = message + ' IP: ' + ip
        
     if message is None:
         message = "A backend server is down and has been stopped."
@@ -1522,7 +1399,7 @@ def sendStatusEmail(message=None,subject=None):
             server.send_message(msg)
         server.quit()
 
-def checkResourceUsage(stop_machine_and_email=True):
+def checkResourceUsage():
     import psutil
     
     resourceUsage = {}
@@ -1538,28 +1415,7 @@ def checkResourceUsage(stop_machine_and_email=True):
     resourceUsage['disk_gb'] = disk_usage.used / (1024 ** 3)
     resourceUsage['disk_perc'] = disk_usage.percent
     
-    if stop_machine_and_email and resourceUsage['disk_perc'] > 95:
-            
-        message = "Disc is full on an OpenCap backend machine. It has been stopped. Data: " \
-                            + json.dumps(resourceUsage)
-        sendStatusEmail(message=message)
-        
-        raise Exception('Not enough available disc space. Stopped.')
-    
     return resourceUsage
-
-def checkCudaTF():
-    import tensorflow as tf
-
-    if tf.config.list_physical_devices('GPU'):
-        gpus = tf.config.list_physical_devices('GPU')
-        print(f"Found {len(gpus)} GPU(s).")
-        for gpu in gpus:
-            print(f"GPU: {gpu.name}")
-    else:
-        message = "Cuda check failed on an OpenCap backend machine. It has been stopped."
-        sendStatusEmail(message=message)
-        raise Exception("No GPU detected. Exiting.")
 
 # %% Some functions for loading subject data
 
@@ -1617,40 +1473,15 @@ def get_entry_with_largest_number(trialList):
 
     return max_entry
 
-# Get local client info and update
 
-def getCommitHash():
-    """Get the git commit hash stored in the environment variable
-    GIT_COMMIT_HASH. This is assumed to be set in the Docker build
-    step. If not set, returns Null (default value for os.getenv())
-    """
-    return os.getenv('GIT_COMMIT_HASH')
+# Returns a list of all subjects of the user.
+def get_user_subjects(user_token=API_TOKEN):
+    subjects = requests.get(
+            API_URL + "subjects/",
+            headers = {"Authorization": "Token {}".format(user_token)}).json()
 
-def getHostname():
-    """Get the hostname. For a docker container, this is the container ID."""
-    return socket.gethostname()
+    return subjects
 
-def postLocalClientInfo(trial_url):
-    """Given a trial_url, updates the Trial fields for 
-    'git_commit' and 'hostname'.
-    """
-    data = {
-            "git_commit": getCommitHash(),
-            "hostname": getHostname()
-        }
-    r = requests.patch(trial_url, data=data,
-          headers = {"Authorization": "Token {}".format(API_TOKEN)})
-    
-    return r
-
-def postProcessedDuration(trial_url, duration):
-    """Given a trial_url and duration (formed from difference in datetime
-    objects), updates the Trial field for 'processed_duration'.
-    """
-    data = {
-        "processed_duration": duration
-    }
-    r = requests.patch(trial_url, data=data,
-            headers = {"Authorization": "Token {}".format(API_TOKEN)})
-    
-    return r
+def set_session_subject(session_id, subject_id):
+    requests.patch(API_URL+"sessions/{}/".format(session_id), data={'subject': subject_id},
+                     headers = {"Authorization": "Token {}".format(API_TOKEN)})

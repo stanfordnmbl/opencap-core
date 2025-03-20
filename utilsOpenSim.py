@@ -128,6 +128,7 @@ def runScaleTool(pathGenericSetupFile, pathGenericModel, subjectMass,
     os.system(command)
     
     # Sanity check
+    print(pathOutputModel)
     scaled_model = opensim.Model(pathOutputModel)
     bodySet = scaled_model.getBodySet()
     nBodies = bodySet.getSize()
