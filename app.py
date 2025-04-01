@@ -17,7 +17,10 @@ from utils import (getDataDirectory, checkTime, checkResourceUsage,
                   postProcessedDuration, makeRequestWithRetry,
                   writeToErrorLog)
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(format="[%(asctime)s] [%(levelname)s] %(message)s",
+                    level=logging.INFO,
+                    datefmt='%Y-%m-%d %H:%M:%S',
+                    force=True)
 
 API_TOKEN = getToken()
 API_URL = getAPIURL()
@@ -125,10 +128,20 @@ while True:
         error_msg['error_msg'] = 'No videos uploaded. Ensure phones are connected and you have stable internet connection.'
         error_msg['error_msg_dev'] = 'No videos uploaded.'
 
-        r = makeRequestWithRetry('PATCH',
-                                 trial_url,
-                                 data={"status": "error", "meta": json.dumps(error_msg)},
-                                 headers = {"Authorization": "Token {}".format(API_TOKEN)})
+        try: 
+            r = makeRequestWithRetry('PATCH',
+                                    trial_url,
+                                    data={"status": "error", "meta": json.dumps(error_msg)},
+                                    headers = {"Authorization": "Token {}".format(API_TOKEN)})
+            
+        except Exception as e:
+            traceback.print_exc()
+
+            if ERROR_LOG:
+                stack = traceback.format_exc()
+                writeToErrorLog(error_log_path, trial["session"], trial["id"],
+                                e, stack)
+        
         continue
 
     # The following is now done in main, to allow reprocessing trials with missing videos
