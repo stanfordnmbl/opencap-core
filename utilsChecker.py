@@ -1035,7 +1035,7 @@ def synchronizeVideoKeypoints(keypointList, confidenceList,
     # Re-sample the lists    
     vertVelList = [v[idxStart:idxEnd] for v in vertVelList]
     mkrSpeedList = [v[:,idxStart:idxEnd] for v in mkrSpeedList]
-    handPunchVertPositionList = [p[:,idxStart:idxEnd] for p in handPunchVertPositionList]
+    # handPunchVertPositionList = [p[:,idxStart:idxEnd] for p in handPunchVertPositionList]
     allMarkerList = [p[:,idxStart:idxEnd] for p in allMarkerList]
     confSyncList= [c[:,idxStart:idxEnd] for c in confidenceList]
     
