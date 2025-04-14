@@ -603,7 +603,8 @@ def main(sessionName, trialName, trial_id, cameras_to_use=['all'],
                                          trialName + '.json')
         generateVisualizerJson(pathModelIK, pathOutputIK,
                                outputJsonVisPath, 
-                               vertical_offset=vertical_offset)  
+                               vertical_offset=vertical_offset,
+                               roundToRotations=4, roundToTranslations=4)
         
     # %% Rewrite settings, adding offset  
     if not extrinsicsTrial:
