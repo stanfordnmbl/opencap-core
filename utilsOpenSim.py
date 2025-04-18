@@ -702,11 +702,10 @@ def getScaleTimeRange(pathTRCFile, thresholdPosition=0.005, thresholdTime=0.3,
             markers = [marker.replace('r_mwrist','R_wrist_ulna') for marker in markers] # should just change the mocap marker set
             markers = [marker.replace('L_mwrist','L_wrist_ulna') for marker in markers] # should just change the mocap marker set
             
-
-    trc_data = np.zeros((c_trc_time.shape[0], 3*len(markers)))
-    for count, marker in enumerate(markers):
-        trc_data[:, count*3:count*3+3] = c_trc_file.marker(marker)
-    
+# %% This takes model and IK and generates a json of body transforms that can 
+# be passed to the webapp visualizer
+def generateVisualizerJson(modelPath,ikPath,jsonOutputPath,statesInDegrees=True,
+                           vertical_offset=None, roundToRotations=None, roundToTranslations=None):    
     if removeRoot:
         try:
             root_data = c_trc_file.marker('midHip')
@@ -832,10 +831,20 @@ def addOpenPoseMarkersTool(pathModel, adjustLocationHipAnkle=True,
     markerSet = model.get_MarkerSet()  
     for marker in markersInfo:
         
-        if markersInfo[marker]["method"] == "marker":
-            referenceMarker = markerSet.get(markersInfo[marker]["reference_marker"])            
-            parentFrame = referenceMarker.getParentFrameName()
-            location = referenceMarker.get_location()
+        # get body translations and rotations in ground
+        for body in bodyset:
+            # This gives us body transform to opensim body frame, which isn't nec. 
+            # geometry origin. Ayman said getting transform to Geometry::Mesh is safest
+            # but we don't have access to it thru API and Ayman said what we're doing
+            # is OK for now
+            c_rotations = body.getTransformInGround(state).R().convertRotationToBodyFixedXYZ().to_numpy()
+            c_translations = body.getTransformInGround(state).T().to_numpy()
+            if roundToRotations is not None:                
+                c_rotations = np.round(c_rotations, roundToRotations)
+            if roundToTranslations is not None:
+                c_translations = np.round(c_translations, roundToTranslations)
+            visualizeDict['bodies'][body.getName()]['rotation'].append(c_rotations.tolist())
+            visualizeDict['bodies'][body.getName()]['translation'].append(c_translations.tolist())            
             
         if markersInfo[marker]["method"] == "jointCenter":
                 joint = jointSet.get(markersInfo[marker]["joint"])            

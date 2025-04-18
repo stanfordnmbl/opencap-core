@@ -22,6 +22,4 @@ Examples/reprocessDataServer.py
 *.ini
 *.stats
 
-tests/
-
 newsletter.py

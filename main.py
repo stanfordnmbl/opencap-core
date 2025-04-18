@@ -303,26 +303,18 @@ def main(sessionName, trialName, trial_id, cameras_to_use=['all'],
     trialRelativePath = os.path.join('InputMedia', trialName, trial_id)
     
     if runPoseDetection:
-        # Detect if checkerboard is upside down.
-        upsideDownChecker = isCheckerboardUpsideDown(CamParamDict)
         # Get rotation angles from motion capture environment to OpenSim.
         # Space-fixed are lowercase, Body-fixed are uppercase. 
         checkerBoardMount = sessionMetadata['checkerBoard']['placement']
-        if checkerBoardMount == 'backWall' and not upsideDownChecker:
-            rotationAngles = {'y':90, 'z':180}
-        elif checkerBoardMount == 'backWall' and upsideDownChecker:
-            rotationAngles = {'y':-90}
-        elif checkerBoardMount == 'backWall_largeCB':
-            rotationAngles = {'y':-90}
-        # TODO: uppercase?
-        elif checkerBoardMount == 'backWall_walking':
-            rotationAngles = {'YZ':(-90,180)}
-        elif checkerBoardMount == 'ground':
-            rotationAngles = {'x':-90, 'y':90}
-        elif checkerBoardMount == 'ground_jumps': # for sub1
-            rotationAngles = {'x':90, 'y':180}
-        elif checkerBoardMount == 'ground_gaits': # for sub1
-            rotationAngles = {'x':90, 'y':90}        
+        if checkerBoardMount == 'backWall' or checkerBoardMount == 'Perpendicular':
+            # Detect if checkerboard is upside down.
+            upsideDownChecker = isCheckerboardUpsideDown(CamParamDict)
+            if upsideDownChecker:
+                rotationAngles = {'y':-90}
+            else:
+                rotationAngles = {'y':90, 'z':180}
+        elif checkerBoardMount == 'ground' or checkerBoardMount == 'Lying':
+            rotationAngles = {'x':90, 'y':90}
         else:
             raise Exception('checkerBoard placement value in\
              sessionMetadata.yaml is not currently supported')
@@ -611,7 +603,8 @@ def main(sessionName, trialName, trial_id, cameras_to_use=['all'],
                                          trialName + '.json')
         generateVisualizerJson(pathModelIK, pathOutputIK,
                                outputJsonVisPath, 
-                               vertical_offset=vertical_offset)  
+                               vertical_offset=vertical_offset,
+                               roundToRotations=4, roundToTranslations=4)
         
     # %% Rewrite settings, adding offset  
     if not extrinsicsTrial:
