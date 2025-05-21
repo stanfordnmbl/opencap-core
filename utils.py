@@ -106,7 +106,7 @@ def saveMetadata(metadataDict,filePath):
 def download_file(url, file_name):
     with urllib.request.urlopen(url) as response, open(file_name, 'wb') as out_file:
         shutil.copyfileobj(response, out_file)
-        
+
 def getTrialJson(trial_id):
     trialJson = requests.get(API_URL + "trials/{}/".format(trial_id),
                          headers = {"Authorization": "Token {}".format(API_TOKEN)}).json()

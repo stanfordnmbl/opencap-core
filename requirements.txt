@@ -1,4 +1,5 @@
-opencv-python==4.5.1.48
+# opencv-python==4.5.1.48
+opencv-python
 pyyaml==5.4.1
 # tensorflow-gpu==2.4.1 # install with conda
 tensorflow-gpu==2.9.3 # enabled for the docker 
