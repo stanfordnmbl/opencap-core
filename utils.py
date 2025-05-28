@@ -842,7 +842,39 @@ def getMotionData(trial_id,session_path,simplePath=False):
         ikURL = trial['results'][resultTags.index('ik_results')]['media']
         download_file(ikURL,ikPath)
     
-    # TODO will want to get pose pickles eventually, once those are processed elsewhere
+    # get pose pickles
+    if 'pose_pickle' in resultTags:
+        # metadata needed for pose pickle folder naming
+        main_settings = getMainSettings(trial_id)
+        poseDetector = main_settings['poseDetector']
+
+        # sometimes mmpose is used instead of hrnet
+        if poseDetector.lower() == 'mmpose':
+            poseDetector = 'hrnet'
+
+        # infer pose detection from main settings to get correct folders
+        if poseDetector.lower() == 'openpose':
+            getPosePickles(trial_id, session_path,
+                           poseDetector=poseDetector,
+                           resolutionPoseDetection=main_settings['resolutionPoseDetection'])
+
+        elif poseDetector.lower() == 'hrnet':
+            # shared check with `checkAndGetPosePickles()`
+            if 'bbox_thr' in main_settings:
+                bbox_thr = main_settings['bbox_thr']
+            else:
+                # There was a bug in main, where bbox_thr was not saved in main_settings.yaml.
+                # Since there is in practice no option to change bbox_thr in the GUI, we can
+                # assume that the default value was used.
+                bbox_thr = 0.8
+
+            getPosePickles(trial_id, session_path,
+                           poseDetector=poseDetector,
+                           bbox_thr=bbox_thr)
+        else:
+            print(f'pose pickles found, but specified pose detector  \
+                    {poseDetector} does not exist. skipping pose pickle \
+                    download')
         
     return
         
