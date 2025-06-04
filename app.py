@@ -7,9 +7,12 @@ from utilsServer import processTrial, runTestSession
 import traceback
 import logging
 import glob
+import random
 from datetime import datetime, timedelta
 import numpy as np
-from utilsAPI import getAPIURL, getWorkerType, getErrorLogBool, getASInstance, unprotect_current_instance, get_number_of_pending_trials
+from utilsAPI import (getAPIURL, getWorkerType, getErrorLogBool, getASInstance, 
+                      unprotect_current_instance, get_number_of_pending_trials,
+                      getAppPullWaitTimeAndJitter, getLogLevel)
 from utilsAuth import getToken
 from utils import (getDataDirectory, checkTime, checkResourceUsage,
                   sendStatusEmail, checkForTrialsWithStatus,
@@ -17,8 +20,10 @@ from utils import (getDataDirectory, checkTime, checkResourceUsage,
                   postProcessedDuration, makeRequestWithRetry,
                   writeToErrorLog)
 
+log_level = getLogLevel()
+
 logging.basicConfig(format="[%(asctime)s] [%(levelname)s] %(message)s",
-                    level=logging.INFO,
+                    level=log_level,
                     datefmt='%Y-%m-%d %H:%M:%S',
                     force=True)
 
@@ -30,6 +35,7 @@ logging.info(f"AUTOSCALING TEST INSTANCE: {autoScalingInstance}")
 
 ERROR_LOG = getErrorLogBool()
 error_log_path = "/data/error_log.json"
+wait_base_time, wait_jitter = getAppPullWaitTimeAndJitter()
 
 # if true, will delete entire data directory when finished with a trial
 isDocker = True
@@ -84,7 +90,9 @@ while True:
     if r.status_code == 404:
         logging.info(f"...pulling {workerType} trials from {API_URL} "
                      f"using commit {getCommitHash()}")
-        time.sleep(1)
+        wait_time = wait_base_time + random.uniform(-wait_jitter, wait_jitter)
+        time.sleep(wait_time)
+        logging.debug(f'waiting {wait_time} seconds')
         
         # When using autoscaling, we will remove the instance scale-in protection if it hasn't
         # pulled a trial recently and there are no actively recording trials

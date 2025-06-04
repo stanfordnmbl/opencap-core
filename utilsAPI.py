@@ -7,6 +7,7 @@ Created on Wed Jul 13 13:37:39 2022
 import os
 import boto3
 import requests
+import logging
 
 from decouple import config
 from datetime import datetime, timedelta
@@ -50,6 +51,18 @@ def getStatusEmails():
 
 def getErrorLogBool():
     return config('ERROR_LOG', default=False, cast=bool)
+
+def getAppPullWaitTimeAndJitter():
+    time = config('APP_PULL_WAIT_TIME', default=5.0, cast=float)
+    jitter = config('APP_PULL_WAIT_TIME_JITTER', default=1.0, cast=float)
+
+    return time, jitter
+
+def getLogLevel():
+    log_level_str = config('LOG_LEVEL', default='INFO')
+    log_level = getattr(logging, log_level_str.upper(), logging.INFO)
+
+    return log_level
 
 def getASInstance():
     try:
