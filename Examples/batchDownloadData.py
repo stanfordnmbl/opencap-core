@@ -54,5 +54,6 @@ useSubjectIdentifierAsFolderName = True
 
 # Batch download. 
 for session_id in session_ids:
+    print(f'Downloading session id {session_id}')
     utils.downloadAndZipSession(session_id,justDownload=True,data_dir=downloadFolder,
                           useSubjectNameFolder=useSubjectIdentifierAsFolderName)
