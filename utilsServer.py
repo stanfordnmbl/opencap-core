@@ -504,19 +504,18 @@ def runTestSession(pose='all',isDocker=True,maxNumTries=3):
         # Catch and re-enter while loop if it's an HTTPError or URLError 
         # (could be more than just 404 errors). Wait between 30 and 60 seconds 
         # before retrying.
-        except (requests.exceptions.HTTPError, urllib.error.URLError) as e:
+        except Exception as e:
             if numTries < maxNumTries:
-                logging.info(f"test trial failed on try #{numTries} due to HTTPError or URLError. Retrying.")
-                wait_time = random.randint(30,60)
-                logging.info(f"waiting {wait_time} seconds then retrying...")
+                logging.exception(f"Test trial failed on try #{numTries} with error: {e}. Retrying.")
+                wait_time = random.randint(30, 60)
+                logging.info(f"Waiting {wait_time} seconds then retrying...")
                 time.sleep(wait_time)
                 continue
             else:
-                logging.info(f"test trial failed on try #{numTries} due to HTTPError or URLError.")
-                # send email
-                message = "A backend OpenCap machine failed the status check (HTTPError or URLError). It has been stopped."
+                logging.exception(f"Test trial failed on try #{numTries} with error: {e}. Max retries reached.")
+                message = f"A backend OpenCap machine failed the status check with exception: {e}. It has been stopped."
                 sendStatusEmail(message=message)
-                raise Exception('Failed status check (HTTPError or URLError). Stopped.')
+                raise Exception("Failed status check. Stopped.") from e
         
         # Catch other errors and stop
         except:
