@@ -31,8 +31,7 @@ def load_mot(file, num_metadata_lines=10):
     return df, metadata
 
 def compare_mot(self, output_mot_df, ref_mot_df, t0, tf):
-    # there's larger noise around the arm raise, so we limit comparison
-    # to main part of motion
+    # use t0 and tf to limit comparison to main part of motion
     output_mot_df_slice = output_mot_df[(output_mot_df['time'] >= t0) & 
                                         (output_mot_df['time'] <= tf)]
     ref_mot_df_slice = ref_mot_df[(ref_mot_df['time'] >= t0) & 

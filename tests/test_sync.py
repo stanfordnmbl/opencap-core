@@ -9,33 +9,33 @@ thisDir = os.path.dirname(os.path.realpath(__file__))
 repoDir = os.path.abspath(os.path.join(thisDir,'../'))
 sys.path.append(repoDir)
 from utils import loadCameraParameters
-from utilsChecker import synchronizeVideos
+from utilsSync import synchronizeVideos
 
+import logging
+logging.basicConfig(level=logging.INFO)
 
 class SynchronizeVideos(unittest.TestCase):
     def testSynchronizeVideos(self):
         sessionName = 'sync-tests'
-        trialNameList = ['squats', 'walk', 'squats-with-arm-raise']
         dataDir = os.path.join(thisDir, 'opencap-test-data')
         
-        for trialName in trialNameList:
+        trial_name_list = ['squats', 'walk', 'squats-with-arm-raise']
+        sync_str_list = ['INFO:root:Using general sync function.',
+                         'INFO:root:Using gait sync function.',
+                         'INFO:root:Using handPunch sync function.']
+
+        for trialName, sync_str in zip(trial_name_list, sync_str_list):
             with self.subTest(msg=f'subtest {trialName}',
                               sessionName=sessionName,
                               trialName=trialName,
                               dataDir=dataDir):
-        
-
-                sessionDir = os.path.join(dataDir, 'Data', sessionName)
                 
-                # mimics what's in main()
-                cameraDirectories = {}
-                for pathCam in glob.glob(os.path.join(sessionDir, 'Videos', 'Cam*')):
-                    if os.name == 'nt': # windows
-                        camName = pathCam.split('\\')[-1]
-                    elif os.name == 'posix': 
-                        camName = pathCam.split('/')[-1]
-                    cameraDirectories[camName] = os.path.join(sessionDir, 'Videos',
-                                                            pathCam)
+                sessionDir = os.path.join(dataDir, 'Data', sessionName)
+
+                # original data insert Cam1 first, then Cam0 into the dictionary
+                videosDir = os.path.join(dataDir, 'Data', 'sync-tests', 'Videos')
+                cameraDirectories = {'Cam1': os.path.join(videosDir, 'Cam1'), 
+                                     'Cam0': os.path.join(videosDir, 'Cam0')}
                 
                 trialRelativePath = os.path.join('InputMedia',
                                                 trialName, 
@@ -57,14 +57,17 @@ class SynchronizeVideos(unittest.TestCase):
                 poseDetector = 'mmpose'
                 resolutionPoseDetection = 'default'
 
-                keypoints2D, confidence, keypointNames, frameRate, nansInOut, startEndFrames, cameras2Use = (
-                    synchronizeVideos( 
-                        cameraDirectories, trialRelativePath, poseDetectorDirectory,
-                        undistortPoints=undistortPoints, CamParamDict=CamParamDict,
-                        filtFreqs=filtFreqs, confidenceThreshold=confidenceThreshold,
-                        imageBasedTracker=imageBasedTracker, cams2Use=camerasToUse_c, 
-                        poseDetector=poseDetector, trialName=trialName,
-                        resolutionPoseDetection=resolutionPoseDetection))
+                with self.assertLogs(level='INFO') as cm:
+                    keypoints2D, confidence, keypointNames, frameRate, nansInOut, startEndFrames, cameras2Use = (
+                        synchronizeVideos( 
+                            cameraDirectories, trialRelativePath, poseDetectorDirectory,
+                            undistortPoints=undistortPoints, CamParamDict=CamParamDict,
+                            filtFreqs=filtFreqs, confidenceThreshold=confidenceThreshold,
+                            imageBasedTracker=imageBasedTracker, cams2Use=camerasToUse_c, 
+                            poseDetector=poseDetector, trialName=trialName,
+                            resolutionPoseDetection=resolutionPoseDetection))
+                
+                self.assertIn(sync_str, cm.output)
                 
                 ref_pkl = os.path.join(sessionDir, 'OutputReference', f'sync_{trialName}_output.pkl')
                 with open(ref_pkl, 'rb') as f:
