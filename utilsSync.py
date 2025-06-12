@@ -26,7 +26,8 @@ def synchronizeVideos(CameraDirectories, trialRelativePath, pathPoseDetector,
                       imageBasedTracker=False, cams2Use=['all'],
                       poseDetector='OpenPose', trialName=None, bbox_thr=0.8,
                       resolutionPoseDetection='default', 
-                      visualizeKeypointAnimation=False):
+                      visualizeKeypointAnimation=False,
+                      sync_version='1.0'):
     
     markerNames = getOpenPoseMarkerNames()
     
@@ -154,11 +155,18 @@ def synchronizeVideoKeypoints(keypointList, confidenceList,
                               sampleFreq=30, visualize=False, maxShiftSteps=30,
                               isGait=False, CameraParams = None,
                               cameras2Use=['none'],CameraDirectories = None,
-                              trialName=None, trialID=''):
+                              trialName=None, trialID='',
+                              sync_version='1.0'):
     visualize2Dkeypoint = False # this is a visualization just for testing what filtered input data looks like
     
     # keypointList is a mCamera length list of (nmkrs,nTimesteps,2) arrays of camera 2D keypoints
-    logging.info('Synchronizing Keypoints')
+    logging.info(f'Synchronizing Keypoints using version {sync_version}')
+    if sync_version == '1.0':
+        detectHandPunchAllVideos = detectHandPunchAllVideos_v1_0
+    elif sync_version == '1.1':
+        detectHandPunchAllVideos = detectHandPunchAllVideos_v1_1
+    else:
+        raise Exception(f'synchronization version {sync_version} is not valid.')
     
     # Deep copies such that the inputs do not get modified.
     c_CameraParams = copy.deepcopy(CameraParams)
@@ -768,7 +776,48 @@ def findOverlap(confidenceList, markers4VertVel):
     return overlapInds_clean, minConfLength
 
 # %%
-def detectHandPunchAllVideos(handPunchPositionList,sampleFreq,punchDuration=3):
+def detectHandPunchAllVideos_v1_0(handPunchPositionList,sampleFreq,punchDuration=3):
+    
+    isPunch = []
+    for pos in handPunchPositionList:
+        isPunchThisVid = []
+        relPosList = []
+        maxIndList = []
+        for iSide in range(2):
+            relPos = -np.diff(pos[(iSide, iSide+2),:],axis=0) # vertical position of wrist over shoulder
+            relPosList.append(relPos)
+
+            maxInd = np.argmax(relPos)
+            maxIndList.append(maxInd)
+            maxPos = relPos[:,maxInd]
+                        
+            isPunchThisVid.append(False)
+            if maxPos>0:
+                zeroCrossings = np.argwhere(np.diff(np.sign(np.squeeze(relPos))) != 0)
+                if any(zeroCrossings>maxInd) and any(zeroCrossings<maxInd):
+                    startLength = np.abs(np.min([zeroCrossings-maxInd]))/sampleFreq
+                    endLength = np.abs(np.min([-zeroCrossings+maxInd]))
+                    if (startLength+endLength)/sampleFreq<punchDuration:
+                        isPunchThisVid[-1] = True
+                        
+        # Ensure only one arm is punching
+        hand = None
+        isPunch.append(False)
+        if isPunchThisVid[0]:
+            if relPosList[1][:,maxIndList[0]] < 0:
+                isPunch[-1] = True
+                hand = 'r'
+        elif isPunchThisVid[1]:
+            if relPosList[0][:,maxIndList[1]] < 0:
+                isPunch[-1] = True
+                hand = 'l' 
+        
+    isTrialPunch = all(isPunch)
+    
+    return isTrialPunch, hand
+
+# %%
+def detectHandPunchAllVideos_v1_1(handPunchPositionList,sampleFreq,punchDuration=3):
     
     isPunch = []
     for pos in handPunchPositionList:
