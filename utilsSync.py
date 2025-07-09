@@ -27,7 +27,7 @@ def synchronizeVideos(CameraDirectories, trialRelativePath, pathPoseDetector,
                       poseDetector='OpenPose', trialName=None, bbox_thr=0.8,
                       resolutionPoseDetection='default', 
                       visualizeKeypointAnimation=False,
-                      sync_version='1.0'):
+                      syncVer='1.0'):
     
     markerNames = getOpenPoseMarkerNames()
     
@@ -123,7 +123,8 @@ def synchronizeVideos(CameraDirectories, trialRelativePath, pathPoseDetector,
         filtFreqs=filtFreqs, sampleFreq=frameRate, visualize=False,
         maxShiftSteps=2*frameRate, CameraParams=CamParamList_selectedCams,
         cameras2Use=cameras2Use, 
-        CameraDirectories=CameraDirectories_selectedCams, trialName=trialName)
+        CameraDirectories=CameraDirectories_selectedCams, trialName=trialName,
+        syncVer=syncVer)
     
     if undistortPoints:
         if CamParamList_selectedCams is None:
@@ -156,17 +157,11 @@ def synchronizeVideoKeypoints(keypointList, confidenceList,
                               isGait=False, CameraParams = None,
                               cameras2Use=['none'],CameraDirectories = None,
                               trialName=None, trialID='',
-                              sync_version='1.0'):
+                              syncVer='1.0'):
     visualize2Dkeypoint = False # this is a visualization just for testing what filtered input data looks like
     
     # keypointList is a mCamera length list of (nmkrs,nTimesteps,2) arrays of camera 2D keypoints
-    logging.info(f'Synchronizing Keypoints using version {sync_version}')
-    if sync_version == '1.0':
-        detectHandPunchAllVideos = detectHandPunchAllVideos_v1_0
-    elif sync_version == '1.1':
-        detectHandPunchAllVideos = detectHandPunchAllVideos_v1_1
-    else:
-        raise Exception(f'synchronization version {sync_version} is not valid.')
+    logging.info(f'Synchronizing Keypoints using version {syncVer}')
     
     # Deep copies such that the inputs do not get modified.
     c_CameraParams = copy.deepcopy(CameraParams)
@@ -227,17 +222,32 @@ def synchronizeVideoKeypoints(keypointList, confidenceList,
     nCams = len(keypointList)
     vertVelList = []
     mkrSpeedList = []
-    handPunchVertPositionList = []
+    inHandPunchVertPositionList = []
+    inHandPunchConfidenceList = []
     allMarkerList = []
     for (keyRaw,conf) in zip(keypointList,confidenceList):
         keyRaw_clean, _, _, _ = clean2Dkeypoints(keyRaw,conf,confidenceThreshold=0.3,nCams=nCams,linearInterp=True)        
         keyRaw_clean_smooth = smoothKeypoints(keyRaw_clean, sdKernel=3) 
-        handPunchVertPositionList.append(getPositions(keyRaw_clean_smooth,markers4HandPunch,direction=1)) 
+        inHandPunchVertPositionList.append(getPositions(keyRaw_clean_smooth,markers4HandPunch,direction=1))
+        inHandPunchConfidenceList.append(conf[markers4HandPunch])
         vertVelList.append(getVertVelocity(keyRaw_clean_smooth)) # doing it again b/c these settings work well for synchronization
         mkrSpeedList.append(getMarkerSpeed(keyRaw_clean_smooth,markers4VertVel,confidence=conf,averageVels=False)) # doing it again b/c these settings work well for synchronization
         allMarkerList.append(keyRaw_clean_smooth)
-        
-    # Find indices with high confidence that overlap between cameras.    
+    
+    # Prepare hand punch data
+    # Clip the end of the hand punch data to the shortest length of the hand punch data
+    min_hand_frames = min(np.shape(p)[1] for p in inHandPunchVertPositionList)
+    inHandPunchVertPositionList = [p[:, :min_hand_frames] for p in inHandPunchVertPositionList]
+    inHandPunchConfidenceList = [c[:, :min_hand_frames] for c in inHandPunchConfidenceList]
+
+    # For sync 1.1, we keep the original input (inHandPunchVertPositionList)
+    # but make a copy that is clipped after checks below (for sync 1.0)
+    clippedHandPunchVertPositionList = copy.deepcopy(inHandPunchVertPositionList)
+    clippedHandPunchConfidenceList = copy.deepcopy(inHandPunchConfidenceList)
+    
+    # Prepare data for syncing without hand punch
+    # Find indices with high confidence that overlap between cameras with
+    # ankle markers.
     # Note: Could get creative and do camera pair syncing in the future, based
     # on cameras with greatest amount of overlapping confidence.
     overlapInds_clean, minConfLength_all = findOverlap(confidenceList,
@@ -285,7 +295,8 @@ def synchronizeVideoKeypoints(keypointList, confidenceList,
     # Re-sample the lists    
     vertVelList = [v[idxStart:idxEnd] for v in vertVelList]
     mkrSpeedList = [v[:,idxStart:idxEnd] for v in mkrSpeedList]
-    handPunchVertPositionList = [p[:,idxStart:idxEnd] for p in handPunchVertPositionList]
+    clippedHandPunchVertPositionList = [p[:,idxStart:idxEnd] for p in clippedHandPunchVertPositionList]
+    clippedHandPunchConfidenceList = [c[:,idxStart:idxEnd] for c in clippedHandPunchConfidenceList]
     allMarkerList = [p[:,idxStart:idxEnd] for p in allMarkerList]
     confSyncList= [c[:,idxStart:idxEnd] for c in confidenceList]
     
@@ -309,13 +320,18 @@ def synchronizeVideoKeypoints(keypointList, confidenceList,
         
         vertVelList.pop(idxbadCameraOverlap)
         mkrSpeedList.pop(idxbadCameraOverlap)
-        handPunchVertPositionList.pop(idxbadCameraOverlap)
+        clippedHandPunchVertPositionList.pop(idxbadCameraOverlap)
+        clippedHandPunchConfidenceList.pop(idxbadCameraOverlap)
+        inHandPunchVertPositionList.pop(idxbadCameraOverlap)
+        inHandPunchConfidenceList.pop(idxbadCameraOverlap)
         allMarkerList.pop(idxbadCameraOverlap)
         confSyncList.pop(idxbadCameraOverlap)        
     nCams = len(keypointList)
     
-    # Detect whether it is a gait trial, which determines what sync algorithm
-    # to use. Input right and left ankle marker speeds. Gait should be
+    # Detect activities, which determines sync function and filtering
+    # that gets used
+
+    # Gait trial: Input right and left ankle marker speeds. Gait should be
     # detected for all cameras (all but one camera is > 2 cameras) for the
     # trial to be considered a gait trial.
     try:
@@ -324,17 +340,36 @@ def synchronizeVideoKeypoints(keypointList, confidenceList,
         isGait = False
         print('Detect gait activity algorithm failed.')
     
-    # Detect activity, which determines sync function that gets used
-    isHandPunch,handForPunch = detectHandPunchAllVideos(handPunchVertPositionList,sampleFreq)
+    # Hand punch: Input right and left wrist and shoulder positions.
+    # For sync 1.0 we use the clipped data, but use the original inputs for 1.1
+    # Also setting some other parameters for later use.
+    if syncVer == '1.0':
+        handPunchVertPositionList = clippedHandPunchVertPositionList
+        handPunchConfList = None
+        handPunchSignalType = None
+        padTime = None
+        reprojTimeWindow = None
+    elif syncVer == '1.1':
+        handPunchVertPositionList = inHandPunchVertPositionList
+        handPunchConfList = inHandPunchConfidenceList
+        handPunchSignalType = 'position'
+        padTime = 1.0
+        reprojTimeWindow = 0.2
+    else:
+        raise ValueError(f'Invalid syncVer: {syncVer}')
+    isHandPunch, handForPunch, handPunchRange = \
+        detectHandPunchAllVideos(syncVer, 
+                                 handPunchVertPositionList,
+                                 sampleFreq,
+                                 confList=handPunchConfList)
+
     if isHandPunch:
         syncActivity = 'handPunch'
     elif isGait:
         syncActivity = 'gait'
     else:
         syncActivity = 'general'
-        
     logging.info(f'Using {syncActivity} sync function.')
-    
     
     # Select filtering frequency based on if it is gait
     if isGait: 
@@ -367,39 +402,58 @@ def synchronizeVideoKeypoints(keypointList, confidenceList,
     shiftVals.append(0)
     timeVecs = []
     tStartEndVec = np.zeros((len(keypointList),2))
+
     for iCam,vertVel in enumerate(vertVelList):
         timeVecs.append(np.arange(keypointList[iCam].shape[1]))
         if iCam>0:
             # if no keypoints in Cam0 or the camera of interest, do not use cross_corr to sync.
             if np.max(np.abs(vertVelList[iCam])) == 0 or np.max(np.abs(vertVelList[0])) == 0:
                 lag = 0
+
             elif syncActivity == 'general':
-                dataForReproj = {'CamParamList':c_CameraParams,
-                                 'keypointList':keypointListFilt,
-                                 'cams2UseReproj': [0, c_cameras2Use.index(c_cameras2Use[iCam])],
-                                 'confidence': confidenceSyncListFilt,
-                                 'cameras2Use': c_cameras2Use
-                                 }
-                corVal,lag = cross_corr(vertVel,vertVelList[0],multCorrGaussianStd=maxShiftSteps/2,
-                                        visualize=False,dataForReproj=dataForReproj,
-                                        frameRate=sampleFreq) # gaussian curve gets multipled by correlation plot - helping choose the smallest shift value for periodic motions
-            elif syncActivity == 'gait':
+                    dataForReproj = {'CamParamList':c_CameraParams,
+                                    'keypointList':keypointListFilt,
+                                    'cams2UseReproj': [0, c_cameras2Use.index(c_cameras2Use[iCam])],
+                                    'confidence': confidenceSyncListFilt,
+                                    'cameras2Use': c_cameras2Use
+                                    }
+                    corVal,lag = cross_corr(vertVel,vertVelList[0],multCorrGaussianStd=maxShiftSteps/2,
+                                            visualize=False,dataForReproj=dataForReproj,
+                                            frameRate=sampleFreq) # gaussian curve gets multipled by correlation plot - helping choose the smallest shift value for periodic motions
                 
+            elif syncActivity == 'gait':    
                 dataForReproj = {'CamParamList':c_CameraParams,
-                                 'keypointList':keypointListFilt,
-                                 'cams2UseReproj': [0, c_cameras2Use.index(c_cameras2Use[iCam])],
-                                 'confidence': confidenceSyncListFilt,
-                                 'cameras2Use': c_cameras2Use
-                                 }
+                                'keypointList':keypointListFilt,
+                                'cams2UseReproj': [0, c_cameras2Use.index(c_cameras2Use[iCam])],
+                                'confidence': confidenceSyncListFilt,
+                                'cameras2Use': c_cameras2Use
+                                }
                 corVal,lag = cross_corr_multiple_timeseries(mkrSpeedList[iCam],
                                             mkrSpeedList[0],
                                             multCorrGaussianStd=maxShiftSteps/2,
                                             dataForReproj=dataForReproj,
                                             visualize=False,
-                                            frameRate=sampleFreq)    
+                                            frameRate=sampleFreq)
             elif syncActivity == 'handPunch':
-                corVal,lag = syncHandPunch([handPunchVertPositionList[i] for i in [0,iCam]],
-                                           handForPunch,maxShiftSteps=maxShiftSteps)
+                dataForReproj = {'CamParamList':c_CameraParams,
+                                'keypointList':keypointListFilt,
+                                'cams2UseReproj': [0, c_cameras2Use.index(c_cameras2Use[iCam])],
+                                'confidence': confidenceSyncListFilt,
+                                'cameras2Use': c_cameras2Use
+                                }
+                corVal,lag = syncHandPunch(syncVer,
+                                            [handPunchVertPositionList[i] for i in [0,iCam]],
+                                            handForPunch,
+                                            maxShiftSteps=maxShiftSteps,
+                                            confList=([handPunchConfList[i] for i in [0,iCam]] 
+                                                     if handPunchConfList is not None else None),
+                                            handPunchRange=handPunchRange,
+                                            frameRate=sampleFreq,
+                                            padTime=padTime,
+                                            signalType=handPunchSignalType,
+                                            dataForReproj=dataForReproj,
+                                            reprojTimeWindow=reprojTimeWindow
+                                            )
             if np.abs(lag) > maxShiftSteps: # if this fails and we get a lag greater than maxShiftSteps (units=timesteps)
                 lag = 0 
                 print('Did not use cross correlation to sync {} - computed shift was greater than specified {} frames. Shift set to 0.'.format(c_cameras2Use[iCam], maxShiftSteps))
@@ -776,7 +830,7 @@ def findOverlap(confidenceList, markers4VertVel):
     return overlapInds_clean, minConfLength
 
 # %%
-def detectHandPunchAllVideos_v1_0(handPunchPositionList,sampleFreq,punchDuration=3):
+def detectHandPunchAllVideos_v1(handPunchPositionList,sampleFreq,punchDurationThreshold=3):
     
     isPunch = []
     for pos in handPunchPositionList:
@@ -797,7 +851,7 @@ def detectHandPunchAllVideos_v1_0(handPunchPositionList,sampleFreq,punchDuration
                 if any(zeroCrossings>maxInd) and any(zeroCrossings<maxInd):
                     startLength = np.abs(np.min([zeroCrossings-maxInd]))/sampleFreq
                     endLength = np.abs(np.min([-zeroCrossings+maxInd]))
-                    if (startLength+endLength)/sampleFreq<punchDuration:
+                    if (startLength+endLength)/sampleFreq<punchDurationThreshold:
                         isPunchThisVid[-1] = True
                         
         # Ensure only one arm is punching
@@ -817,56 +871,193 @@ def detectHandPunchAllVideos_v1_0(handPunchPositionList,sampleFreq,punchDuration
     return isTrialPunch, hand
 
 # %%
-def detectHandPunchAllVideos_v1_1(handPunchPositionList,sampleFreq,punchDuration=3):
-    
-    isPunch = []
-    for pos in handPunchPositionList:
-        isPunchThisVid = []
-        relPosList = []
-        maxIndList = []
-        maxPosList = []
-        for iSide in range(2):
-            relPos = -np.diff(pos[(iSide, iSide+2),:],axis=0) # vertical position of wrist over shoulder
-            relPosList.append(relPos)
+def detectHandPunchAllVideos_v2(handPunchPositionList,sampleFreq,
+                                punchDurationThreshold=3, confList=None,
+                                confThresh=0.5, maxPosSimilarityThresh=0.5,
+                                maxConfGap=4):
+    """
+    Detects whether a hand punch activity is present across all videos/cameras,
+    and determines which hand (left or right) performed the punch and the possible 
+    frame range of the punch across all cameras.
 
-            maxInd = np.argmax(relPos)
-            maxIndList.append(maxInd)
-            maxPos = relPos[:,maxInd]
-            maxPosList.append(maxPos)
-                        
-            isPunchThisVid.append(False)
-            if maxPos>0:
-                zeroCrossings = np.argwhere(np.diff(np.sign(np.squeeze(relPos))) != 0)
-                if any(zeroCrossings>maxInd) and any(zeroCrossings<maxInd):
-                    # Carmichael: division by sampleFreq makes startLength much
-                    # smaller than endLength, so setting this to 0 for now
-                    #startLength = np.abs(np.min([zeroCrossings-maxInd]))/sampleFreq
-                    startLength = 0
-                    endLength = np.abs(np.min([-zeroCrossings+maxInd]))
-                    if (startLength+endLength)/sampleFreq<punchDuration:
-                        isPunchThisVid[-1] = True
-                        
-        # If arm raise detected on both hands, use the one with larger
-        # difference
-        if all(isPunchThisVid):
-            isPunchThisVid[np.argmin(maxPosList)] = False
+    Args:
+        handPunchPositionList (list of np.ndarray):
+            List of arrays (one per camera), each of shape (4, nFrames),
+            containing the vertical positions of the right wrist, left wrist,
+            right shoulder, and left shoulder over time.
+            Expected order: [r_wrist, l_wrist, r_shoulder, l_shoulder].
+        sampleFreq (float):
+            The sampling frequency (frames per second) of the video data.
+        punchDurationThreshold (float, optional):
+            Maximum allowed duration (in seconds) for a punch event.
+            Default is 3.
+        confList (list of np.ndarray):
+            List of arrays (one per camera), each of shape (4, nFrames),
+            containing the confidence values for the corresponding markers in
+            handPunchPositionList. Required for this function.
+        confThresh (float, optional):
+            Confidence threshold multiplier for determining high-confidence
+            stretches. Default is 0.5.
+        maxPosSimilarityThresh (float, optional):
+            Threshold for how similar two punch heights can be on the same arm
+            before the punch is considered ambiguous. Default is 0.5.
+        maxConfGap (int, optional):
+            Maximum allowed gap (in frames) of low confidence within a
+            high-confidence stretch. Default is 4.
 
-        # Check if other hand is below the shoulder at the moment of
-        # peak arm raise
-        hand = None
-        isPunch.append(False)
-        if isPunchThisVid[0]:
-            if relPosList[1][:,maxIndList[0]] < 0:
-                isPunch[-1] = True
-                hand = 'r'
-        elif isPunchThisVid[1]:
-            if relPosList[0][:,maxIndList[1]] < 0:
-                isPunch[-1] = True
-                hand = 'l' 
-        
-    isTrialPunch = all(isPunch)
+    Returns:
+        isTrialPunch (bool):
+            True if a valid punch is detected in all cameras and by the same
+            hand, False otherwise.
+        hand (str or None):
+            'r' if the right hand performed the punch, 'l' if the left hand,
+            or None if no valid punch is found.
+        handPunchRange (list or None):
+            [start_idx, end_idx] of the possible punch event (frame indices) 
+            across all cameras, or None if no valid punch is found.
+    """
+    if confList is None:
+        raise Exception('list of confidences need to be passed in to "conf"')
     
-    return isTrialPunch, hand
+    # all positions and confs should have the same number of markers and frames
+    if any(np.shape(p) != np.shape(handPunchPositionList[0]) for p in handPunchPositionList):
+        raise Exception('all positions should have the same number of markers')
+    if any(np.shape(c) != np.shape(handPunchPositionList[0]) for c in confList):
+        raise Exception('all confs should have the same number of frames')
+
+    # Loop over each camera
+    cam_punch_list = []
+    for pos, conf in zip(handPunchPositionList, confList):
+        valid_stretches = []
+       
+        # Loop over each side, starting with right side of arrays in
+        # handPunchPositionList.
+        # Expected order: ['r_wrist', 'l_wrist', 'r_shoulder', 'l_shoulder']
+        for side, indices in zip(['r', 'l'], [
+            {'wrist': 0, 'shoulder': 2, 'other_wrist': 1, 'other_shoulder': 3},
+            {'wrist': 1, 'shoulder': 3, 'other_wrist': 0, 'other_shoulder': 2}
+        ]):
+            # Find the highest relative position of the wrist over shoulder
+            relPos = np.diff(pos[(indices['shoulder'], indices['wrist']), :], axis=0).squeeze()
+
+            # Find all stretches when wrist is above shoulder
+            positiveInd = relPos > 0
+            starts = np.where((~positiveInd[:-1]) & (positiveInd[1:]))[0]
+            ends = np.where((positiveInd[:-1]) & (~positiveInd[1:]))[0] + 1
+
+            # Account for cases where hand starts or ends above shoulder
+            if positiveInd[0]:
+                starts = np.insert(starts, 0, 0)
+            if positiveInd[-1]:
+                ends = np.append(ends, len(relPos))
+
+            positiveStretches = list(zip(starts, ends))
+            
+            # Ensure stretches are valid:
+            # 1. duration of stretch is less than 'punchDurationThreshold'
+            # 2. high confidence
+            # 3. other wrist is below other shoulder
+            for start, end in positiveStretches:
+                duration = (end - start) / sampleFreq
+                if duration > punchDurationThreshold:
+                    continue 
+
+                # Require minimum confidence of wrist and shoulder to be
+                # above 'confThresh' of the maximum of the minimum confidence 
+                # values.
+                # Gaps of 'maxConfGap' or fewer frames of low confidence are allowed.
+                conf_wrist = conf[indices['wrist']]
+                conf_shoulder = conf[indices['shoulder']]
+                high_conf_indices = \
+                    find_longest_confidence_stretch_in_range_with_gaps(
+                        [conf_wrist, conf_shoulder], confThresh, maxConfGap,
+                        rangeList=[start, end])
+                # Check if the high confidence region covers the entire stretch
+                if (
+                    high_conf_indices is None or
+                    high_conf_indices[0] > start or
+                    high_conf_indices[1] < end
+                ):
+                    continue
+
+                other_relPos = np.diff(pos[(indices['other_shoulder'], indices['other_wrist']), :], axis=0).squeeze()
+                other_relPos_stretch = other_relPos[start:end]
+                if np.any(other_relPos_stretch >= 0):
+                    continue 
+
+                # If all checks passed, add to valid stretches
+                stretch_relPos = relPos[start:end]
+                stretch_maxpos = np.max(stretch_relPos)
+                valid_stretches.append({
+                    'crossings': [start, end],
+                    'maxPos': stretch_maxpos,
+                    'hand': side
+                })
+
+        # Use the side with the higher punch. Do not use if there is
+        # another valid punch with a similar height (maxPosSimilarityThresh) 
+        # on the same arm.
+        if valid_stretches:
+            max_pos_idx = np.argmax([s['maxPos'] for s in valid_stretches])
+            max_pos_hand = valid_stretches[max_pos_idx]['hand']
+            max_pos_val = valid_stretches[max_pos_idx]['maxPos']
+            other_max_pos_val = np.array([s['maxPos'] for i, s in enumerate(valid_stretches) if i != max_pos_idx and s['hand'] == max_pos_hand])
+            if other_max_pos_val.size and np.any(other_max_pos_val / max_pos_val > maxPosSimilarityThresh):
+                cam_punch_list.append(None)
+            else:
+                cam_punch_list.append(valid_stretches[max_pos_idx])
+        else:
+            cam_punch_list.append(None)
+    
+    # across all cameras check if: 
+    # 1. there is a punch in all trials 
+    # 2. it's the same hand each time.
+    # 3. confidence is good across the widest range of indices of crossings
+    isTrialPunch = all(cam_punch is not None for cam_punch in cam_punch_list)
+    hand = None
+    handPunchRange = None
+    
+    if isTrialPunch:
+        hands = [cam_punch['hand'] for cam_punch in cam_punch_list]
+        if len(set(hands)) == 1:
+            crossingsList = [cam_punch['crossings'] for cam_punch in cam_punch_list]
+            handPunchRange = [np.min(crossingsList), np.max(crossingsList)]
+
+            confMeanList = [np.mean(c, axis=0) for c in confList]
+            high_conf_indices = \
+                find_longest_confidence_stretch_in_range_with_gaps(
+                    confMeanList, confThresh, maxConfGap, rangeList=handPunchRange)
+            # Check if the high confidence region covers the entire hand punch range
+            if high_conf_indices is not None and high_conf_indices[0] == handPunchRange[0] and high_conf_indices[1] == handPunchRange[1]:
+                hand = hands[0]
+            else:
+                isTrialPunch = False
+                handPunchRange = None
+
+        else:
+            isTrialPunch = False
+    
+    return isTrialPunch, hand, handPunchRange
+
+# %%
+def detectHandPunchAllVideos(syncVer, *args, **kwargs):
+    """
+    Dispatcher for versions of detecting hand punch.
+    """
+    if syncVer == '1.0':
+        isTrialPunch, hand = detectHandPunchAllVideos_v1(*args,
+                                                         punchDurationThreshold=kwargs.get('punchDurationThreshold', 3))
+        return isTrialPunch, hand, None
+    
+    elif syncVer == '1.1':
+        return detectHandPunchAllVideos_v2(*args,
+                                           punchDurationThreshold=kwargs.get('punchDurationThreshold', 3),
+                                           confList=kwargs.get('confList', None),
+                                           confThresh=kwargs.get('confThresh', 0.5),
+                                           maxPosSimilarityThresh=kwargs.get('maxPosSimilarityThresh', 0.5),
+                                           maxConfGap=kwargs.get('maxConfGap', 4))
+    else:
+        raise ValueError(f'Unsupported sync version: {syncVer}')
 
 # %% 
 def detectGaitAllVideos(mkrSpeedList,allMarkers,confidence,ankleInds,sampleFreq):
@@ -945,7 +1136,7 @@ def detectFeetMoving(allMarkers,confidence,ankleInds,motionThreshold=.5):
     return anyFootMoving
 
 # %% 
-def syncHandPunch(positions,hand,maxShiftSteps=600):
+def syncHandPunch_v1(positions,hand,maxShiftSteps=600):
     if hand == 'r':
         startInd = 0
     else:
@@ -958,7 +1149,192 @@ def syncHandPunch(positions,hand,maxShiftSteps=600):
         
     corr_val,lag = cross_corr(relVel[1],relVel[0],multCorrGaussianStd=maxShiftSteps,visualize=False)
     
+    logging.debug(f'corr_val: {corr_val}, lag: {lag}')
     return corr_val, lag
+
+# %% 
+def syncHandPunch_v2(positionsList, hand,
+                     maxShiftSteps=600, confList=None, 
+                     padTime=None, handPunchRange=None,
+                     frameRate=None, confThresh=0.5, maxConfGap=4,
+                     signalType='velocity', dataForReproj=None,
+                     reprojTimeWindow=0.2):
+    """
+    Synchronizes two hand punch signals (from two cameras) by finding the lag
+    that best aligns the punch event, using either velocity or position signals.
+
+    The function first uses correlation to find the lag that best aligns the
+    punch event. Optionally, it refines the lag by minimizing reprojection error
+    over a window around the correlation peak.
+
+    Args:
+        positionsList (list of np.ndarray):
+            List of arrays (one per camera), each of shape (4, nFrames),
+            containing the vertical positions of the right wrist, left wrist,
+            right shoulder, and left shoulder over time. Expected order:
+            [r_wrist, l_wrist, r_shoulder, l_shoulder].
+        hand (str):
+            'r' for right hand punch, 'l' for left hand punch.
+        maxShiftSteps (int, optional):
+            Maximum allowed lag (in frames) to search for alignment.
+            Default is 600.
+        confList (list of np.ndarray, optional):
+            List of arrays (one per camera), each of shape (4, nFrames),
+            containing the confidence values for the corresponding markers in
+            positionsList. Required for high-confidence region selection.
+        padTime (float, optional):
+            Time (in seconds) to pad before and after the punch event when
+            searching for the best lag. If None, uses the full range.
+        handPunchRange (list or None):
+            [start_idx, end_idx] of the punch event (frame indices) to focus
+            the synchronization.
+        frameRate (float):
+            Frame rate (frames per second) of the video.
+        confThresh (float, optional):
+            Confidence threshold multiplier for determining high-confidence
+            stretches. Default is 0.5.
+        maxConfGap (int, optional):
+            Maximum allowed gap (in frames) of low confidence within a
+            high-confidence stretch. Default is 4.
+        signalType (str, optional):
+            'velocity' to use the derivative of the wrist-over-shoulder
+            position, 'position' to use the position directly. Default is
+            'velocity'.
+        dataForReproj (dict, optional):
+            If provided, contains data for reprojection error minimization.
+            Used to refine the lag selection.
+        reprojTimeWindow (float, optional):
+            Time window (in seconds) around the correlation peak to search for
+            the lag with minimum reprojection error. Default is 0.2.
+
+    Returns:
+        corr_val (float):
+            Maximum correlation value found between the two signals.
+        lag (int):
+            The lag (in frames) that best aligns the punch event between the
+            two cameras.
+    """
+    if confList is None:
+        raise Exception('list of confidences need to be passed in to "conf"')
+    
+    if handPunchRange is None:
+        raise Exception('"handPunchRange" must be provided to give start and end indices')
+
+    if frameRate is None:
+        raise Exception('video frequency was not specified')
+
+    if len(positionsList) != len(confList):
+        raise Exception('length of "positions" and "conf" lists are not equal')
+
+    # all positions and confs should have the same number of frames and markers
+    if any(np.shape(p) != np.shape(positionsList[0]) for p in positionsList):
+        raise Exception('all positions should have the same number of frames and markers')
+    if any(np.shape(c) != np.shape(positionsList[0]) for c in confList):
+        raise Exception('all confs should have the same number of frames and markers')
+
+    # expected order of positions and conf lists:
+    # [r_wrist, l_wrist, r_shoulder, l_shoulder]
+    if hand == 'r':
+        shoulderInd = 2
+        wristInd = 0
+    elif hand == 'l':
+        shoulderInd = 3
+        wristInd = 1
+    else:
+        raise Exception(f'hand must be either "r" or "l", but was "{hand}"')
+
+    # Set initial search range based on padTime
+    confMeanList = [np.mean(c,axis=0) for c in confList]
+    if padTime is not None:
+        # Use padded region around hand punch
+        padFrames = int(padTime * frameRate)
+        search_start = max(0, handPunchRange[0] - padFrames)
+        search_end = min(positionsList[0].shape[1] - 1, handPunchRange[1] + padFrames)
+        rangeList = [search_start, search_end]
+    else:
+        # Use the entire input range
+        rangeList = None
+    
+    # Find the widest high confidence region that contains the hand punch range
+    high_conf_indices = \
+        find_longest_confidence_stretch_in_range_with_gaps(
+            confMeanList, confThresh, maxConfGap, rangeList=rangeList)
+    
+    if high_conf_indices is not None:
+        # Ensure the hand punch range is contained within the high confidence region
+        if high_conf_indices[0] <= handPunchRange[0] and high_conf_indices[1] >= handPunchRange[1]:
+            # High confidence region contains the hand punch range
+            startInd = high_conf_indices[0]
+            endInd = high_conf_indices[1]
+        else:
+            # High confidence region doesn't contain hand punch range, fall back
+            startInd = handPunchRange[0]
+            endInd = handPunchRange[1]
+    else:
+        # Fall back to hand punch range
+        startInd = handPunchRange[0]
+        endInd = handPunchRange[1]
+
+    relPosList = []
+    relVelList = []
+    for pos in positionsList:
+        relPos = np.diff(pos[(shoulderInd, wristInd),startInd:endInd],axis=0).squeeze() # vertical position of wrist over shoulder
+        relPosList.append(relPos)
+        relVelList.append(np.diff(relPos))
+        
+    if signalType == 'velocity':
+        corr_val, lag_corr = cross_corr(relVelList[1],relVelList[0],multCorrGaussianStd=maxShiftSteps,visualize=False)
+    elif signalType == 'position':
+        corr_val, lag_corr = cross_corr(relPosList[1],relPosList[0],multCorrGaussianStd=maxShiftSteps,visualize=False)
+    else:
+        raise ValueError(f'Invalid signalType: {signalType}. Must be "velocity" or "position"')
+    
+
+    if dataForReproj is None:
+        return corr_val, lag_corr
+
+    else:
+        # Refine with reprojection error minimization
+        # Calculate reprojection error with lags around correlation peak. Select the lag with the lowest reprojection error.
+        # This helps the fact that correlation peak is not always the best lag, esp for front-facing cameras
+        numFrames = int(reprojTimeWindow*frameRate)
+        lags = np.arange(lag_corr-numFrames,lag_corr+numFrames+1)
+        
+        reprojErrors = [
+            calcReprojectionErrorForSync(
+                dataForReproj['CamParamList'], dataForReproj['keypointList'],
+                l, dataForReproj['cams2UseReproj'], 
+                dataForReproj['confidence'], dataForReproj['cameras2Use'])[0]
+            for l in lags
+        ]
+            
+        # Select the lag with the lowest reprojection error
+        lag = lags[np.argmin(reprojErrors)]
+
+        return corr_val, lag
+
+# %%
+def syncHandPunch(syncVer, *args, **kwargs):
+    """Dispatcher to call the appropriate syncHandPunch function based on the
+    syncVer.
+    """
+    if syncVer == '1.0':
+        return syncHandPunch_v1(*args, 
+                                maxShiftSteps=kwargs.get('maxShiftSteps', 600))
+    elif syncVer == '1.1':
+        return syncHandPunch_v2(*args, 
+                                maxShiftSteps=kwargs.get('maxShiftSteps', 600),
+                                confList=kwargs.get('confList', None),
+                                padTime=kwargs.get('padTime', None),
+                                handPunchRange=kwargs.get('handPunchRange', None),
+                                frameRate=kwargs.get('frameRate', None),
+                                confThresh=kwargs.get('confThresh', 0.5),
+                                maxConfGap=kwargs.get('maxConfGap', 4),
+                                signalType=kwargs.get('signalType', 'velocity'),
+                                dataForReproj=kwargs.get('dataForReproj', None),
+                                reprojTimeWindow=kwargs.get('reprojTimeWindow', 0.2))
+    else:
+        raise ValueError(f'Unsupported synchronization version: {syncVer}')
 
 # %%
 def cross_corr(y1, y2,multCorrGaussianStd=None,visualize=False, dataForReproj=None, frameRate=60):
@@ -1086,7 +1462,6 @@ def cross_corr(y1, y2,multCorrGaussianStd=None,visualize=False, dataForReproj=No
     lag = argmax_corr-shift
     
     return max_corr, lag
-
 # %%
 def cross_corr_multiple_timeseries(Y1, Y2,multCorrGaussianStd=None,dataForReproj=None,visualize=False,frameRate=60):
     
@@ -1433,3 +1808,88 @@ def getMarkerSpeed(key2D,idxMkrs = [0],confidence = None, confThresh = 0.2, aver
     if not np.max(np.abs(vertVelTotal)) == 0: # only if markers were found, otherwise div by 0
         vertVelTotal = vertVelTotal / np.max(np.abs(vertVelTotal))
     return vertVelTotal
+
+# %%
+def find_longest_confidence_stretch_in_range_with_gaps(confList, confThresh, maxConfGap,
+                                                       rangeList=None):
+    """
+    Check if confidence values meet threshold requirements, allowing for small gaps.
+    Minimum confidence is calculated based on the whole range of confidence values.
+    If rangeList is provided, the confidence is checked in the specified range.
+    
+    Args:
+        confList: List of confidence arrays (e.g., different markers or cameras)
+        confThresh: Threshold multiplier for minimum confidence
+        maxConfGap: Maximum allowed gap in frames for low confidence
+        rangeList: List of [start_idx, end_idx] of the range to check.
+                   If None, the confidence is checked in the whole range.
+        
+    Returns:
+        list: [start_idx, end_idx] of the widest good stretch that meets the gap requirements.
+              If no valid stretch found, returns None.
+    """
+
+    if any(len(c) != len(confList[0]) or c.ndim != 1 for c in confList):
+        raise Exception('all confs should be 1-D arrays of the same length')
+
+    # find minimum confidence based on whole range
+    # suppress warnings since it's OK if all cameras are nan on some frames
+    import warnings
+    with warnings.catch_warnings():
+        warnings.filterwarnings('ignore', message='All-NaN slice encountered')
+        min_conf = np.nanmin(np.array(confList), axis=0)
+
+    # but still check that min_conf is not all nan
+    if np.all(np.isnan(min_conf)):
+        return None
+    
+    min_conf_thresh = confThresh * np.nanmax(min_conf)
+
+    # check confidence in specified range
+    if rangeList is not None:
+        conf_range_array = np.array([c[rangeList[0]:rangeList[1]] for c in confList])
+    else:
+        conf_range_array = np.array(confList)
+    
+    # Find the widest high confidence stretch that allows for small gaps
+    # in conf_range_array
+    min_conf_range_array = np.nanmin(conf_range_array, axis=0)
+    high_conf_frames = min_conf_range_array > min_conf_thresh
+    if np.any(high_conf_frames):
+        # Find all stretches of high confidence
+        diff_high_conf = np.diff(np.concatenate(([False], high_conf_frames, [False])).astype(int))
+        high_conf_starts = np.where(diff_high_conf == 1)[0]
+        high_conf_ends = np.where(diff_high_conf == -1)[0]
+        
+        if len(high_conf_starts) > 0:
+            # Find the longest stretch that allows for gaps up to maxConfGap
+            # We need to merge stretches that are close enough together
+            merged_stretches = []
+            current_start = high_conf_starts[0]
+            current_end = high_conf_ends[0]
+            
+            for i in range(1, len(high_conf_starts)):
+                gap = high_conf_starts[i] - current_end
+                if gap <= maxConfGap:
+                    # Merge this stretch with the current one
+                    current_end = high_conf_ends[i]
+                else:
+                    # Gap is too large, save current stretch and start new one
+                    merged_stretches.append((current_start, current_end))
+                    current_start = high_conf_starts[i]
+                    current_end = high_conf_ends[i]
+            
+            # Don't forget the last stretch
+            merged_stretches.append((current_start, current_end))
+            
+            if merged_stretches:
+                # Find the longest merged stretch
+                longest_stretch = max(merged_stretches, key=lambda x: x[1] - x[0])
+                start_idx, end_idx = longest_stretch
+                if rangeList is not None:
+                    start_idx += rangeList[0]
+                    end_idx += rangeList[0]
+                return [start_idx, end_idx]
+    
+    # If no valid stretches found, return None
+    return None

@@ -42,7 +42,7 @@ def main(sessionName, trialName, trial_id, cameras_to_use=['all'],
          dataDir=None, overwriteAugmenterModel=False,
          filter_frequency='default', overwriteFilterFrequency=False,
          scaling_setup='upright_standing_pose', overwriteScalingSetup=False,
-         overwriteCamerasToUse=False):
+         overwriteCamerasToUse=False, syncVer='1.0', overwriteSyncVer=False):
 
     # %% High-level settings.
     # Camera calibration.
@@ -130,6 +130,14 @@ def main(sessionName, trialName, trial_id, cameras_to_use=['all'],
         camerasToUse = sessionMetadata['camerastouse']
     else:
         camerasToUse = cameras_to_use
+
+    # If syncVer is in sessionMetadata, use the specified syncVer.
+    # If overwriteSyncVer is True, the syncVer is the one
+    # passed as an argument to main(). This is useful for local testing.
+    if 'syncVer' in sessionMetadata and not overwriteSyncVer:
+        syncVer = sessionMetadata['syncVer']
+    else:
+        syncVer = syncVer
 
     # %% Paths to pose detector folder for local testing.
     if poseDetector == 'OpenPose':
@@ -392,7 +400,8 @@ def main(sessionName, trialName, trial_id, cameras_to_use=['all'],
                     filtFreqs=filtFreqs, confidenceThreshold=0.4,
                     imageBasedTracker=False, cams2Use=camerasToUse_c, 
                     poseDetector=poseDetector, trialName=trialName,
-                    resolutionPoseDetection=resolutionPoseDetection))
+                    resolutionPoseDetection=resolutionPoseDetection,
+                    syncVer=syncVer))
         except Exception as e:
             if len(e.args) == 2: # specific exception
                 raise Exception(e.args[0], e.args[1])

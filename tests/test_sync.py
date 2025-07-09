@@ -12,7 +12,7 @@ from utils import loadCameraParameters
 from utilsSync import synchronizeVideos
 
 import logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 
 class SynchronizeVideos(unittest.TestCase):
     def testSynchronizeVideos(self):
@@ -65,7 +65,8 @@ class SynchronizeVideos(unittest.TestCase):
                             filtFreqs=filtFreqs, confidenceThreshold=confidenceThreshold,
                             imageBasedTracker=imageBasedTracker, cams2Use=camerasToUse_c, 
                             poseDetector=poseDetector, trialName=trialName,
-                            resolutionPoseDetection=resolutionPoseDetection))
+                            resolutionPoseDetection=resolutionPoseDetection,
+                            syncVer='1.1'))
                 
                 self.assertIn(sync_str, cm.output)
                 
