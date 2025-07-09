@@ -925,7 +925,7 @@ def detectHandPunchAllVideos_v2(handPunchPositionList,sampleFreq,
     if any(np.shape(c) != np.shape(handPunchPositionList[0]) for c in confList):
         raise Exception('all confs should have the same number of frames')
 
-    # Loop over each camera
+    # Loop over each camera, adding cleanest possible punch event for each camera.
     cam_punch_list = []
     for pos, conf in zip(handPunchPositionList, confList):
         valid_stretches = []

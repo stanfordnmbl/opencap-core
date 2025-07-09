@@ -23,3 +23,6 @@ Examples/reprocessDataServer.py
 *.stats
 
 newsletter.py
+
+.DS_Store
+.vscode/
