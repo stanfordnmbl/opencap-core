@@ -9,6 +9,7 @@ import pandas as pd
 from scipy.interpolate import pchip_interpolate
 from scipy.ndimage import gaussian_filter1d
 from scipy.signal import butter, gaussian, find_peaks, sosfiltfilt
+from scipy import signal
 import scipy.linalg
 
 from utils import (getOpenPoseMarkerNames, getOpenPoseFaceMarkers, 
@@ -343,25 +344,34 @@ def synchronizeVideoKeypoints(keypointList, confidenceList,
     # Hand punch: Input right and left wrist and shoulder positions.
     # For sync 1.0 we use the clipped data, but use the original inputs for 1.1
     # Also setting some other parameters for later use.
+    '''
     if syncVer == '1.0':
         handPunchVertPositionList = clippedHandPunchVertPositionList
         handPunchConfList = None
         handPunchSignalType = None
         padTime = None
         reprojTimeWindow = None
+        filterFreq = None
+        handPunchMaxShiftSteps = maxShiftSteps
     elif syncVer == '1.1':
         handPunchVertPositionList = inHandPunchVertPositionList
         handPunchConfList = inHandPunchConfidenceList
-        handPunchSignalType = 'position'
+        handPunchSignalType = 'velocity'
         padTime = 1.0
-        reprojTimeWindow = 0.2
+        reprojTimeWindow = None
+        filterFreq = 6.0
+        handPunchMaxShiftSteps = None
     else:
         raise ValueError(f'Invalid syncVer: {syncVer}')
+    '''
     isHandPunch, handForPunch, handPunchRange = \
         detectHandPunchAllVideos(syncVer, 
-                                 handPunchVertPositionList,
-                                 sampleFreq,
-                                 confList=handPunchConfList)
+                                 clippedHandPunchVertPositionList=clippedHandPunchVertPositionList,
+                                 clippedHandPunchConfidenceList=clippedHandPunchConfidenceList,
+                                 inHandPunchVertPositionList=inHandPunchVertPositionList,
+                                 inHandPunchConfidenceList=inHandPunchConfidenceList,
+                                 sampleFreq=sampleFreq,
+                                 )
 
     if isHandPunch:
         syncActivity = 'handPunch'
@@ -442,17 +452,15 @@ def synchronizeVideoKeypoints(keypointList, confidenceList,
                                 'cameras2Use': c_cameras2Use
                                 }
                 corVal,lag = syncHandPunch(syncVer,
-                                            [handPunchVertPositionList[i] for i in [0,iCam]],
-                                            handForPunch,
+                                            clippedHandPunchVertPositionList=[clippedHandPunchVertPositionList[i] for i in [0,iCam]],
+                                            inHandPunchVertPositionList=[inHandPunchVertPositionList[i] for i in [0,iCam]],
+                                            clippedHandPunchConfidenceList=[clippedHandPunchConfidenceList[i] for i in [0,iCam]],
+                                            inHandPunchConfidenceList=[inHandPunchConfidenceList[i] for i in [0,iCam]],
+                                            handForPunch=handForPunch,
                                             maxShiftSteps=maxShiftSteps,
-                                            confList=([handPunchConfList[i] for i in [0,iCam]] 
-                                                     if handPunchConfList is not None else None),
                                             handPunchRange=handPunchRange,
                                             frameRate=sampleFreq,
-                                            padTime=padTime,
-                                            signalType=handPunchSignalType,
-                                            dataForReproj=dataForReproj,
-                                            reprojTimeWindow=reprojTimeWindow
+                                            dataForReproj=dataForReproj
                                             )
             if np.abs(lag) > maxShiftSteps: # if this fails and we get a lag greater than maxShiftSteps (units=timesteps)
                 lag = 0 
@@ -871,14 +879,14 @@ def detectHandPunchAllVideos_v1(handPunchPositionList,sampleFreq,punchDurationTh
     return isTrialPunch, hand
 
 # %%
-def detectHandPunchAllVideos_v2(handPunchPositionList,sampleFreq,
-                                punchDurationThreshold=3, confList=None,
-                                confThresh=0.5, maxPosSimilarityThresh=0.5,
-                                maxConfGap=4):
+def detectHandPunchAllVideos_v2(handPunchPositionList, confList, sampleFreq,
+                                punchDurationLimits=(0.2, 3.0), confThresh=0.5, 
+                                maxPosSimilarityThresh=0.5, maxConfGap=4):
     """
-    Detects whether a hand punch activity is present across all videos/cameras,
-    and determines which hand (left or right) performed the punch and the possible 
-    frame range of the punch across all cameras.
+    Detects a hand punch event across all cameras, determines which hand
+    (left or right) performed the punch, and finds the consensus frame
+    range of the punch event. Uses wrist-over-shoulder position signals
+    and confidence values.
 
     Args:
         handPunchPositionList (list of np.ndarray):
@@ -886,15 +894,15 @@ def detectHandPunchAllVideos_v2(handPunchPositionList,sampleFreq,
             containing the vertical positions of the right wrist, left wrist,
             right shoulder, and left shoulder over time.
             Expected order: [r_wrist, l_wrist, r_shoulder, l_shoulder].
-        sampleFreq (float):
-            The sampling frequency (frames per second) of the video data.
-        punchDurationThreshold (float, optional):
-            Maximum allowed duration (in seconds) for a punch event.
-            Default is 3.
         confList (list of np.ndarray):
             List of arrays (one per camera), each of shape (4, nFrames),
             containing the confidence values for the corresponding markers in
             handPunchPositionList. Required for this function.
+        sampleFreq (float):
+            The sampling frequency (frames per second) of the video data.
+        punchDurationLimits (tuple, optional):
+            (min_duration, max_duration) in seconds for a punch event.
+            Default is (0.2, 3).
         confThresh (float, optional):
             Confidence threshold multiplier for determining high-confidence
             stretches. Default is 0.5.
@@ -925,6 +933,8 @@ def detectHandPunchAllVideos_v2(handPunchPositionList,sampleFreq,
     if any(np.shape(c) != np.shape(handPunchPositionList[0]) for c in confList):
         raise Exception('all confs should have the same number of frames')
 
+    punch_duration_min, punch_duration_max = punchDurationLimits
+
     # Loop over each camera, adding cleanest possible punch event for each camera.
     cam_punch_list = []
     for pos, conf in zip(handPunchPositionList, confList):
@@ -954,12 +964,12 @@ def detectHandPunchAllVideos_v2(handPunchPositionList,sampleFreq,
             positiveStretches = list(zip(starts, ends))
             
             # Ensure stretches are valid:
-            # 1. duration of stretch is less than 'punchDurationThreshold'
+            # 1. punch duration is within time limits
             # 2. high confidence
             # 3. other wrist is below other shoulder
             for start, end in positiveStretches:
                 duration = (end - start) / sampleFreq
-                if duration > punchDurationThreshold:
+                if duration < punch_duration_min or duration > punch_duration_max:
                     continue 
 
                 # Require minimum confidence of wrist and shoulder to be
@@ -1040,22 +1050,58 @@ def detectHandPunchAllVideos_v2(handPunchPositionList,sampleFreq,
     return isTrialPunch, hand, handPunchRange
 
 # %%
-def detectHandPunchAllVideos(syncVer, *args, **kwargs):
+def detectHandPunchAllVideos(syncVer, **kwargs):
     """
-    Dispatcher for versions of detecting hand punch.
+    Dispatcher and version-specific logic for detecting hand punch.
+
+    Args:
+        syncVer (str):
+            Version of the hand punch detection algorithm.
+        **kwargs:
+            Keyword arguments for the hand punch detection algorithm.
+
+    Returns:
+        isTrialPunch (bool):
+            True if a valid punch is detected in all cameras and by the same
+            hand, False otherwise.
+        hand (str or None):
+            'r' if the right hand performed the punch, 'l' if the left hand,
+            or None if no valid punch is found.
+        handPunchRange (list or None):
+            Version 1.0: None
+            Version 1.1: [start_idx, end_idx] of the possible punch event 
+            (frame indices) across all cameras, or None if no valid punch is 
+            found.
+
+    Raises:
+        ValueError: If the sync version is not supported.
     """
     if syncVer == '1.0':
-        isTrialPunch, hand = detectHandPunchAllVideos_v1(*args,
-                                                         punchDurationThreshold=kwargs.get('punchDurationThreshold', 3))
+        handPunchVertPositionList = kwargs.get('clippedHandPunchVertPositionList', None)
+        sampleFreq = kwargs.get('sampleFreq', None)
+
+        isTrialPunch, hand = detectHandPunchAllVideos_v1(handPunchVertPositionList,
+                                                         sampleFreq,
+                                                         punchDurationThreshold=3)
         return isTrialPunch, hand, None
     
     elif syncVer == '1.1':
-        return detectHandPunchAllVideos_v2(*args,
-                                           punchDurationThreshold=kwargs.get('punchDurationThreshold', 3),
-                                           confList=kwargs.get('confList', None),
-                                           confThresh=kwargs.get('confThresh', 0.5),
-                                           maxPosSimilarityThresh=kwargs.get('maxPosSimilarityThresh', 0.5),
-                                           maxConfGap=kwargs.get('maxConfGap', 4))
+        handPunchVertPositionList = kwargs.get('inHandPunchVertPositionList', None)
+        confList = kwargs.get('inHandPunchConfidenceList', None)
+        sampleFreq = kwargs.get('sampleFreq', None)
+
+        punchDurationLimits = (0.2, 3.0)
+        confThresh = 0.5
+        maxPosSimilarityThresh = 0.7
+        maxConfGap = 4
+
+        return detectHandPunchAllVideos_v2(handPunchVertPositionList,
+                                           confList,
+                                           sampleFreq,
+                                           punchDurationLimits=punchDurationLimits,
+                                           confThresh=confThresh,
+                                           maxPosSimilarityThresh=maxPosSimilarityThresh,
+                                           maxConfGap=maxConfGap)
     else:
         raise ValueError(f'Unsupported sync version: {syncVer}')
 
@@ -1153,19 +1199,19 @@ def syncHandPunch_v1(positions,hand,maxShiftSteps=600):
     return corr_val, lag
 
 # %% 
-def syncHandPunch_v2(positionsList, hand,
-                     maxShiftSteps=600, confList=None, 
-                     padTime=None, handPunchRange=None,
-                     frameRate=None, confThresh=0.5, maxConfGap=4,
-                     signalType='velocity', dataForReproj=None,
-                     reprojTimeWindow=0.2):
+def syncHandPunch_v2(positionsList, hand, confList, handPunchRange, frameRate,
+                     multCorrGaussianStd=None, padTime=1.0, confThresh=0.5, 
+                     maxConfGap=4, signalType='velocity', signalFilterFreq=6.0,
+                     dataForReproj=None, reprojTimeWindow=None):
     """
-    Synchronizes two hand punch signals (from two cameras) by finding the lag
-    that best aligns the punch event, using either velocity or position signals.
+    Synchronize two hand punch signals from two cameras by aligning the punch
+    event using correlation (and optionally reprojection error minimization).
 
-    The function first uses correlation to find the lag that best aligns the
-    punch event. Optionally, it refines the lag by minimizing reprojection error
-    over a window around the correlation peak.
+    This function computes the lag (frame shift) that best aligns the punch
+    event between two cameras, focusing on the period of the punch and
+    optionally refining the alignment using reprojection error. It supports
+    both velocity and position-based synchronization, and can restrict the
+    search to high-confidence regions.
 
     Args:
         positionsList (list of np.ndarray):
@@ -1175,21 +1221,23 @@ def syncHandPunch_v2(positionsList, hand,
             [r_wrist, l_wrist, r_shoulder, l_shoulder].
         hand (str):
             'r' for right hand punch, 'l' for left hand punch.
-        maxShiftSteps (int, optional):
-            Maximum allowed lag (in frames) to search for alignment.
-            Default is 600.
-        confList (list of np.ndarray, optional):
+        confList (list of np.ndarray):
             List of arrays (one per camera), each of shape (4, nFrames),
             containing the confidence values for the corresponding markers in
-            positionsList. Required for high-confidence region selection.
-        padTime (float, optional):
-            Time (in seconds) to pad before and after the punch event when
-            searching for the best lag. If None, uses the full range.
-        handPunchRange (list or None):
+            positionsList.
+        handPunchRange (list of int):
             [start_idx, end_idx] of the punch event (frame indices) to focus
             the synchronization.
         frameRate (float):
             Frame rate (frames per second) of the video.
+        multCorrGaussianStd (float or None, optional):
+            Standard deviation (in frames) of a Gaussian window applied to the
+            correlation curve, which prioritizes lag solutions closer to zero.
+            Default is None (no Gaussian weighting is applied).
+        padTime (float, optional):
+            Time (in seconds) to pad before and after the punch event when
+            searching for the best lag. If None, uses the full range.
+            Default is 1.0.
         confThresh (float, optional):
             Confidence threshold multiplier for determining high-confidence
             stretches. Default is 0.5.
@@ -1200,12 +1248,16 @@ def syncHandPunch_v2(positionsList, hand,
             'velocity' to use the derivative of the wrist-over-shoulder
             position, 'position' to use the position directly. Default is
             'velocity'.
+        signalFilterFreq (float or None, optional):
+            Frequency (in Hz) to filter the signals before correlation.
+            None is no filtering. Default is 6.0.
         dataForReproj (dict, optional):
             If provided, contains data for reprojection error minimization.
-            Used to refine the lag selection.
+            Used to refine the lag selection. Default is None.
         reprojTimeWindow (float, optional):
             Time window (in seconds) around the correlation peak to search for
-            the lag with minimum reprojection error. Default is 0.2.
+            the lag with minimum reprojection error. Default is None (no
+            reprojection error minimization).
 
     Returns:
         corr_val (float):
@@ -1213,6 +1265,9 @@ def syncHandPunch_v2(positionsList, hand,
         lag (int):
             The lag (in frames) that best aligns the punch event between the
             two cameras.
+
+    Raises:
+        Exception: If required arguments are missing or inconsistent.
     """
     if confList is None:
         raise Exception('list of confidences need to be passed in to "conf"')
@@ -1281,16 +1336,23 @@ def syncHandPunch_v2(positionsList, hand,
         relPos = np.diff(pos[(shoulderInd, wristInd),startInd:endInd],axis=0).squeeze() # vertical position of wrist over shoulder
         relPosList.append(relPos)
         relVelList.append(np.diff(relPos))
+    
+    if signalFilterFreq is not None:
+        order = 4
+        wn = signalFilterFreq / (frameRate/2)
+        sos = signal.butter(order, wn, 'low', analog=False, output='sos')
+        relPosList = [signal.sosfiltfilt(sos, pos) for pos in relPosList]
+        relVelList = [signal.sosfiltfilt(sos, vel) for vel in relVelList]
         
     if signalType == 'velocity':
-        corr_val, lag_corr = cross_corr(relVelList[1],relVelList[0],multCorrGaussianStd=maxShiftSteps,visualize=False)
+        corr_val, lag_corr = cross_corr(relVelList[1],relVelList[0],multCorrGaussianStd=multCorrGaussianStd,visualize=False)
     elif signalType == 'position':
-        corr_val, lag_corr = cross_corr(relPosList[1],relPosList[0],multCorrGaussianStd=maxShiftSteps,visualize=False)
+        corr_val, lag_corr = cross_corr(relPosList[1],relPosList[0],multCorrGaussianStd=multCorrGaussianStd,visualize=False)
     else:
         raise ValueError(f'Invalid signalType: {signalType}. Must be "velocity" or "position"')
     
 
-    if dataForReproj is None:
+    if dataForReproj is None or reprojTimeWindow is None:
         return corr_val, lag_corr
 
     else:
@@ -1314,25 +1376,63 @@ def syncHandPunch_v2(positionsList, hand,
         return corr_val, lag
 
 # %%
-def syncHandPunch(syncVer, *args, **kwargs):
-    """Dispatcher to call the appropriate syncHandPunch function based on the
-    syncVer.
+def syncHandPunch(syncVer, **kwargs):
+    """Dispatcher and version-specific logic for synchronizing hand punch.
+
+    Args:
+        syncVer (str):
+            Version of the hand punch synchronization algorithm.
+        **kwargs:
+            Keyword arguments for the hand punch synchronization algorithm.
+
+    Returns:
+        corr_val (float):
+            Maximum correlation value found between the two signals.
+        lag (int):
+            The lag (in frames) that best aligns the punch event between the
+            two cameras.
+
+    Raises:
+        ValueError: If the sync version is not supported.
     """
     if syncVer == '1.0':
-        return syncHandPunch_v1(*args, 
-                                maxShiftSteps=kwargs.get('maxShiftSteps', 600))
+        positions = kwargs.get('clippedHandPunchVertPositionList', None)
+        hand = kwargs.get('handForPunch', None)
+        maxShiftSteps = kwargs.get('maxShiftSteps', 600)
+
+        return syncHandPunch_v1(positions,
+                                hand,
+                                maxShiftSteps=maxShiftSteps)
     elif syncVer == '1.1':
-        return syncHandPunch_v2(*args, 
-                                maxShiftSteps=kwargs.get('maxShiftSteps', 600),
-                                confList=kwargs.get('confList', None),
-                                padTime=kwargs.get('padTime', None),
-                                handPunchRange=kwargs.get('handPunchRange', None),
-                                frameRate=kwargs.get('frameRate', None),
-                                confThresh=kwargs.get('confThresh', 0.5),
-                                maxConfGap=kwargs.get('maxConfGap', 4),
-                                signalType=kwargs.get('signalType', 'velocity'),
-                                dataForReproj=kwargs.get('dataForReproj', None),
-                                reprojTimeWindow=kwargs.get('reprojTimeWindow', 0.2))
+        positionsList = kwargs.get('inHandPunchVertPositionList', None)
+        hand = kwargs.get('handForPunch', None)
+        confList = kwargs.get('inHandPunchConfidenceList', None)
+        handPunchRange = kwargs.get('handPunchRange', None)
+        frameRate = kwargs.get('frameRate', None)
+
+        multCorrGaussianStd = None
+        padTime = 1.0
+        confThresh = 0.5
+        maxConfGap = 4
+        signalType = 'velocity'
+        signalFilterFreq = 6.0
+        dataForReproj = None
+        reprojTimeWindow = None
+
+        return syncHandPunch_v2(positionsList,
+                                hand,
+                                confList,
+                                handPunchRange,
+                                frameRate,
+                                multCorrGaussianStd=multCorrGaussianStd,
+                                padTime=padTime,
+                                confThresh=confThresh,
+                                maxConfGap=maxConfGap,
+                                signalType=signalType,
+                                signalFilterFreq=signalFilterFreq,
+                                dataForReproj=dataForReproj,
+                                reprojTimeWindow=reprojTimeWindow,
+                                )
     else:
         raise ValueError(f'Unsupported synchronization version: {syncVer}')
 

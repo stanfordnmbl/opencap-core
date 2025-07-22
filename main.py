@@ -134,8 +134,8 @@ def main(sessionName, trialName, trial_id, cameras_to_use=['all'],
     # If syncVer is in sessionMetadata, use the specified syncVer.
     # If overwriteSyncVer is True, the syncVer is the one
     # passed as an argument to main(). This is useful for local testing.
-    if 'syncVer' in sessionMetadata and not overwriteSyncVer:
-        syncVer = sessionMetadata['syncVer']
+    if 'sync_ver' in sessionMetadata and not overwriteSyncVer:
+        syncVer = sessionMetadata['sync_ver']
     else:
         syncVer = syncVer
 
