@@ -35,9 +35,11 @@ def compare_mot(output_mot_df, ref_mot_df, t0, tf):
     of interest. In particular, the arm raise can create larger differences
     on single frames.
 
-    Time column is checked for equality (IK is frame-by-frame).
-    Translation error is checked within 1 mm max per frame, RMSE within 0.2 mm.
-    Rotation error is checked within 2.5 degrees max per frame, RMSE within 0.5 degrees.
+    - Time column is checked for equality (IK is frame-by-frame).
+    - Translation error is checked within 2 mm max per frame, RMSE within 
+      1 mm.
+    - Rotation error is checked within 2.5 degrees max per frame, RMSE 
+      within 0.5 degrees.
     '''
     output_mot_df_slice = output_mot_df[(output_mot_df['time'] >= t0) & (output_mot_df['time'] <= tf)]
     ref_mot_df_slice = ref_mot_df[(ref_mot_df['time'] >= t0) & (ref_mot_df['time'] <= tf)]
@@ -46,7 +48,7 @@ def compare_mot(output_mot_df, ref_mot_df, t0, tf):
         if col == 'time':
             pd.testing.assert_series_equal(output_mot_df[col], ref_mot_df[col])
 
-        # check translational within 1 mm max error, rmse within 0.2 mm
+        # check translational within 2 mm max error, rmse within 1 mm
         elif any(substr in col for substr in ['tx', 'ty', 'tz']):
             pd.testing.assert_series_equal(
                 output_mot_df_slice[col], ref_mot_df_slice[col], atol=0.002
@@ -82,8 +84,7 @@ def test_main(trialName, t0, tf):
     )
 
     # Compare marker data
-    output_trc = os.path.join(
-        dataDir,
+    output_trc = os.path.join(dataDir,
         'Data',
         'sync-tests',
         'MarkerData',

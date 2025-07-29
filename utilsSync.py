@@ -342,28 +342,8 @@ def synchronizeVideoKeypoints(keypointList, confidenceList,
         print('Detect gait activity algorithm failed.')
     
     # Hand punch: Input right and left wrist and shoulder positions.
-    # For sync 1.0 we use the clipped data, but use the original inputs for 1.1
-    # Also setting some other parameters for later use.
-    '''
-    if syncVer == '1.0':
-        handPunchVertPositionList = clippedHandPunchVertPositionList
-        handPunchConfList = None
-        handPunchSignalType = None
-        padTime = None
-        reprojTimeWindow = None
-        filterFreq = None
-        handPunchMaxShiftSteps = maxShiftSteps
-    elif syncVer == '1.1':
-        handPunchVertPositionList = inHandPunchVertPositionList
-        handPunchConfList = inHandPunchConfidenceList
-        handPunchSignalType = 'velocity'
-        padTime = 1.0
-        reprojTimeWindow = None
-        filterFreq = 6.0
-        handPunchMaxShiftSteps = None
-    else:
-        raise ValueError(f'Invalid syncVer: {syncVer}')
-    '''
+    # Different sync versions use different input data, handled by
+    # dispatcher function detectHandPunchAllVideos.
     isHandPunch, handForPunch, handPunchRange = \
         detectHandPunchAllVideos(syncVer, 
                                  clippedHandPunchVertPositionList=clippedHandPunchVertPositionList,
@@ -445,23 +425,16 @@ def synchronizeVideoKeypoints(keypointList, confidenceList,
                                             visualize=False,
                                             frameRate=sampleFreq)
             elif syncActivity == 'handPunch':
-                dataForReproj = {'CamParamList':c_CameraParams,
-                                'keypointList':keypointListFilt,
-                                'cams2UseReproj': [0, c_cameras2Use.index(c_cameras2Use[iCam])],
-                                'confidence': confidenceSyncListFilt,
-                                'cameras2Use': c_cameras2Use
-                                }
                 corVal,lag = syncHandPunch(syncVer,
-                                            clippedHandPunchVertPositionList=[clippedHandPunchVertPositionList[i] for i in [0,iCam]],
-                                            inHandPunchVertPositionList=[inHandPunchVertPositionList[i] for i in [0,iCam]],
-                                            clippedHandPunchConfidenceList=[clippedHandPunchConfidenceList[i] for i in [0,iCam]],
-                                            inHandPunchConfidenceList=[inHandPunchConfidenceList[i] for i in [0,iCam]],
-                                            handForPunch=handForPunch,
-                                            maxShiftSteps=maxShiftSteps,
-                                            handPunchRange=handPunchRange,
-                                            frameRate=sampleFreq,
-                                            dataForReproj=dataForReproj
-                                            )
+                                           clippedHandPunchVertPositionList=[clippedHandPunchVertPositionList[i] for i in [0,iCam]],
+                                           inHandPunchVertPositionList=[inHandPunchVertPositionList[i] for i in [0,iCam]],
+                                           clippedHandPunchConfidenceList=[clippedHandPunchConfidenceList[i] for i in [0,iCam]],
+                                           inHandPunchConfidenceList=[inHandPunchConfidenceList[i] for i in [0,iCam]],
+                                           handForPunch=handForPunch,
+                                           maxShiftSteps=maxShiftSteps,
+                                           handPunchRange=handPunchRange,
+                                           frameRate=sampleFreq,
+                                           )
             if np.abs(lag) > maxShiftSteps: # if this fails and we get a lag greater than maxShiftSteps (units=timesteps)
                 lag = 0 
                 print('Did not use cross correlation to sync {} - computed shift was greater than specified {} frames. Shift set to 0.'.format(c_cameras2Use[iCam], maxShiftSteps))
@@ -1200,9 +1173,8 @@ def syncHandPunch_v1(positions,hand,maxShiftSteps=600):
 
 # %% 
 def syncHandPunch_v2(positionsList, hand, confList, handPunchRange, frameRate,
-                     multCorrGaussianStd=None, padTime=1.0, confThresh=0.5, 
-                     maxConfGap=4, signalType='velocity', signalFilterFreq=6.0,
-                     dataForReproj=None, reprojTimeWindow=None):
+                     padTime=1.0, confThresh=0.5, maxConfGap=4,
+                     signalType='velocity', signalFilterFreq=6.0):
     """
     Synchronize two hand punch signals from two cameras by aligning the punch
     event using correlation (and optionally reprojection error minimization).
@@ -1230,10 +1202,6 @@ def syncHandPunch_v2(positionsList, hand, confList, handPunchRange, frameRate,
             the synchronization.
         frameRate (float):
             Frame rate (frames per second) of the video.
-        multCorrGaussianStd (float or None, optional):
-            Standard deviation (in frames) of a Gaussian window applied to the
-            correlation curve, which prioritizes lag solutions closer to zero.
-            Default is None (no Gaussian weighting is applied).
         padTime (float, optional):
             Time (in seconds) to pad before and after the punch event when
             searching for the best lag. If None, uses the full range.
@@ -1251,13 +1219,6 @@ def syncHandPunch_v2(positionsList, hand, confList, handPunchRange, frameRate,
         signalFilterFreq (float or None, optional):
             Frequency (in Hz) to filter the signals before correlation.
             None is no filtering. Default is 6.0.
-        dataForReproj (dict, optional):
-            If provided, contains data for reprojection error minimization.
-            Used to refine the lag selection. Default is None.
-        reprojTimeWindow (float, optional):
-            Time window (in seconds) around the correlation peak to search for
-            the lag with minimum reprojection error. Default is None (no
-            reprojection error minimization).
 
     Returns:
         corr_val (float):
@@ -1345,35 +1306,19 @@ def syncHandPunch_v2(positionsList, hand, confList, handPunchRange, frameRate,
         relVelList = [signal.sosfiltfilt(sos, vel) for vel in relVelList]
         
     if signalType == 'velocity':
-        corr_val, lag_corr = cross_corr(relVelList[1],relVelList[0],multCorrGaussianStd=multCorrGaussianStd,visualize=False)
+        corr = signal.correlate(relVelList[1], relVelList[0], mode='full', method='auto')
+        lags = signal.correlation_lags(len(relVelList[1]), len(relVelList[0]), mode='full')
     elif signalType == 'position':
-        corr_val, lag_corr = cross_corr(relPosList[1],relPosList[0],multCorrGaussianStd=multCorrGaussianStd,visualize=False)
+        corr = signal.correlate(relPosList[1], relPosList[0], mode='full', method='auto')
+        lags = signal.correlation_lags(len(relPosList[1]), len(relPosList[0]), mode='full')
     else:
         raise ValueError(f'Invalid signalType: {signalType}. Must be "velocity" or "position"')
+    lag = lags[np.argmax(corr)]
+    corr_val = np.max(corr)
     
-
-    if dataForReproj is None or reprojTimeWindow is None:
-        return corr_val, lag_corr
-
-    else:
-        # Refine with reprojection error minimization
-        # Calculate reprojection error with lags around correlation peak. Select the lag with the lowest reprojection error.
-        # This helps the fact that correlation peak is not always the best lag, esp for front-facing cameras
-        numFrames = int(reprojTimeWindow*frameRate)
-        lags = np.arange(lag_corr-numFrames,lag_corr+numFrames+1)
-        
-        reprojErrors = [
-            calcReprojectionErrorForSync(
-                dataForReproj['CamParamList'], dataForReproj['keypointList'],
-                l, dataForReproj['cams2UseReproj'], 
-                dataForReproj['confidence'], dataForReproj['cameras2Use'])[0]
-            for l in lags
-        ]
-            
-        # Select the lag with the lowest reprojection error
-        lag = lags[np.argmin(reprojErrors)]
-
-        return corr_val, lag
+    logging.debug(f'Using signalType: {signalType}, signalFilterFreq: {signalFilterFreq}')
+    logging.debug(f'corr_val: {corr_val}, lag: {lag}')
+    return corr_val, lag
 
 # %%
 def syncHandPunch(syncVer, **kwargs):
@@ -1410,28 +1355,22 @@ def syncHandPunch(syncVer, **kwargs):
         handPunchRange = kwargs.get('handPunchRange', None)
         frameRate = kwargs.get('frameRate', None)
 
-        multCorrGaussianStd = None
         padTime = 1.0
         confThresh = 0.5
         maxConfGap = 4
         signalType = 'velocity'
         signalFilterFreq = 6.0
-        dataForReproj = None
-        reprojTimeWindow = None
 
         return syncHandPunch_v2(positionsList,
                                 hand,
                                 confList,
                                 handPunchRange,
                                 frameRate,
-                                multCorrGaussianStd=multCorrGaussianStd,
                                 padTime=padTime,
                                 confThresh=confThresh,
                                 maxConfGap=maxConfGap,
                                 signalType=signalType,
                                 signalFilterFreq=signalFilterFreq,
-                                dataForReproj=dataForReproj,
-                                reprojTimeWindow=reprojTimeWindow,
                                 )
     else:
         raise ValueError(f'Unsupported synchronization version: {syncVer}')
