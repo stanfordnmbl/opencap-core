@@ -1,9 +1,11 @@
 import glob
+import logging
 import os
-import sys
-import numpy as np
 import pickle
 import pytest
+import sys
+
+import numpy as np
 
 thisDir = os.path.dirname(os.path.realpath(__file__))
 repoDir = os.path.abspath(os.path.join(thisDir,'../'))
@@ -11,8 +13,7 @@ sys.path.append(repoDir)
 from utils import loadCameraParameters
 from utilsSync import synchronizeVideos, detectHandPunchAllVideos, syncHandPunch, syncHandPunch_v2
 
-import logging
-logging.basicConfig(level=logging.DEBUG)
+
 
 # Helper functions
 
@@ -606,11 +607,13 @@ class TestSyncHandPunch:
 
     @pytest.mark.parametrize("signal_type,filter_freq", [
         ("position", None),
-        ("position", 6),
+        ("position", 6.0),
         ("velocity", None),
-        ("velocity", 6),
+        ("velocity", 6.0),
     ])
-    def test_sync_hand_punch_v2_stability(self, signal_type, filter_freq):
+    def test_sync_hand_punch_v2_stability(self, signal_type, filter_freq, caplog):
+        caplog.set_level(logging.DEBUG)
+
         # Create a clean right hand punch for Cam0, shift for Cam1
         length = 2000
         frame_rate = 60
@@ -642,12 +645,16 @@ class TestSyncHandPunch:
         handForPunch = 'r'
         handPunchRange = [punch_start, punch_end + input_lag] # earliest start, latest end
 
-        _, lag = syncHandPunch_v2(handPunchVertPositionList,
-                                  handForPunch,
-                                  handPunchConfidenceList,
-                                  handPunchRange,
-                                  frame_rate,
-                                  signalType=signal_type,
-                                  signalFilterFreq=filter_freq,
-                                 )
+        _, lag = syncHandPunch_v2(
+            handPunchVertPositionList,
+            handForPunch,
+            handPunchConfidenceList,
+            handPunchRange,
+            frame_rate,
+            signalType=signal_type,
+            signalFilterFreq=filter_freq,
+        )
+        assert f"signalType: {signal_type}" in caplog.text
+        assert f"signalFilterFreq: {filter_freq}" in caplog.text
         assert lag == input_lag
+        
