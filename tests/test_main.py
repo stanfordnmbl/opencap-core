@@ -76,7 +76,7 @@ def compare_mot(output_mot_df, ref_mot_df, t0, tf):
 def test_main(trialName, t0, tf, syncVer, caplog):
     caplog.set_level(logging.INFO)
 
-    sessionName = 'sync_2-camera'
+    sessionName = 'sync_2-cameras'
     trialID = trialName
     dataDir = os.path.join(thisDir, 'opencap-test-data')
     main(
