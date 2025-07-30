@@ -18,6 +18,7 @@ from utilsChecker import (loadPklVideo, unpackKeypointList,
                           keypointsToBoundingBox, calcReprojectionError,
                           triangulateMultiviewVideo)
 from utilsCameraPy3 import Camera
+from defaults import DEFAULT_SYNC_VER
 
 # %%
 def synchronizeVideos(CameraDirectories, trialRelativePath, pathPoseDetector,
@@ -28,7 +29,7 @@ def synchronizeVideos(CameraDirectories, trialRelativePath, pathPoseDetector,
                       poseDetector='OpenPose', trialName=None, bbox_thr=0.8,
                       resolutionPoseDetection='default', 
                       visualizeKeypointAnimation=False,
-                      syncVer='1.0'):
+                      syncVer=DEFAULT_SYNC_VER):
     
     markerNames = getOpenPoseMarkerNames()
     
@@ -158,7 +159,7 @@ def synchronizeVideoKeypoints(keypointList, confidenceList,
                               isGait=False, CameraParams = None,
                               cameras2Use=['none'],CameraDirectories = None,
                               trialName=None, trialID='',
-                              syncVer='1.0'):
+                              syncVer=DEFAULT_SYNC_VER):
     visualize2Dkeypoint = False # this is a visualization just for testing what filtered input data looks like
     
     # keypointList is a mCamera length list of (nmkrs,nTimesteps,2) arrays of camera 2D keypoints

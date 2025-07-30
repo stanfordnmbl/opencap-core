@@ -64,14 +64,19 @@ def compare_mot(output_mot_df, ref_mot_df, t0, tf):
             rmse = calc_rmse(output_mot_df_slice[col], ref_mot_df_slice[col])
             assert rmse <= 0.5
 
-# End to end tests for main function (without pose detection)
+# End to end tests with different sync methods (hand, gait, general).
+# Also check that syncVer updates with main changes.
+# Note: no pose detection, uses pre-scaled opensim model
+@pytest.mark.parametrize("syncVer", ['1.0', '1.1'])
 @pytest.mark.parametrize("trialName, t0, tf", [
     ('squats-with-arm-raise', 5.0, 10.0),
     ('squats', 3.0, 8.0),
     ('walk', 1.0, 5.0),
 ])
-def test_main(trialName, t0, tf):
-    sessionName = 'sync-tests'
+def test_main(trialName, t0, tf, syncVer, caplog):
+    caplog.set_level(logging.INFO)
+
+    sessionName = 'sync_2-camera'
     trialID = trialName
     dataDir = os.path.join(thisDir, 'opencap-test-data')
     main(
@@ -81,12 +86,14 @@ def test_main(trialName, t0, tf):
         dataDir=dataDir,
         genericFolderNames=True,
         poseDetector='hrnet',
+        syncVer=syncVer,
     )
+    assert f"Synchronizing Keypoints using version {syncVer}" in caplog.text
 
     # Compare marker data
     output_trc = os.path.join(dataDir,
         'Data',
-        'sync-tests',
+        sessionName,
         'MarkerData',
         'PostAugmentation',
         f'{trialName}.trc',
@@ -94,7 +101,7 @@ def test_main(trialName, t0, tf):
     ref_trc = os.path.join(
         dataDir,
         'Data',
-        'sync-tests',
+        sessionName,
         'OutputReference',
         f'{trialName}.trc',
     )
@@ -108,7 +115,7 @@ def test_main(trialName, t0, tf):
     output_mot = os.path.join(
         dataDir,
         'Data',
-        'sync-tests',
+        sessionName,
         'OpenSimData',
         'Kinematics',
         f'{trialName}.mot',
@@ -116,7 +123,7 @@ def test_main(trialName, t0, tf):
     ref_mot = os.path.join(
         dataDir,
         'Data',
-        'sync-tests',
+        sessionName,
         'OutputReference',
         f'{trialName}.mot',
     )
@@ -124,3 +131,7 @@ def test_main(trialName, t0, tf):
     ref_mot_df, _ = load_mot(ref_mot)
     pd.testing.assert_index_equal(output_mot_df.columns, ref_mot_df.columns)
     compare_mot(output_mot_df, ref_mot_df, t0, tf)
+
+# TODO: calibration and neutral
+# TODO: > 2 cameras
+# TODO: augmenter versions

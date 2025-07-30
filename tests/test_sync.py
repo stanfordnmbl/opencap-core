@@ -13,8 +13,6 @@ sys.path.append(repoDir)
 from utils import loadCameraParameters
 from utilsSync import synchronizeVideos, detectHandPunchAllVideos, syncHandPunch, syncHandPunch_v2
 
-
-
 # Helper functions
 
 def generate_test_signal_with_peaks(
@@ -81,9 +79,9 @@ def generate_test_signal_with_peaks(
 
 # Integration / regression tests for the synchronizeVideos function.
 dataDir = os.path.join(thisDir, 'opencap-test-data')
-sessionName = 'sync-tests'
+sessionName = 'sync_2-cameras'
 sessionDir = os.path.join(dataDir, 'Data', sessionName)
-videosDir = os.path.join(dataDir, 'Data', 'sync-tests', 'Videos')
+videosDir = os.path.join(dataDir, 'Data', sessionName, 'Videos')
 cameraDirectories = {'Cam1': os.path.join(videosDir, 'Cam1'), 
                      'Cam0': os.path.join(videosDir, 'Cam0')}
 

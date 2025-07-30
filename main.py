@@ -30,6 +30,7 @@ from utilsSync import synchronizeVideos
 from utilsDetector  import runPoseDetector
 from utilsAugmenter import augmentTRC
 from utilsOpenSim import runScaleTool, getScaleTimeRange, runIKTool, generateVisualizerJson
+from defaults import DEFAULT_SYNC_VER
 
 def main(sessionName, trialName, trial_id, cameras_to_use=['all'],
          intrinsicsFinalFolder='Deployed', isDocker=False,
@@ -42,7 +43,7 @@ def main(sessionName, trialName, trial_id, cameras_to_use=['all'],
          dataDir=None, overwriteAugmenterModel=False,
          filter_frequency='default', overwriteFilterFrequency=False,
          scaling_setup='upright_standing_pose', overwriteScalingSetup=False,
-         overwriteCamerasToUse=False, syncVer='1.0', overwriteSyncVer=False):
+         overwriteCamerasToUse=False, syncVer=None,):
 
     # %% High-level settings.
     # Camera calibration.
@@ -131,13 +132,13 @@ def main(sessionName, trialName, trial_id, cameras_to_use=['all'],
     else:
         camerasToUse = cameras_to_use
 
-    # If syncVer is in sessionMetadata, use the specified syncVer.
-    # If overwriteSyncVer is True, the syncVer is the one
-    # passed as an argument to main(). This is useful for local testing.
-    if 'sync_ver' in sessionMetadata and not overwriteSyncVer:
-        syncVer = sessionMetadata['sync_ver']
-    else:
-        syncVer = syncVer
+    # We'll use syncVer if provided to this function. If not, try to use one 
+    # from sessionMetadata, otherwise use the default one.
+    if syncVer is None:
+        if 'sync_ver' in sessionMetadata:
+            syncVer = sessionMetadata['sync_ver']
+        else:
+            syncVer = DEFAULT_SYNC_VER
 
     # %% Paths to pose detector folder for local testing.
     if poseDetector == 'OpenPose':
