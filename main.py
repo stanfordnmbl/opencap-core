@@ -134,11 +134,7 @@ def main(sessionName, trialName, trial_id, cameras_to_use=['all'],
 
     # We'll use syncVer if provided to this function. If not, try to use one 
     # from sessionMetadata, otherwise use the default one.
-    if syncVer is None:
-        if 'sync_ver' in sessionMetadata:
-            syncVer = sessionMetadata['sync_ver']
-        else:
-            syncVer = DEFAULT_SYNC_VER
+    syncVer = syncVer or sessionMetadata.get('sync_ver', DEFAULT_SYNC_VER)
 
     # %% Paths to pose detector folder for local testing.
     if poseDetector == 'OpenPose':
