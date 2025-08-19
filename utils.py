@@ -817,7 +817,9 @@ def postMotionData(trial_id,session_path,trial_name=None,isNeutral=False,
         
     return
 
-def getMotionData(trial_id,session_path,simplePath=False):
+def getMotionData(trial_id, session_path, 
+                  simplePath=False, 
+                  include_pose_pickles=False):
     trial = getTrialJson(trial_id)
     trial_name = trial['name']
     resultTags = [res['tag'] for res in trial['results']]
@@ -835,15 +837,13 @@ def getMotionData(trial_id,session_path,simplePath=False):
     # get IK data
     if 'ik_results' in resultTags:
         ikFolder = os.path.join(session_path,'OpenSimData','Kinematics')
-        if simplePath:
-            ikFolder = os.path.join(session_path,'OpenSimData','Kinematics')
         ikPath = os.path.join(ikFolder,trial_name + '.mot')
         os.makedirs(ikFolder, exist_ok=True)
         ikURL = trial['results'][resultTags.index('ik_results')]['media']
         download_file(ikURL,ikPath)
     
     # get pose pickles
-    if 'pose_pickle' in resultTags:
+    if include_pose_pickles and 'pose_pickle' in resultTags:
         # metadata needed for pose pickle folder naming
         main_settings = getMainSettings(trial_id)
         poseDetector = main_settings['poseDetector']
@@ -1036,7 +1036,8 @@ def getMainSettings(trial_id):
         
 def downloadAndZipSession(session_id,deleteFolderWhenZipped=True,isDocker=True,
                           writeToDjango=False,justDownload=False,data_dir=None,
-                          useSubjectNameFolder=False):
+                          useSubjectNameFolder=False,
+                          include_pose_pickles=False):
     
     session = getSessionJson(session_id)
     
@@ -1059,14 +1060,14 @@ def downloadAndZipSession(session_id,deleteFolderWhenZipped=True,isDocker=True,
     
     # Neutral
     getModelAndMetadata(session_id,session_path)
-    getMotionData(neutral_id,session_path)
+    getMotionData(neutral_id,session_path,include_pose_pickles=include_pose_pickles)
     downloadVideosFromServer(session_id,neutral_id,isDocker=isDocker,
                      isCalibration=False,isStaticPose=True,session_path=session_path)
     getSyncdVideos(neutral_id,session_path)
 
     # Dynamic
     for dynamic_id in dynamic_ids:
-        getMotionData(dynamic_id,session_path)
+        getMotionData(dynamic_id,session_path,include_pose_pickles=include_pose_pickles)
         downloadVideosFromServer(session_id,dynamic_id,isDocker=isDocker,
                  isCalibration=False,isStaticPose=False,session_path=session_path)
         getSyncdVideos(dynamic_id,session_path)
