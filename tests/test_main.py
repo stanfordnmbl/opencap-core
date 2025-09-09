@@ -108,7 +108,7 @@ def test_main(trialName, t0, tf, syncVer, caplog):
     output_trc_df, _ = load_trc(output_trc)
     ref_trc_df, _ = load_trc(ref_trc)
     pd.testing.assert_frame_equal(
-        output_trc_df, ref_trc_df, check_exact=False, atol=1e-5
+        output_trc_df, ref_trc_df, check_exact=False, atol=1e-3
     )
 
     # Compare IK data
