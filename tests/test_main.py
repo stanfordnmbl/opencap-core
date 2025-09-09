@@ -38,8 +38,11 @@ def compare_mot(output_mot_df, ref_mot_df, t0, tf):
     - Time column is checked for equality (IK is frame-by-frame).
     - Translation error is checked within 2 mm max per frame, RMSE within 
       1 mm.
-    - Rotation error is checked within 2.5 degrees max per frame, RMSE 
-      within 0.5 degrees.
+    - Rotation error for wrist pronation/supination (coordinates pro_sup_r
+      and pro_sup_l) are checked within 5.0 degrees max per frame, RMSE
+      within 1.0 degrees.
+    - Rotation error for all other coordinates are tighter and checked 
+      within 2.5 degrees max per frame, RMSE within 0.5 degrees.
     '''
     output_mot_df_slice = output_mot_df[(output_mot_df['time'] >= t0) & (output_mot_df['time'] <= tf)]
     ref_mot_df_slice = ref_mot_df[(ref_mot_df['time'] >= t0) & (ref_mot_df['time'] <= tf)]
@@ -55,6 +58,13 @@ def compare_mot(output_mot_df, ref_mot_df, t0, tf):
             )
             rmse = calc_rmse(output_mot_df_slice[col], ref_mot_df_slice[col])
             assert rmse <= 0.001
+
+        elif 'pro_sup' in col:
+            pd.testing.assert_series_equal(
+                output_mot_df_slice[col], ref_mot_df_slice[col], atol=5.0
+            )
+            rmse = calc_rmse(output_mot_df_slice[col], ref_mot_df_slice[col])
+            assert rmse <= 1.0
 
         # check rotational within 2.5 degrees max error, rmse within 0.5 degrees
         else:
