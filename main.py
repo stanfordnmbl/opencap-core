@@ -22,14 +22,15 @@ from utilsChecker import saveCameraParameters
 from utilsChecker import calcExtrinsicsFromVideo
 from utilsChecker import isCheckerboardUpsideDown
 from utilsChecker import autoSelectExtrinsicSolution
-from utilsChecker import synchronizeVideos
 from utilsChecker import triangulateMultiviewVideo
 from utilsChecker import writeTRCfrom3DKeypoints
 from utilsChecker import popNeutralPoseImages
 from utilsChecker import rotateIntrinsics
+from utilsSync import synchronizeVideos
 from utilsDetector  import runPoseDetector
 from utilsAugmenter import augmentTRC
 from utilsOpenSim import runScaleTool, getScaleTimeRange, runIKTool, generateVisualizerJson
+from defaults import DEFAULT_SYNC_VER
 
 def main(sessionName, trialName, trial_id, cameras_to_use=['all'],
          intrinsicsFinalFolder='Deployed', isDocker=False,
@@ -42,7 +43,7 @@ def main(sessionName, trialName, trial_id, cameras_to_use=['all'],
          dataDir=None, overwriteAugmenterModel=False,
          filter_frequency='default', overwriteFilterFrequency=False,
          scaling_setup='upright_standing_pose', overwriteScalingSetup=False,
-         overwriteCamerasToUse=False):
+         overwriteCamerasToUse=False, syncVer=None,):
 
     # %% High-level settings.
     # Camera calibration.
@@ -130,6 +131,10 @@ def main(sessionName, trialName, trial_id, cameras_to_use=['all'],
         camerasToUse = sessionMetadata['camerastouse']
     else:
         camerasToUse = cameras_to_use
+
+    # We'll use syncVer if provided to this function. If not, try to use one 
+    # from sessionMetadata, otherwise use the default one.
+    syncVer = syncVer or sessionMetadata.get('sync_ver', DEFAULT_SYNC_VER)
 
     # %% Paths to pose detector folder for local testing.
     if poseDetector == 'OpenPose':
@@ -392,7 +397,8 @@ def main(sessionName, trialName, trial_id, cameras_to_use=['all'],
                     filtFreqs=filtFreqs, confidenceThreshold=0.4,
                     imageBasedTracker=False, cams2Use=camerasToUse_c, 
                     poseDetector=poseDetector, trialName=trialName,
-                    resolutionPoseDetection=resolutionPoseDetection))
+                    resolutionPoseDetection=resolutionPoseDetection,
+                    syncVer=syncVer))
         except Exception as e:
             if len(e.args) == 2: # specific exception
                 raise Exception(e.args[0], e.args[1])
