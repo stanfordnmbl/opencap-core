@@ -16,6 +16,7 @@ __pycache__
 Data/
 Examples/Data/*
 *.snakemake
+*.csv
 
 *.ini
 *.stats
