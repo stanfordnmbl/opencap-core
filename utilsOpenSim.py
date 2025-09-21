@@ -4,6 +4,7 @@ import opensim
 import numpy as np
 import glob
 import json
+import logging
 from utils import storage2numpy
 
 # %% Scaling.
@@ -13,6 +14,15 @@ def runScaleTool(pathGenericSetupFile, pathGenericModel, subjectMass,
                  createModelWithContacts=False, fixed_markers=False,
                  suffix_model=''):
     
+    logging.info(f"Scaling setup file: {pathGenericSetupFile}")
+    logging.info(f"Scaling model file: {pathGenericModel}")
+    logging.info(f"Scaling TRC file: {pathTRCFile}")
+    logging.info(f"Scaling output dir: {pathOutputFolder}")
+    logging.debug(f"subjectMass: {subjectMass}")
+    logging.debug(f"subjectHeight: {subjectHeight}")
+    logging.debug(f"timeRange: {timeRange}")
+    logging.debug(f"suffix_model: {suffix_model}")
+
     dirGenericModel, scaledModelNameA = os.path.split(pathGenericModel)
     
     # Paths.
@@ -154,6 +164,11 @@ def runScaleTool(pathGenericSetupFile, pathGenericModel, subjectMass,
 def runIKTool(pathGenericSetupFile, pathScaledModel, pathTRCFile,
               pathOutputFolder, timeRange=[], IKFileName='not_specified'):
     
+    logging.info(f"IK setup file: {pathGenericSetupFile}")
+    logging.info(f"IK model file: {pathScaledModel}")
+    logging.info(f"IK TRC file: {pathTRCFile}")
+    logging.info(f"IK output dir: {pathOutputFolder}")
+
     # Paths
     if IKFileName == 'not_specified':
         _, IKFileName = os.path.split(pathTRCFile)

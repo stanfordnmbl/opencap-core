@@ -635,6 +635,11 @@ def changeSessionMetadata(session_ids,newMetaDict):
                                                 'Share no data']:
                 raise Exception('datasharing is {} but should be one of the following options: "Share processed data and identified videos", "Share processed data and de-identified videos", "Share processed data", "Share no data".'.format(newMetaDict['datasharing']))
    
+    meta_settings_fields = [
+        'framerate', 'posemodel', 'openSimModel', 'augmentermodel',
+        'filterfrequency', 'scalingsetup', 'camerastouse', 'sync_ver',
+    ]
+
     for session_id in session_ids:
         session_url = "{}{}{}/".format(API_URL, "sessions/", session_id)
         
@@ -684,8 +689,8 @@ def changeSessionMetadata(session_ids,newMetaDict):
         for newMeta in newMetaDict:
             if not newMeta in addedKey:
                 print("Could not find {} in existing metadata, trying to add it.".format(newMeta))
-                settings_fields = ['framerate', 'posemodel', 'openSimModel', 'augmentermodel', 'filterfrequency', 'scalingsetup', 'camerastouse']
-                if newMeta in settings_fields:
+                
+                if newMeta in meta_settings_fields:
                     if 'settings' not in existingMeta:
                         existingMeta['settings'] = {}
                     existingMeta['settings'][newMeta] = newMetaDict[newMeta]
@@ -817,7 +822,9 @@ def postMotionData(trial_id,session_path,trial_name=None,isNeutral=False,
         
     return
 
-def getMotionData(trial_id,session_path,simplePath=False):
+def getMotionData(trial_id, session_path, 
+                  simplePath=False, 
+                  include_pose_pickles=False):
     trial = getTrialJson(trial_id)
     trial_name = trial['name']
     resultTags = [res['tag'] for res in trial['results']]
@@ -835,14 +842,44 @@ def getMotionData(trial_id,session_path,simplePath=False):
     # get IK data
     if 'ik_results' in resultTags:
         ikFolder = os.path.join(session_path,'OpenSimData','Kinematics')
-        if simplePath:
-            ikFolder = os.path.join(session_path,'OpenSimData','Kinematics')
         ikPath = os.path.join(ikFolder,trial_name + '.mot')
         os.makedirs(ikFolder, exist_ok=True)
         ikURL = trial['results'][resultTags.index('ik_results')]['media']
         download_file(ikURL,ikPath)
     
-    # TODO will want to get pose pickles eventually, once those are processed elsewhere
+    # get pose pickles
+    if include_pose_pickles and 'pose_pickle' in resultTags:
+        # metadata needed for pose pickle folder naming
+        main_settings = getMainSettings(trial_id)
+        poseDetector = main_settings['poseDetector']
+
+        # sometimes mmpose is used instead of hrnet
+        if poseDetector.lower() == 'mmpose':
+            poseDetector = 'hrnet'
+
+        # infer pose detection from main settings to get correct folders
+        if poseDetector.lower() == 'openpose':
+            getPosePickles(trial_id, session_path,
+                           poseDetector=poseDetector,
+                           resolutionPoseDetection=main_settings['resolutionPoseDetection'])
+
+        elif poseDetector.lower() == 'hrnet':
+            # shared check with `checkAndGetPosePickles()`
+            if 'bbox_thr' in main_settings:
+                bbox_thr = main_settings['bbox_thr']
+            else:
+                # There was a bug in main, where bbox_thr was not saved in main_settings.yaml.
+                # Since there is in practice no option to change bbox_thr in the GUI, we can
+                # assume that the default value was used.
+                bbox_thr = 0.8
+
+            getPosePickles(trial_id, session_path,
+                           poseDetector=poseDetector,
+                           bbox_thr=bbox_thr)
+        else:
+            print(f'pose pickles found, but specified pose detector  \
+                    {poseDetector} does not exist. skipping pose pickle \
+                    download')
         
     return
         
@@ -1004,7 +1041,8 @@ def getMainSettings(trial_id):
         
 def downloadAndZipSession(session_id,deleteFolderWhenZipped=True,isDocker=True,
                           writeToDjango=False,justDownload=False,data_dir=None,
-                          useSubjectNameFolder=False):
+                          useSubjectNameFolder=False,
+                          include_pose_pickles=False):
     
     session = getSessionJson(session_id)
     
@@ -1027,14 +1065,14 @@ def downloadAndZipSession(session_id,deleteFolderWhenZipped=True,isDocker=True,
     
     # Neutral
     getModelAndMetadata(session_id,session_path)
-    getMotionData(neutral_id,session_path)
+    getMotionData(neutral_id,session_path,include_pose_pickles=include_pose_pickles)
     downloadVideosFromServer(session_id,neutral_id,isDocker=isDocker,
                      isCalibration=False,isStaticPose=True,session_path=session_path)
     getSyncdVideos(neutral_id,session_path)
 
     # Dynamic
     for dynamic_id in dynamic_ids:
-        getMotionData(dynamic_id,session_path)
+        getMotionData(dynamic_id,session_path,include_pose_pickles=include_pose_pickles)
         downloadVideosFromServer(session_id,dynamic_id,isDocker=isDocker,
                  isCalibration=False,isStaticPose=False,session_path=session_path)
         getSyncdVideos(dynamic_id,session_path)
